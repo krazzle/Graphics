@@ -338,67 +338,97 @@ void draw_vrml(void) {
 void draw_free_scene(void) {
 	
 	const float DegreesToRadians = 3.14159/180;
-	float quad_data[342*3];	
+	float quad_data[342*3*4*4];	
 	float phi; 
 	float theta;
-
+	glColor3f(1.0f, 0.0f, 0.0f);
+	
+	if (disp_style == DS_SOLID) {
+                glBegin(GL_TRIANGLE_FAN);
+        } else if (disp_style == DS_WIRE) {
+                glBegin(GL_LINE_LOOP);
+        }
+	
 	int k = 0;
-	for(phi = -80.0; phi <= 80.0; phi += 20.0)
+	for(phi = -80.0; phi <= 80.0; phi += 5.0)
 	{
 		float phir = phi*DegreesToRadians;
 		float phir20 = (phi + 20.0)*DegreesToRadians;
 
-		for(theta = -180.0; theta <= 180.0; theta += 20.0)
+		for(theta = -180.0; theta <= 180.0; theta += 5.0)
 		{
 			float thetar = theta*DegreesToRadians;
 			quad_data[k] = sin(thetar)*cos(phir);
 			quad_data[k+1] = cos(thetar)*cos(phir);
 			quad_data[k+2] = sin(phir);
+			glVertex3f(quad_data[k], quad_data[k+1], quad_data[k+2]);
 			k+=3;
 			quad_data[k] = sin(thetar)*cos(phir20);
 			quad_data[k+1] = cos(thetar)*cos(phir20);
 			quad_data[k+2] = sin(phir20);
+			glVertex3f(quad_data[k], quad_data[k+1], quad_data[k+2]);
 			k+=3;
 		}
 	}
+	
+	glEnd();
+	///glDrawArrays(GL_LINE_LOOP, 0, 342*3);
+	
+       if (disp_style == DS_SOLID) {
+                glBegin(GL_TRIANGLE_FAN);
+        } else if (disp_style == DS_WIRE) {
+                glBegin(GL_LINE_LOOP);
+        }
 
-	glDrawArrays(GL_LINE_LOOP, 0, 342*3);
 
 	k = 0;
-	float strip_data[40*3];
+	float strip_data[40*3*4*4];
 	strip_data[k] = 0;
 	strip_data[k+1] = 0;
 	strip_data[k+2] = 1.0;
+	glVertex3f(strip_data[k], strip_data[k+1], strip_data[k+2]);
 	k+=3;
 	
 	float sin80 = sin(80.0*DegreesToRadians);
 	float cos80 = cos(80.0*DegreesToRadians);
 
-	for(theta = -180.0; theta <= 180.0; theta += 20)
+	for(theta = -180.0; theta <= 180.0; theta += 5)
 	{
 		float thetar = theta*DegreesToRadians;
 		strip_data[k] = sin(thetar)*cos80;
 		strip_data[k+1] = cos(thetar)*cos80;
 		strip_data[k+2] = sin80;
+		glVertex3f(strip_data[k], strip_data[k+1], strip_data[k+2]);
 		k+=3;
 	}
-		
+	glEnd();
+
+	if (disp_style == DS_SOLID) {
+                glBegin(GL_TRIANGLE_FAN);
+        } else if (disp_style == DS_WIRE) {
+                glBegin(GL_LINE_LOOP);
+        }
+
 	strip_data[k] = 0;
 	strip_data[k+1] = 0;
 	strip_data[k+2] = -1.0;
+	glVertex3f(strip_data[k], strip_data[k+1], strip_data[k+2]);
 	k+=3;
 		
-	for(theta = -180.0; theta <= 180.0; theta += 20.0)
+	sin80 = sin(-80.0*DegreesToRadians);
+	cos80 = cos(-80.0*DegreesToRadians);
+	for(theta = -180.0; theta <= 180.0; theta += 5.0)
 	{
 		float thetar = theta;
 		strip_data[k] = sin(thetar)*cos80;
 		strip_data[k+1] = cos(thetar)*cos80;
 		strip_data[k+2] = sin80;
+		glVertex3f(strip_data[k], strip_data[k+1], strip_data[k+2]);
 		k+=3;
 	}
-
+	glEnd();
 	
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 40*3);
+	//glDrawArrays(GL_TRIANGLE_FAN, 0, 40*3);
 		
 
 
