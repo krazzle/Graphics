@@ -163,6 +163,36 @@ GLint v_pyramid_indices[] = {
  * See vrml.h for a list of suggested functions.
  */
 
+void draw_vrml_cube()
+{
+	int i;
+		
+	glBegin(GL_LINE_LOOP);
+	glColor3f(1.0f, 1.0f, 0.0f);
+	for(i = 0; i < 30; i+=5)
+	{
+		int index1 = v_cube_indices[i];
+		int index2 = v_cube_indices[i+1];
+		int index3 = v_cube_indices[i+2];
+		int index4 = v_cube_indices[i+3];
 
-/* end of vrml.c */
+		glVertex4f(v_cube_vertices[index1], v_cube_vertices[index2], v_cube_vertices[index3], v_cube_vertices[index4]);
+	}
+	glEnd();
+}
+
+void draw_vrml_dodecahedron()
+{
+
+}
+
+void draw_vrml_icosahedron()
+{
+
+}
+
+void draw_vrml_pyramid()
+{
+
+}
 

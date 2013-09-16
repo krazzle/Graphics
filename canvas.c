@@ -29,7 +29,7 @@ void performanceTest(void);
 void initLighting(void);
 
 /* The current vrml object */
-int vr_object;
+int vr_object = 1;
 
 #define FALSE		0
 #define TRUE		1
@@ -56,6 +56,10 @@ GLfloat ftop    =  1.0;
 GLfloat zNear   = -2.0;
 GLfloat zFar    = -7.0;
 
+/*the arguments for the cone*/
+double radius = 1.0;
+double height = 1.0;
+int numTriangles = 8;
 
 /* Global zoom factor.  Modified by user input. Initially 1.0 */
 GLfloat zoomFactor = 1.0; 
@@ -122,16 +126,10 @@ void myDisplay (void) {
 			draw_cone_tri_arrays();
 			break;
 		case DM_CONE_TRI_CALC:
-			/*
-			 * NOTE
-			 * ----
-			 * This call will need to be changed to use the user-specified
-			 * parameters.  Right now, hard coded parameters are used.
-			 */
-			draw_cone_tri_calc(0.0, 0.0, 0);
+			draw_cone_tri_calc(radius, height, numTriangles);
 			break;
 		case DM_VRML:
-			draw_vrml();
+			draw_vrml(vr_object);
 			break;
 		case DM_FREE_SCENE:
 			draw_free_scene();
@@ -376,7 +374,73 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 		/*********************************************/
 		/* ADD ADDITIONAL KEYS HERE                  */
 		/*********************************************/
+		case 'I':
+			if(disp_mode == DM_CONE_TRI_CALC)
+			{
+				radius+=.1;
+				printf("Radius increased by .1\n");
+				draw_cone_tri_calc(radius, height, numTriangles);
+			}
+			break;
+		
+ 		case 'i':
+			if(disp_mode ==  DM_CONE_TRI_CALC)
+			{
+				if(radius > 0.1){
+					radius-=.1;
+					printf("Radius decreased by .1\n");
+					draw_cone_tri_calc(radius, height, numTriangles);
+				}
+			}
+			break;
+			
+		case 'O':
+			if(disp_mode == DM_CONE_TRI_CALC)
+			{
+				height+=.1;
+				printf("Height increase by .1\n");
+				draw_cone_tri_calc(radius, height, numTriangles);
+			}
+			break;
 
+		case 'o':
+			if(disp_mode ==  DM_CONE_TRI_CALC)
+			{
+				if(height > 0.1) {
+					height-=.1;
+					printf("Height decreased by .1\n");
+					draw_cone_tri_calc(radius, height, numTriangles);			
+				}
+			}
+			break;
+	
+		case 'P':
+			if(disp_mode ==  DM_CONE_TRI_CALC)
+                        {
+				numTriangles++;
+				printf("Number of Triangles increased by 1\n");
+				draw_cone_tri_calc(radius, height, numTriangles);
+			}
+			break;
+		
+		case 'p':
+			if(disp_mode == DM_CONE_TRI_CALC)
+			{
+				if(numTriangles > 3){
+					numTriangles--;
+					printf("Number of Triangles decreased by 1\n");
+					draw_cone_tri_calc(radius, height, numTriangles);
+				}
+			}
+			break;
+		case 'v':
+			if(disp_mode == DM_VRML)
+			{
+				vr_object++;
+				if(vr_object == 5)
+					vr_object = 1;
+				draw_vrml(vr_object);
+			}
 
 		default:
 			/* Unrecognized key press, just return */

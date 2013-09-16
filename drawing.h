@@ -40,7 +40,7 @@ void draw_cone_glut(void);
 void draw_cone_tri(void);
 void draw_cone_tri_arrays(void);
 void draw_cone_tri_calc(double height, double radius, int base_tri);
-void draw_vrml(void);
+void draw_vrml(int vr_object);
 void draw_free_scene(void);
 void print_disp_mode(void);
 void print_disp_style(void);

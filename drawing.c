@@ -322,26 +322,86 @@ void draw_cone_tri_arrays(void) {
  * exactly 2 * BASE_TRI.
  */
 void draw_cone_tri_calc(double height, double radius, int base_tri) {
-	/* ADD YOUR CODE HERE */
+	int index = 0;
+	if(base_tri == 0)
+		base_tri = 8;
+	if(radius == 0)
+		radius = 1;
+	if(height == 0)
+		height = 1;
+	//center point
 
+//	printf("triangles: %d, radius: %f, height: %f\n", base_tri, radius, height);
+	double points[base_tri*3];
+
+	double theta;
+	double degreesToRads = 3.14159/180;
+	double increment = 360/base_tri;
+	for(theta = 0; theta <= 360; theta+=increment)
+	{
+		double thetar = degreesToRads*theta;
+		points[index] = radius*sin(thetar); //x
+		points[index+1] = 0; //y
+		points[index+2] = radius*cos(thetar); //z
+		index+=3;
+	}
+
+	glColor3f(0.0f, 0.0f, 1.0f);
+
+//draw the base of the cone
+        if (disp_style == DS_SOLID) {
+                glBegin(GL_TRIANGLES);
+        } else if (disp_style == DS_WIRE) {
+                glBegin(GL_LINE_LOOP);
+        }
+	
+	int i;
+	for(i = 0; i < index-3; i+=3)
+	{	
+		glVertex3f(0,0,0);
+		glVertex3f(points[i], points[i+1], points[i+2]);
+		glVertex3f(points[i+3], points[i+4], points[i+5]);
+	}
+	glEnd();
+
+//draw the faces of the cone
+	if (disp_style == DS_SOLID) {
+                glBegin(GL_TRIANGLES);
+        } else if (disp_style == DS_WIRE) {
+                glBegin(GL_LINE_LOOP);
+        }
+
+	for(i = 0; i < index-3; i+=3)
+	{
+		glVertex3f(0, height, 0);
+		glVertex3f(points[i], points[i+1], points[i+2]);
+                glVertex3f(points[i+3], points[i+4], points[i+5]);
+
+	}
+	glEnd();
 }
 
 /* Draw the various vrml scenes */
-void draw_vrml(void) {
-	/* ADD YOUR CODE HERE */
-	/* NOTE: you should be calling a function or functions in vrml.c */
-
+void draw_vrml(int vr_object) {
+	if(vr_object == 1)
+		draw_vrml_cube();
+	else if (vr_object == 2)
+		draw_vrml_dodecahedron();
+	else if (vr_object == 3)
+		draw_vrml_icosahedron();
+	else if(vr_object == 4)
+		draw_vrml_pyramid();
 }
 
 
-/* Draws a freeform scene */
+/* Drawsa freeform scene */
 void draw_free_scene(void) {
-	
+
 	const float DegreesToRadians = 3.14159/180;
 	float quad_data[342*3*4*4];	
 	float phi; 
 	float theta;
-	glColor3f(1.0f, 0.0f, 0.0f);
+	glColor3f(0.0f, 1.0f, 0.0f);
 	
 	if (disp_style == DS_SOLID) {
                 glBegin(GL_TRIANGLE_FAN);
@@ -350,12 +410,12 @@ void draw_free_scene(void) {
         }
 	
 	int k = 0;
-	for(phi = -80.0; phi <= 80.0; phi += 5.0)
+	for(phi = -90.0; phi <= 90.0; phi += 10.0)
 	{
 		float phir = phi*DegreesToRadians;
-		float phir20 = (phi + 20.0)*DegreesToRadians;
+		float phir20 = (phi + 10.0)*DegreesToRadians;
 
-		for(theta = -180.0; theta <= 180.0; theta += 5.0)
+		for(theta = -180.0; theta <= 180.0; theta += 10.0)
 		{
 			float thetar = theta*DegreesToRadians;
 			quad_data[k] = sin(thetar)*cos(phir);
@@ -372,66 +432,6 @@ void draw_free_scene(void) {
 	}
 	
 	glEnd();
-	///glDrawArrays(GL_LINE_LOOP, 0, 342*3);
-	
-       if (disp_style == DS_SOLID) {
-                glBegin(GL_TRIANGLE_FAN);
-        } else if (disp_style == DS_WIRE) {
-                glBegin(GL_LINE_LOOP);
-        }
-
-
-	k = 0;
-	float strip_data[40*3*4*4];
-	strip_data[k] = 0;
-	strip_data[k+1] = 0;
-	strip_data[k+2] = 1.0;
-	glVertex3f(strip_data[k], strip_data[k+1], strip_data[k+2]);
-	k+=3;
-	
-	float sin80 = sin(80.0*DegreesToRadians);
-	float cos80 = cos(80.0*DegreesToRadians);
-
-	for(theta = -180.0; theta <= 180.0; theta += 5)
-	{
-		float thetar = theta*DegreesToRadians;
-		strip_data[k] = sin(thetar)*cos80;
-		strip_data[k+1] = cos(thetar)*cos80;
-		strip_data[k+2] = sin80;
-		glVertex3f(strip_data[k], strip_data[k+1], strip_data[k+2]);
-		k+=3;
-	}
-	glEnd();
-
-	if (disp_style == DS_SOLID) {
-                glBegin(GL_TRIANGLE_FAN);
-        } else if (disp_style == DS_WIRE) {
-                glBegin(GL_LINE_LOOP);
-        }
-
-	strip_data[k] = 0;
-	strip_data[k+1] = 0;
-	strip_data[k+2] = -1.0;
-	glVertex3f(strip_data[k], strip_data[k+1], strip_data[k+2]);
-	k+=3;
-		
-	sin80 = sin(-80.0*DegreesToRadians);
-	cos80 = cos(-80.0*DegreesToRadians);
-	for(theta = -180.0; theta <= 180.0; theta += 5.0)
-	{
-		float thetar = theta;
-		strip_data[k] = sin(thetar)*cos80;
-		strip_data[k+1] = cos(thetar)*cos80;
-		strip_data[k+2] = sin80;
-		glVertex3f(strip_data[k], strip_data[k+1], strip_data[k+2]);
-		k+=3;
-	}
-	glEnd();
-	
-	//glDrawArrays(GL_TRIANGLE_FAN, 0, 40*3);
-		
-
-
 
 	/* ADD YOUR CODE HERE */
 	/* NOTE: Modify or remove the existing code in this func, as necessary */
@@ -457,7 +457,8 @@ void draw_free_scene(void) {
 //	glTranslatef(1.0f, 0.0f, 1.0f);		/* the drawing offset */
 //	glColor3f(0.0f, 1.0f, 0.0f);		/* green */
 //	glutWireCube(1.0f);
-//	glPopMatrix();
+//	glPopMatrix(); 
+
 }
 
 
