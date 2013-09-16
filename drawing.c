@@ -397,42 +397,10 @@ void draw_vrml(int vr_object) {
 /* Drawsa freeform scene */
 void draw_free_scene(void) {
 
-	const float DegreesToRadians = 3.14159/180;
-	float quad_data[342*3*4*4];	
-	float phi; 
-	float theta;
-	glColor3f(0.0f, 1.0f, 0.0f);
-	
-	if (disp_style == DS_SOLID) {
-                glBegin(GL_TRIANGLE_FAN);
-        } else if (disp_style == DS_WIRE) {
-                glBegin(GL_LINE_LOOP);
-        }
-	
-	int k = 0;
-	for(phi = -90.0; phi <= 90.0; phi += 10.0)
-	{
-		float phir = phi*DegreesToRadians;
-		float phir20 = (phi + 10.0)*DegreesToRadians;
-
-		for(theta = -180.0; theta <= 180.0; theta += 10.0)
-		{
-			float thetar = theta*DegreesToRadians;
-			quad_data[k] = sin(thetar)*cos(phir);
-			quad_data[k+1] = cos(thetar)*cos(phir);
-			quad_data[k+2] = sin(phir);
-			glVertex3f(quad_data[k], quad_data[k+1], quad_data[k+2]);
-			k+=3;
-			quad_data[k] = sin(thetar)*cos(phir20);
-			quad_data[k+1] = cos(thetar)*cos(phir20);
-			quad_data[k+2] = sin(phir20);
-			glVertex3f(quad_data[k], quad_data[k+1], quad_data[k+2]);
-			k+=3;
-		}
-	}
-	
-	glEnd();
-
+	drawSphere(2.5, 1.0, 0.0, 0.0);
+	drawSphere(2.0, 1.0, 1.0, 0.0);
+	drawSphere(1.5, 1.0, 0.0, 1.0);
+	drawSphere(1.0, 0.0, 1.0, 1.0);
 	/* ADD YOUR CODE HERE */
 	/* NOTE: Modify or remove the existing code in this func, as necessary */
 
@@ -461,6 +429,46 @@ void draw_free_scene(void) {
 
 }
 
+
+void drawSphere(double radius, double r, double g, double b)
+{
+	const float DegreesToRadians = 3.14159/180;
+        float quad_data[342*3*4*4];
+        float phi;
+        float theta;
+        glColor3f(r, g, b);
+
+       // if (disp_style == DS_SOLID) {
+       //         glBegin(GL_TRIANGLE_FAN);
+       // } else if (disp_style == DS_WIRE) {
+       //         glBegin(GL_LINE_LOOP);
+       // }
+
+        int k = 0;
+        for(phi = -90.0; phi <= 90.0; phi += 10.0)
+        {
+                float phir = phi*DegreesToRadians;
+                float phir20 = (phi + 10.0)*DegreesToRadians;
+
+		glBegin(GL_LINE_LOOP);
+                for(theta = -180.0; theta <= 180.0; theta += 10.0)
+                {
+                        float thetar = theta*DegreesToRadians;
+                        quad_data[k] = radius*sin(thetar)*cos(phir);
+                        quad_data[k+1] = radius*cos(thetar)*cos(phir);
+                        quad_data[k+2] = radius*sin(phir);
+                        glVertex3f(quad_data[k], quad_data[k+1], quad_data[k+2]);
+                        k+=3;
+                        quad_data[k] = radius*sin(thetar)*cos(phir20);
+                        quad_data[k+1] = radius*cos(thetar)*cos(phir20);
+                        quad_data[k+2] = radius*sin(phir20);
+                        glVertex3f(quad_data[k], quad_data[k+1], quad_data[k+2]);
+                        k+=3;
+                }
+		glEnd();
+        }
+
+}
 
 /* Prints to stdout the current display mode */
 void print_disp_mode( void ) {

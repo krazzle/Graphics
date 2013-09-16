@@ -167,30 +167,30 @@ void draw_vrml_cube()
 {
 	int i;
 		
-	glBegin(GL_LINE_LOOP);
 	glColor3f(1.0f, 1.0f, 0.0f);
 	for(i = 0; i < 30; i+=5)
 	{
+		glBegin(GL_LINE_LOOP);
 		int index1 = v_cube_indices[i] * 3;
 		int index2 = v_cube_indices[i+1] * 3;
 		int index3 = v_cube_indices[i+2] * 3;
 		int index4 = v_cube_indices[i+3] * 3;
-
+		
 		glVertex3f(v_cube_vertices[index1], v_cube_vertices[index1+1], v_cube_vertices[index1+2]);
 		glVertex3f(v_cube_vertices[index2], v_cube_vertices[index2+1], v_cube_vertices[index2+2]);
 		glVertex3f(v_cube_vertices[index3], v_cube_vertices[index3+1], v_cube_vertices[index3+2]);
 		glVertex3f(v_cube_vertices[index4], v_cube_vertices[index4+1], v_cube_vertices[index4+2]);
+		glEnd();
 	}
-	glEnd();
 }
 
 void draw_vrml_dodecahedron()
 {
 	int i;
-	glBegin(GL_LINE_LOOP);
 	glColor3f(1.0f, 1.0f, 0.0f);
 	for(i = 0; i < 72; i+=6)
 	{
+		glBegin(GL_LINE_LOOP);
 		int index1 = v_dodeca_indices[i] * 3;
 		int index2 = v_dodeca_indices[i+1] * 3;
 		int index3 = v_dodeca_indices[i+2] * 3;
@@ -202,17 +202,18 @@ void draw_vrml_dodecahedron()
 		glVertex3f(v_dodeca_vertices[index3], v_dodeca_vertices[index3+1], v_dodeca_vertices[index3+2]);
 		glVertex3f(v_dodeca_vertices[index4], v_dodeca_vertices[index4+1], v_dodeca_vertices[index4+2]);
 		glVertex3f(v_dodeca_vertices[index5], v_dodeca_vertices[index5+1], v_dodeca_vertices[index5+2]);
+		glEnd();
 	}
-	glEnd();
 }
 
 void draw_vrml_icosahedron()
 {
 	int i;
-	glBegin(GL_LINE_LOOP);
+
 	glColor3f(1.0f, 1.0f, 0.0f);
 	for(i = 0; i < 80; i+=4)
-	{
+	{	
+		glBegin(GL_LINE_LOOP);
 		int index1 = v_icosa_indices[i]*3;
 		int index2 = v_icosa_indices[i+1]*3;
 		int index3 = v_icosa_indices[i+2]*3;
@@ -220,17 +221,18 @@ void draw_vrml_icosahedron()
 		glVertex3f(v_icosa_vertices[index1], v_icosa_vertices[index1+1], v_icosa_vertices[index1+2]);
 		glVertex3f(v_icosa_vertices[index2], v_icosa_vertices[index2+1], v_icosa_vertices[index2+2]);
 		glVertex3f(v_icosa_vertices[index3], v_icosa_vertices[index3+1], v_icosa_vertices[index3+2]);
+		glEnd();
 	}
-	glEnd();
 }
 
 void draw_vrml_pyramid()
 {
 	int i;
-	glBegin(GL_LINE_LOOP);
+
 	glColor3f(1.0f, 1.0f, 0.0f);
 	for(i = 0; i < 48; i+=4)
-	{
+	{	
+		glBegin(GL_LINE_LOOP);
 		int index1 = v_pyramid_indices[i]*3;
 		int index2 = v_pyramid_indices[i+1]*3;
 		int index3 = v_pyramid_indices[i+2]*3;
@@ -238,7 +240,7 @@ void draw_vrml_pyramid()
 		glVertex3f(v_pyramid_vertices[index1], v_pyramid_vertices[index1+1], v_pyramid_vertices[index1+2]);
 		glVertex3f(v_pyramid_vertices[index2], v_pyramid_vertices[index2+1], v_pyramid_vertices[index2+2]);
 		glVertex3f(v_pyramid_vertices[index3], v_pyramid_vertices[index3+1], v_pyramid_vertices[index3+2]);
+		glEnd();
 	}
-	glEnd();
 }
 
