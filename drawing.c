@@ -362,6 +362,11 @@ void draw_cone_tri_calc(double height, double radius, int base_tri) {
 		glVertex3f(points[i], points[i+1], points[i+2]);
 		glVertex3f(points[i+3], points[i+4], points[i+5]);
 	}
+
+	glVertex3f(0,0,0);
+	glVertex3f(points[0], points[1], points[2]);
+	glVertex3f(points[index], points[index+1], points[index+2]);
+
 	glEnd();
 
 //draw the faces of the cone
@@ -378,6 +383,11 @@ void draw_cone_tri_calc(double height, double radius, int base_tri) {
                 glVertex3f(points[i+3], points[i+4], points[i+5]);
 
 	}
+	
+//	glVertex3f(0, height, 0);
+//	glVertex3f(points[0], points[1], points[2]);
+//	glVertex3f(points[index], points[index+1], points[index+2]);
+
 	glEnd();
 }
 

@@ -436,10 +436,15 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 		case 'v':
 			if(disp_mode == DM_VRML)
 			{
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				resetCamera();
 				vr_object++;
 				if(vr_object == 5)
 					vr_object = 1;
 				draw_vrml(vr_object);
+				glFlush();
+        			glutSwapBuffers();
+
 			}
 
 		default:
