@@ -166,8 +166,8 @@ GLint v_pyramid_indices[] = {
 void draw_vrml_cube()
 {
 	int i;
-		
 	glColor3f(1.0f, 1.0f, 0.0f);
+
 	for(i = 0; i < 30; i+=5)
 	{
 		glBegin(GL_LINE_LOOP);
@@ -186,6 +186,7 @@ void draw_vrml_cube()
 
 void draw_vrml_dodecahedron()
 {
+
 	int i;
 	glColor3f(1.0f, 1.0f, 0.0f);
 	for(i = 0; i < 72; i+=6)
