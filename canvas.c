@@ -379,7 +379,7 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 			{
 				radius+=.1;
 				printf("Radius increased by .1\n");
-				draw_cone_tri_calc(radius, height, numTriangles);
+				draw_cone_tri_calc(height, radius, numTriangles);
 			}
 			break;
 		
@@ -389,7 +389,7 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 				if(radius > 0.1){
 					radius-=.1;
 					printf("Radius decreased by .1\n");
-					draw_cone_tri_calc(radius, height, numTriangles);
+					draw_cone_tri_calc(height, radius, numTriangles);
 				}
 			}
 			break;
@@ -399,7 +399,7 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 			{
 				height+=.1;
 				printf("Height increase by .1\n");
-				draw_cone_tri_calc(radius, height, numTriangles);
+				draw_cone_tri_calc(height, radius, numTriangles);
 			}
 			break;
 
@@ -409,7 +409,7 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 				if(height > 0.1) {
 					height-=.1;
 					printf("Height decreased by .1\n");
-					draw_cone_tri_calc(radius, height, numTriangles);			
+					draw_cone_tri_calc(height, radius, numTriangles);			
 				}
 			}
 			break;
@@ -419,7 +419,7 @@ void myKeyHandler(unsigned char ch, int x, int y) {
                         {
 				numTriangles++;
 				printf("Number of Triangles increased by 1\n");
-				draw_cone_tri_calc(radius, height, numTriangles);
+				draw_cone_tri_calc(height, radius, numTriangles);
 			}
 			break;
 		
@@ -429,7 +429,7 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 				if(numTriangles > 3){
 					numTriangles--;
 					printf("Number of Triangles decreased by 1\n");
-					draw_cone_tri_calc(radius, height, numTriangles);
+					draw_cone_tri_calc(height, radius, numTriangles);
 				}
 			}
 			break;
@@ -439,6 +439,18 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 				vr_object++;
 				if(vr_object == 5)
 					vr_object = 1;
+				switch(vr_object){
+					case 1: printf("drawing cube...\n");
+						break;
+					case 2: printf("drawing dodecahedron...\n");
+						break;
+					case 3: printf("drawing icosahedron... \n");
+						break;
+					case 4: printf("drawing pyramid...\n");
+						break;
+					default:
+						break;
+				}
 				draw_vrml(vr_object);
 			}
 

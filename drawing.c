@@ -397,9 +397,9 @@ void draw_vrml(int vr_object) {
 /* Drawsa freeform scene */
 void draw_free_scene(void) {
 
-	drawSphere(2.5, 1.0, 0.0, 0.0);
+//	drawSphere(2.5, 1.0, 0.0, 0.0);
 	drawSphere(2.0, 1.0, 1.0, 0.0);
-	drawSphere(1.5, 1.0, 0.0, 1.0);
+//	drawSphere(1.5, 1.0, 0.0, 1.0);
 	drawSphere(1.0, 0.0, 1.0, 1.0);
 	/* ADD YOUR CODE HERE */
 	/* NOTE: Modify or remove the existing code in this func, as necessary */
@@ -438,6 +438,8 @@ void drawSphere(double radius, double r, double g, double b)
         float theta;
         glColor3f(r, g, b);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
        // if (disp_style == DS_SOLID) {
        //         glBegin(GL_TRIANGLE_FAN);
        // } else if (disp_style == DS_WIRE) {
