@@ -346,6 +346,15 @@ void draw_cone_tri_calc(double height, double radius, int base_tri) {
 		index+=3;
 	}
 
+	if(360%base_tri != 0)
+	{
+		double thetar = degreesToRads*360;
+		points[index] = radius*sin(thetar);
+		points[index+1] = 0;
+		points[index+2] = radius*cos(thetar);
+		index+=3;
+	}
+
 	glColor3f(0.0f, 0.0f, 1.0f);
 
 //draw the base of the cone
@@ -363,10 +372,6 @@ void draw_cone_tri_calc(double height, double radius, int base_tri) {
 		glVertex3f(points[i+3], points[i+4], points[i+5]);
 	}
 
-	glVertex3f(0,0,0);
-	glVertex3f(points[0], points[1], points[2]);
-	glVertex3f(points[index], points[index+1], points[index+2]);
-
 	glEnd();
 
 //draw the faces of the cone
@@ -383,10 +388,6 @@ void draw_cone_tri_calc(double height, double radius, int base_tri) {
                 glVertex3f(points[i+3], points[i+4], points[i+5]);
 
 	}
-	
-//	glVertex3f(0, height, 0);
-//	glVertex3f(points[0], points[1], points[2]);
-//	glVertex3f(points[index], points[index+1], points[index+2]);
 
 	glEnd();
 }
@@ -401,15 +402,17 @@ void draw_vrml(int vr_object) {
 		draw_vrml_icosahedron();
 	else if(vr_object == 4)
 		draw_vrml_pyramid();
+	else if(vr_object == 5)
+		draw_spikey_cube();
 }
 
 
 /* Drawsa freeform scene */
 void draw_free_scene(void) {
 
-//	drawSphere(2.5, 1.0, 0.0, 0.0);
+	drawSphere(2.5, 1.0, 0.0, 0.0);
 	drawSphere(2.0, 1.0, 1.0, 0.0);
-//	drawSphere(1.5, 1.0, 0.0, 1.0);
+	drawSphere(1.5, 1.0, 0.0, 1.0);
 	drawSphere(1.0, 0.0, 1.0, 1.0);
 	/* ADD YOUR CODE HERE */
 	/* NOTE: Modify or remove the existing code in this func, as necessary */
@@ -508,6 +511,7 @@ void print_disp_mode( void ) {
 			break;
         case DM_VRML:
             printf("Display Mode: VRML objects\n");
+	    printf("Drawing vrml cube...\n");
             break;
         case DM_FREE_SCENE:
             printf("Display Mode: Freeform scene\n");

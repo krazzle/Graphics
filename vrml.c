@@ -245,3 +245,103 @@ void draw_vrml_pyramid()
 	}
 }
 
+void draw_spikey_cube()
+{
+	 int i;
+        glColor3f(1.0f, 1.0f, 0.0f);
+
+        for(i = 0; i < 30; i+=5)
+        {
+                int index1 = v_cube_indices[i] * 3;
+                int index2 = v_cube_indices[i+1] * 3;
+                int index3 = v_cube_indices[i+2] * 3;
+                int index4 = v_cube_indices[i+3] * 3;
+			
+		//pick any (I guess the first) three vertices
+		GLfloat vertex_a[3] = {v_cube_vertices[index1], v_cube_vertices[index1+1], v_cube_vertices[index1+2]};
+		GLfloat vertex_b[3] = {v_cube_vertices[index2], v_cube_vertices[index2+1], v_cube_vertices[index2+2]};
+		GLfloat vertex_c[3] = {v_cube_vertices[index3], v_cube_vertices[index3+1], v_cube_vertices[index3+2]};
+		GLfloat vertex_d[3] = {v_cube_vertices[index4], v_cube_vertices[index4+1], v_cube_vertices[index4+2]};
+		GLfloat *vec1 = combine_vertices(vertex_b, vertex_a, 3, 0);
+		GLfloat *vec2 = combine_vertices(vertex_c, vertex_a, 3, 0);
+		GLfloat *vertex_cross_product = cross(vec1, vec2);
+		printf("cross product vector: (%f, %f, %f)\n", vertex_cross_product[0], vertex_cross_product[1], vertex_cross_product[2]);
+
+		GLfloat *normalized = normalize(vertex_cross_product);	
+
+		//GLfloat vectors[4][3] = {vertex_a, vertex_b, vertex_c, vertex_d};
+		GLfloat *vectors[4] = {vertex_a, vertex_b, vertex_c, vertex_d};
+		GLfloat *center = centerpoint(vectors, 4);
+
+		GLfloat *result = combine_vertices(center, normalized, 3, 1);
+
+		printf("centerpoint: (%f, %f, %f)\n", center[0], center[1], center[2]);
+		printf("normal vector: (%f, %f, %f)\n", result[0], result[1], result[2]);
+
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(result[0], result[1], result[2]);
+		glVertex3f(center[0], center[1], center[2]);
+		glEnd();
+
+		glBegin(GL_LINE_LOOP);
+                glVertex3f(v_cube_vertices[index1], v_cube_vertices[index1+1], v_cube_vertices[index1+2]);
+                glVertex3f(v_cube_vertices[index2], v_cube_vertices[index2+1], v_cube_vertices[index2+2]);
+                glVertex3f(v_cube_vertices[index3], v_cube_vertices[index3+1], v_cube_vertices[index3+2]);
+                glVertex3f(v_cube_vertices[index4], v_cube_vertices[index4+1], v_cube_vertices[index4+2]);
+                glEnd();
+        }
+}
+
+GLfloat* normalize(GLfloat* vector)
+{
+	GLfloat result[3];
+	GLfloat length = sqrt((vector[0]*vector[0]) + (vector[1]*vector[1]) * (vector[2]*vector[2]));
+	
+	result[0] = vector[0]/length;
+	result[1] = vector[1]/length;
+	result[2] = vector[2]/length;
+
+	return result;
+}
+
+GLfloat* centerpoint(GLfloat** vectors, int num)
+{
+	int i = 0;
+	GLfloat result[3];
+	for(; i < num; i++)
+	{
+		GLfloat *temp = vectors[i];
+		result[0] += temp[0];
+		result[1] += temp[1];
+		result[2] += temp[2];		
+	}
+	result[0]/=num;
+	result[1]/=num;
+	result[2]/=num;
+	
+	return result;
+}
+
+GLfloat* cross(GLfloat* a, GLfloat* b)
+{
+	GLfloat result[3];
+	result[0] = (a[1]*b[2]) - (a[2]*b[1]);
+	result[1] = (a[2]*b[0]) - (a[0]*b[2]);
+	result[3] = (a[0]*b[1]) - (a[1]*b[0]);
+	return result;
+}
+
+GLfloat* combine_vertices(GLfloat* a, GLfloat* b, int length, int is_add)
+{
+	GLfloat new_vertices[length];
+	int i;
+	for(i = 0; i < length; i++)
+	{
+		if(is_add)
+			new_vertices[i] = a[i] + b[i];
+		else
+			new_vertices[i] = a[i] - b[i];
+	}
+	
+	return new_vertices;
+}

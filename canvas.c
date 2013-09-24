@@ -439,7 +439,7 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				resetCamera();
 				vr_object++;
-				if(vr_object == 5)
+				if(vr_object == 6)
 					vr_object = 1;
 				switch(vr_object){
 					case 1: printf("drawing cube...\n");
@@ -450,6 +450,7 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 						break;
 					case 4: printf("drawing pyramid...\n");
 						break;
+					case 5: printf("drawing spikey cube...\n");
 					default:
 						break;
 				}
