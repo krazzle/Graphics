@@ -262,10 +262,13 @@ void draw_spikey_cube()
 		GLfloat vertex_b[3] = {v_cube_vertices[index2], v_cube_vertices[index2+1], v_cube_vertices[index2+2]};
 		GLfloat vertex_c[3] = {v_cube_vertices[index3], v_cube_vertices[index3+1], v_cube_vertices[index3+2]};
 		GLfloat vertex_d[3] = {v_cube_vertices[index4], v_cube_vertices[index4+1], v_cube_vertices[index4+2]};
+
 		GLfloat *vec1 = combine_vertices(vertex_b, vertex_a, 3, 0);
 		GLfloat *vec2 = combine_vertices(vertex_c, vertex_a, 3, 0);
 		GLfloat *vertex_cross_product = cross(vec1, vec2);
-		printf("cross product vector: (%f, %f, %f)\n", vertex_cross_product[0], vertex_cross_product[1], vertex_cross_product[2]);
+	//	printf("b - a (%f, %f, %f)\n", *vec1,*(vec1+1),*(vec1+2));
+	//	printf("c - a (%f, %f, %f)\n", vec2[0], vec2[1], vec2[2]);
+	//	printf("cross product vector: (%f, %f, %f)\n", vertex_cross_product[0], vertex_cross_product[1], vertex_cross_product[2]);
 
 		GLfloat *normalized = normalize(vertex_cross_product);	
 
@@ -275,8 +278,8 @@ void draw_spikey_cube()
 
 		GLfloat *result = combine_vertices(center, normalized, 3, 1);
 
-		printf("centerpoint: (%f, %f, %f)\n", center[0], center[1], center[2]);
-		printf("normal vector: (%f, %f, %f)\n", result[0], result[1], result[2]);
+		//printf("centerpoint: (%f, %f, %f)\n", center[0], center[1], center[2]);
+		//printf("normal vector: (%f, %f, %f)\n", result[0], result[1], result[2]);
 
 		glBegin(GL_LINE_LOOP);
 		glVertex3f(result[0], result[1], result[2]);
