@@ -26,7 +26,7 @@ void draw_vrml_icosahedron(void);
 void draw_vrml_pyramid(void);
 /* Print the current vrml object.  Used when the user selects a new object. */
 void print_vrml_object(void);
-GLfloat* cross(GLfloat* a, GLfloat* b);
+GLfloat* cross(GLfloat** vectors);
 GLfloat* centerpoint(GLfloat** vectors, int num);
 GLfloat* normalize(GLfloat* vector);
 void draw_spikey_cube();

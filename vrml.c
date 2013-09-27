@@ -34,6 +34,17 @@ GLfloat v_cube_vertices[] = {
 	-1.632990, 0.000000, -1.154700,
 };
 
+GLfloat v_cube_test[] = {
+	1, 0, 1, 
+	0, 1, 1,
+	-1, 0, 1, 
+	0, -1, 1, 
+	0, -1, -1, 
+	1, 0, -1, 
+	0, 1, -1, 
+	-1, 0, -1, 
+};
+
 GLint v_cube_indices[] = {
 	0, 1, 2, 3, -1,
 	4, 5, 0, 3, -1,
@@ -258,65 +269,67 @@ void draw_spikey_cube()
                 int index4 = v_cube_indices[i+3] * 3;
 			
 		//pick any (I guess the first) three vertices
-		GLfloat vertex_a[3] = {v_cube_vertices[index1], v_cube_vertices[index1+1], v_cube_vertices[index1+2]};
-		GLfloat vertex_b[3] = {v_cube_vertices[index2], v_cube_vertices[index2+1], v_cube_vertices[index2+2]};
-		GLfloat vertex_c[3] = {v_cube_vertices[index3], v_cube_vertices[index3+1], v_cube_vertices[index3+2]};
-		GLfloat vertex_d[3] = {v_cube_vertices[index4], v_cube_vertices[index4+1], v_cube_vertices[index4+2]};
+		GLfloat vertex_a[3] = {v_cube_test[index1], v_cube_test[index1+1], v_cube_test[index1+2]};
+		GLfloat vertex_b[3] = {v_cube_test[index2], v_cube_test[index2+1], v_cube_test[index2+2]};
+		GLfloat vertex_c[3] = {v_cube_test[index3], v_cube_test[index3+1], v_cube_test[index3+2]};
+		GLfloat vertex_d[3] = {v_cube_test[index4], v_cube_test[index4+1], v_cube_test[index4+2]};
 		
 		GLfloat *vectors[4] = {vertex_a, vertex_b, vertex_c, vertex_d};
 //		make_spike(vectors, 4);
-	
-		GLfloat *vec1 = (GLfloat*)malloc(3);
-		GLfloat *vec2 = (GLfloat*)malloc(3);
+
+
+		GLfloat *a;
+		GLfloat *b;
 		
 		//vector combine is okay.
-		vec1 = combine_vertices(vertex_b, vertex_a, 3, 0);
-		printf("vec1: (%f, %f, %f)\n", vec1[0], vec1[1], vec1[2]);
-	
-		vec2 = combine_vertices(vertex_c, vertex_a, 3, 0);
-		printf("vec2: (%f, %f, %f)\n", vec2[0], vec2[1], vec2[2]);
-	
-		GLfloat *vertex_cross_product = cross(*vec1, *vec2);
-		//printf("cross product vector: (%f, %f, %f)\n", vertex_cross_product[0], vertex_cross_product[1], vertex_cross_product[2]);
+		a = combine_vertices(vertex_b, vertex_a, 3, 0);
+	//	printf("a: (%f, %f, %f)\n", a[0], a[1], a[2]);
+		b = combine_vertices(vertex_c, vertex_a, 3, 0);
+	//	printf("b: (%f, %f, %f)\n", b[0], b[1], b[2]);
+
+		GLfloat *cross_vecs[2] = {a, b};
+		GLfloat *vertex_cross_product = cross(cross_vecs);
+		printf("vector cross prod (%f,%f,%f)\n", vertex_cross_product[0], vertex_cross_product[1], vertex_cross_product[2]);		
 
 		GLfloat *normalized = normalize(vertex_cross_product);	
-	//	printf("normalized vector: (%f, %f, %f)\n", normalized[0], normalized[1], normalized[2]);
+		printf("normalized vector: (%f, %f, %f)\n", normalized[0], normalized[1], normalized[2]);
 
 		GLfloat *center = centerpoint(vectors, 4);
-	//	printf("centerpoint: (%f, %f, %f)\n", center[0], center[1], center[2]);
-
+		printf("centerpoint: (%f, %f, %f)\n", center[0], center[1], center[2]);
+	
 		GLfloat *result = combine_vertices(center, normalized, 3, 1);
-
+		printf("result: (%f,%f,%f)\n", result[0], result[1], result[2]);
 		glBegin(GL_LINE_LOOP);
 		glVertex3f(result[0], result[1], result[2]);
 		glVertex3f(center[0], center[1], center[2]);
 		glEnd();
 
 		glBegin(GL_LINE_LOOP);
-                glVertex3f(v_cube_vertices[index1], v_cube_vertices[index1+1], v_cube_vertices[index1+2]);
-                glVertex3f(v_cube_vertices[index2], v_cube_vertices[index2+1], v_cube_vertices[index2+2]);
-                glVertex3f(v_cube_vertices[index3], v_cube_vertices[index3+1], v_cube_vertices[index3+2]);
-                glVertex3f(v_cube_vertices[index4], v_cube_vertices[index4+1], v_cube_vertices[index4+2]);
+                glVertex3f(v_cube_test[index1], v_cube_test[index1+1], v_cube_test[index1+2]);
+                glVertex3f(v_cube_test[index2], v_cube_test[index2+1], v_cube_test[index2+2]);
+                glVertex3f(v_cube_test[index3], v_cube_test[index3+1], v_cube_test[index3+2]);
+                glVertex3f(v_cube_test[index4], v_cube_test[index4+1], v_cube_test[index4+2]);
                 glEnd();
         }
 }
 
 void make_spike(GLfloat **vectors, int num)
 {
-	GLfloat *center = centerpoint(vectors, num);
-	GLfloat *normal = combine_vertices(center,normalize(cross(combine_vertices(vectors[1], vectors[0],3, 0),
-                                        combine_vertices(vectors[2], vectors[0],3, 0))) , 3, 1);
+//	GLfloat *center = centerpoint(vectors, num);
+//	GLfloat *normal = combine_vertices(center,normalize(cross(combine_vertices(vectors[1], vectors[0],3, 0),
+  //                                      combine_vertices(vectors[2], vectors[0],3, 0))) , 3, 1);
 
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(normal[0], normal[1], normal[2]);
-	glVertex3f(center[0], center[1], center[2]);
-	glEnd();
+///	glBegin(GL_LINE_LOOP);
+//	glVertex3f(normal[0], normal[1], normal[2]);
+//	glVertex3f(center[0], center[1], center[2]);
+//	glEnd();
 }
 
 GLfloat* normalize(GLfloat* vector)
 {
-	GLfloat result[3];
+	GLfloat *result = (GLfloat*)malloc(sizeof(GLfloat)*3);
 	GLfloat length = sqrt((vector[0]*vector[0]) + (vector[1]*vector[1]) * (vector[2]*vector[2]));
+	printf("length = %f\n", length);
 	
 	result[0] = vector[0]/length;
 	result[1] = vector[1]/length;
@@ -328,7 +341,7 @@ GLfloat* normalize(GLfloat* vector)
 GLfloat* centerpoint(GLfloat** vectors, int num)
 {
 	int i = 0;
-	GLfloat result[3];
+	GLfloat *result = (GLfloat*)malloc(sizeof(GLfloat)*3);
 	for(; i < num; i++)
 	{
 		GLfloat *temp = vectors[i];
@@ -343,11 +356,16 @@ GLfloat* centerpoint(GLfloat** vectors, int num)
 	return result;
 }
 
-GLfloat* cross(GLfloat* a, GLfloat* b)
+GLfloat* cross(GLfloat** vectors)
 {
-	GLfloat result[3];
-	
-	printf("a X b: (%f, %f, %f) x (%f, %f, %f)\n", a[0], a[1], a[2], b[0], b[1], b[2]);
+	GLfloat *result = (GLfloat*)malloc(sizeof(GLfloat)*3);
+
+	GLfloat *a = vectors[0];
+	GLfloat *b = vectors[1];
+	printf("a (%f, %f, %f)\n", a[0], a[1], a[2]);
+	printf("b (%f, %f, %f)\n", b[0], b[1], b[2]);		
+
+/*	printf("a X b: (%f, %f, %f) x (%f, %f, %f)\n", a[0], a[1], a[2], b[0], b[1], b[2]);
 	GLfloat num1 = a[1]*b[2];
 	GLfloat num2 = a[2]*b[1];
 	printf("%f*%f - %f*%f = %f - %f = %f\n",a[1], b[2], a[2], b[1], num1, num2, num1-num2);
@@ -355,11 +373,11 @@ GLfloat* cross(GLfloat* a, GLfloat* b)
 	num1 = a[2]*b[0];
 	num2 = a[0]*b[2];
 	 printf("%f*%f - %f*%f = %f - %f = %f\n",a[2], b[0], a[0], b[2], num1, num2, num1-num2);
-	
+
 	num1 = a[0]*b[1];
 	num2 = a[1]*b[0];
 	 printf("%f*%f - %f*%f = %f - %f = %f\n",a[0], b[1], a[1], b[0], num1, num2, num1-num2);
-
+*/
 	result[0] = ((a[1]*b[2]) - (a[2]*b[1]));
 	result[1] = ((a[2]*b[0]) - (a[0]*b[2]));
 	result[2] = ((a[0]*b[1]) - (a[1]*b[0]));
@@ -368,7 +386,7 @@ GLfloat* cross(GLfloat* a, GLfloat* b)
 
 GLfloat* combine_vertices(GLfloat* a, GLfloat* b, int length, int is_add)
 {
-	GLfloat new_vertices[length];
+	GLfloat *new_vertices = (GLfloat *) malloc(sizeof(GLfloat)*length);
 	int i;
 	for(i = 0; i < length; i++)
 	{
