@@ -30,6 +30,8 @@ void initLighting(void);
 
 /* The current vrml object */
 int vr_object = 1;
+int spikes = 0;
+
 
 #define FALSE		0
 #define TRUE		1
@@ -129,7 +131,7 @@ void myDisplay (void) {
 			draw_cone_tri_calc(radius, height, numTriangles);
 			break;
 		case DM_VRML:
-			draw_vrml(vr_object);
+			draw_vrml(vr_object, spikes);
 			break;
 		case DM_FREE_SCENE:
 			draw_free_scene();
@@ -437,9 +439,8 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 			if(disp_mode == DM_VRML)
 			{
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				resetCamera();
 				vr_object++;
-				if(vr_object == 6)
+				if(vr_object == 5)
 					vr_object = 1;
 				switch(vr_object){
 					case 1: printf("drawing cube...\n");
@@ -450,16 +451,38 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 						break;
 					case 4: printf("drawing pyramid...\n");
 						break;
-					case 5: printf("drawing spikey cube...\n");
 					default:
 						break;
 				}
-				draw_vrml(vr_object);
+				draw_vrml(vr_object, spikes);
 				glFlush();
         			glutSwapBuffers();
 
 			}
-
+			break;
+		case 'w':
+			if(disp_mode == DM_VRML)
+			{
+				if(spikes)
+				{
+					spikes = 0;
+					printf("turning off spikes...\n");
+				}
+				else
+				{
+					spikes = 1;
+					printf("turning on spikes...\n");
+				}
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				draw_vrml(vr_object, spikes);
+				glFlush();
+				glutSwapBuffers();
+				
+			}
+			break;
+		case 'x':
+			performanceTest();
+			break;
 		default:
 			/* Unrecognized key press, just return */
 			return;

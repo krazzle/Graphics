@@ -1,0 +1,33 @@
+display mode: cube using GLUT
+  18.12 sec
+display mode: cube using quadrilaterals
+  18.04 sec
+display mode: cube using quadrilateral arrays
+  18.05 sec
+display mode: cone using GLUT
+  18.01 sec
+display mode: cone using triangles
+  18.05 sec
+display mode: cone using triangle arrays
+  18.08 sec
+display mode: cone using calculated triangles
+  18.12 sec
+display mode: VRML objects
+  cube: 18.03 sec
+  dodecahedron: 18.01 sec
+  icosahedron: 18.02 sec
+  pyramid: 18.01 sec
+display mode: freeform scene
+  18.01 sec
+
+1. 
+
+2. 
+
+3. 
+
+4. 
+
+5. 
+
+6. 

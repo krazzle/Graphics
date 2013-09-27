@@ -393,17 +393,15 @@ void draw_cone_tri_calc(double height, double radius, int base_tri) {
 }
 
 /* Draw the various vrml scenes */
-void draw_vrml(int vr_object) {
+void draw_vrml(int vr_object, int spikes) {
 	if(vr_object == 1)
-		draw_vrml_cube();
+		draw_vrml_cube(spikes);
 	else if (vr_object == 2)
-		draw_vrml_dodecahedron();
+		draw_vrml_dodecahedron(spikes);
 	else if (vr_object == 3)
-		draw_vrml_icosahedron();
+		draw_vrml_icosahedron(spikes);
 	else if(vr_object == 4)
-		draw_vrml_pyramid();
-	else if(vr_object == 5)
-		draw_spikey_cube();
+		draw_vrml_pyramid(spikes);
 }
 
 
