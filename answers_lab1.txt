@@ -20,11 +20,35 @@ display mode: VRML objects
 display mode: freeform scene
   18.01 sec
 
-1. 
+3.  I want 3 views of the same scene, each taking up 1/4 of my screen. These three views should show the front, side and top views of the object. Describe in words what needs to be done with the viewport and camera to accomplish this. How does this affect the viewing frustum?
 
-2. 
+4.  Describe when and why you would use a single frame buffer. Then describe when and why you would use a double frame buffer.
 
-3. 
+5.  Describe a reasonable alternative to the line equation representation y=mx+b for use in displaying a line segment on the screen. What are its advantages over ax+by+c=0?
+
+6.  Suppose I want to transform as follows: translate (2,3,1), then rotate 225 degrees about Y, and finally translate (-4,1,0). What will my final transformation matrix be?
+
+1. Lets say you have an array of vertices
+Point3 vertices[num]; //assume that Point3 is some arbitrary representation of a vertex
+I'm also assuming that you are given an array of vertex indices
+int indices[num_indices]; where each combination of indices that compose the element are separated by a -1 value.
+In order to draw an object representation using these vertex indices, for each index, go to that point in the vertices array and draw it. Create a line loop/other shape using those indexed vertices. 
+The original array does not change, it only gets indexed. 
+You don't really need any additional data structures. 
+
+2. There are four matrix modes: 
+a) model-view -> used to position the camera and build models of objects
+b) projection -> used to define the view volume and to select a camera lens
+c) texture -> control texture coordinates and project texture
+d) color -> control vertex colors
+
+3.  in order to get the desired view, draw the scene three times. 
+Move the camera in the +z direction to view the object in such a way that it is 1/4th of the screen.
+Draw the object three separate times, and rotate/translate accordingly in order to get the desired views.
+for the front view, just translate the object up and to the left
+for the side view, perform a rotation in the desired direction. 
+
+
 
 4. 
 
