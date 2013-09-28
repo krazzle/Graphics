@@ -20,10 +20,6 @@ display mode: VRML objects
 display mode: freeform scene
   18.01 sec
 
-3.  I want 3 views of the same scene, each taking up 1/4 of my screen. These three views should show the front, side and top views of the object. Describe in words what needs to be done with the viewport and camera to accomplish this. How does this affect the viewing frustum?
-
-4.  Describe when and why you would use a single frame buffer. Then describe when and why you would use a double frame buffer.
-
 5.  Describe a reasonable alternative to the line equation representation y=mx+b for use in displaying a line segment on the screen. What are its advantages over ax+by+c=0?
 
 6.  Suppose I want to transform as follows: translate (2,3,1), then rotate 225 degrees about Y, and finally translate (-4,1,0). What will my final transformation matrix be?
@@ -46,12 +42,40 @@ d) color -> control vertex colors
 Move the camera in the +z direction to view the object in such a way that it is 1/4th of the screen.
 Draw the object three separate times, and rotate/translate accordingly in order to get the desired views.
 for the front view, just translate the object up and to the left
-for the side view, perform a rotation in the desired direction. 
+for the side view, perform a rotation on the z plane and translate the object up and to the right 
+for the top view, perform a rotation on the y plane and translate the object down and to the left/right
 
+4. A single frame buffer can be used for images, and nonmoving parts. But, sometimes if you have moving images, the image can be written over in the buffer before it is displayed completely, displaying a broken look. In these situations, it is beneficial to use a double frame buffer, so while one buffer (the front buffer) is being displayed, the other buffer (the back buffer) is being drawn into and is available for constructing what we would like to display next.
 
-
-4. 
-
-5. 
+5. A reasonable alternative to displaying a line segment on the screen is to simply have a point, P(x,y,z,1) and a vector Q(x',y',z', 0). In this way, you can express a line by simply starting at the point and moving in the direction of a vector. using the y = mx+b formula is better than the ax+by+c=0 formula because it is much easier to generate points with the y=mx+b. 
 
 6. 
+translate (2,3,1)
+[x']    [1 0 0 2][x]
+[y']  = [0 1 0 3][y] 
+[z']    [0 0 1 1][z]
+[1 ]    [0 0 0 1][1]
+rotate 225 deg around y
+[x'']   [1    0       0     0][x']
+[y''] = [0 cos225 -sin225   0][y']
+[z'']	[0 sin225  cos225   0][z']	
+[1  ]   [0    0       0     1][1 ]
+translate (-4,1,0)
+[x''']  [1 0 0 -4][x'']
+[y'''] =[0 1 0  1][y''] 
+[z''']  [0 0 0  0][z'']
+[1   ]  [0 0 0  1][1  ]
+
+after combining you get a final matrix of:
+[x''']   [1   0       0            -2           ][x]
+[y'''] = [0 cos225 -sin225 3(cos225)+(-sin225)+1][y]
+[z''']   [0 sin225  cos225  3(sin225) + (cos225)][z]
+[1   ]   [0   0       0             1           ][1]
+
+
+
+
+
+
+
+ 
