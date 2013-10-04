@@ -84,15 +84,28 @@ void drawBranch(void) {
  * any other necessary arguments.
  */
 void drawPlant(void) {
-
-	matrix_multiply();
 	/* Load a hard-coded rotation matrix of -30 degrees about positive z */
 	/* This matrix is only here as an example, and can be removed */
-	load2DMatrix(
-	       sqrt(3.0)/2.0, -1.0/2.0,      0.0,
-		   1.0/2.0,       sqrt(3.0)/2.0, 0.0,
-		   0.0,           0.0,           1.0);
+//	load2DMatrix(
+//	       sqrt(3.0)/2.0, -1.0/2.0,      0.0,
+//		   1.0/2.0,       sqrt(3.0)/2.0, 0.0,
+//		   0.0,           0.0,           1.0);
+	
+	GLfloat mat[3][3] = {{1, 0, 0}, 
+			 {0, 1, 0}, 
+			 {0, 0, 1}};
+	GLfloat** result = multiply(3, 3, (GLfloat**)mat, 3, 3, (GLfloat **)mat);
 
+	load2DMatrix(
+		result[0][0], result[0][1], result[0][2],
+		result[1][0], result[1][1], result[1][2],
+		result[2][0], result[2][1], result[2][2]
+);	
+
+//	load2DMatrix(
+//		1, 0, 5, 
+//		0, 1, 5, 
+//		0, 0, 1);
 	/*
 	 * The location of the leaf and branch will not look right until
 	 * transformation matrices are implmented.
