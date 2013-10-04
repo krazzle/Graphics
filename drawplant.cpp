@@ -84,34 +84,48 @@ void drawBranch(void) {
  * any other necessary arguments.
  */
 void drawPlant(void) {
-	/* Load a hard-coded rotation matrix of -30 degrees about positive z */
+	/*
+ Load a hard-coded rotation matrix of -30 degrees about positive z */
 	/* This matrix is only here as an example, and can be removed */
 //	load2DMatrix(
 //	       sqrt(3.0)/2.0, -1.0/2.0,      0.0,
 //		   1.0/2.0,       sqrt(3.0)/2.0, 0.0,
 //		   0.0,           0.0,           1.0);
 	
-  cout << "about to delcare mat...";
-	GLfloat mat[3][3] = {{1, 0, 0}, 
-			 {0, 1, 0}, 
-			 {0, 0, 1}};
+	GLfloat vec1[3] = {1, 0, 0};
+	GLfloat vec2[3] = {0, 1, 0};
+	GLfloat vec3[3] = {0, 0, 1};
+	GLfloat* mat[3] = {vec1, vec2, vec3};
 
-	cout << "enterint multiply...";
-	//GLfloat** result = multiply(3, 3, (GLfloat**)mat, 3, 3, (GLfloat **)mat);
+	//GLfloat** result = multiply(3, 3,mat, 3, 3, mat);
+	
+	
 
-	Glfloat trans[3][3] = {
-	  {1, 0, 0},
-	  {0, 1, 0},
-	  {0, 0, 1}
 
-	};
+	GLfloat trans1[3] = {1, 0, 5};
+	GLfloat trans2[3] = {0, 1, 5};
+	GLfloat trans3[3] = {0, 0, 1};
+	GLfloat *trans[3] = {trans1, trans2, trans3};
+	
+	
+	GLfloat pi = 3.141592654;
+	
+	GLfloat rot1[3] = { cos(pi), -sin(pi), 0};
+	GLfloat rot2[3] = { sin(pi), cos(pi), 0};
+	GLfloat rot3[3] = { 0, 0, 1};
+	GLfloat *rot[3] = {rot1, rot2, rot3};
+	
+	GLfloat** result = multiply(3, 3, trans, 3, 3, rot);
+	
 	
 	load2DMatrix(
 		     result[0][0], result[0][1], result[0][2],
 		result[1][0], result[1][1], result[1][2],
 		result[2][0], result[2][1], result[2][2]
-);	
+);	  
 
+
+	
 //	load2DMatrix(
 //		1, 0, 5, 
 //		0, 1, 5, 
@@ -123,6 +137,30 @@ void drawPlant(void) {
 	drawLeaf();
 
 	drawBranch();
+
+	
+	load2DMatrix(
+		     result[0][0], result[0][1], result[0][2]+2.0,
+		result[1][0], result[1][1], result[1][2]+4.0,
+		result[2][0], result[2][1], result[2][2]
+);	  
+
+
+	
+//	load2DMatrix(
+//		1, 0, 5, 
+//		0, 1, 5, 
+//		0, 0, 1);
+	/*
+	 * The location of the leaf and branch will not look right until
+	 * transformation matrices are implmented.
+	 */
+	drawLeaf();
+
+	drawBranch();
+
+	
+
 }
 
 /* end of drawplant.c */
