@@ -91,9 +91,12 @@ void drawPlant(void) {
 //		   1.0/2.0,       sqrt(3.0)/2.0, 0.0,
 //		   0.0,           0.0,           1.0);
 	
+  cout << "about to delcare mat...";
 	GLfloat mat[3][3] = {{1, 0, 0}, 
 			 {0, 1, 0}, 
 			 {0, 0, 1}};
+
+	cout << "enterint multiply...";
 	GLfloat** result = multiply(3, 3, (GLfloat**)mat, 3, 3, (GLfloat **)mat);
 
 	load2DMatrix(
