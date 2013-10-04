@@ -97,7 +97,7 @@ void drawPlant(void) {
 	GLfloat *vec2 = {0, 1, 0};
 	GLfloat *vec3 = {0, 0, 1};
 //  cout << "about to delcare mat...";
-	GLfloat** mat = {vec1, vec2, vec3};
+	GLfloat* mat[3] = {vec1, vec2, vec3};
 
 	cout << "enterint multiply...\n";
 	GLfloat** result = multiply(3, 3,mat, 3, 3, mat);
