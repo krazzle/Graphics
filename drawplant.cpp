@@ -90,16 +90,13 @@ void drawPlant(void) {
 //	       sqrt(3.0)/2.0, -1.0/2.0,      0.0,
 //		   1.0/2.0,       sqrt(3.0)/2.0, 0.0,
 //		   0.0,           0.0,           1.0);
-
-	cout << "halp!" << endl;
 	
-	GLfloat *vec1 = {1, 0, 0};
-	GLfloat *vec2 = {0, 1, 0};
-	GLfloat *vec3 = {0, 0, 1};
-//  cout << "about to delcare mat...";
+	GLfloat vec1[3] = {1, 0, 0};
+	GLfloat vec2[3] = {0, 1, 0};
+	GLfloat vec3[3] = {0, 0, 1};
+
 	GLfloat* mat[3] = {vec1, vec2, vec3};
 
-	cout << "enterint multiply...\n";
 	GLfloat** result = multiply(3, 3,mat, 3, 3, mat);
 
 	load2DMatrix(

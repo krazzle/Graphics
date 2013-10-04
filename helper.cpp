@@ -36,27 +36,14 @@ GLfloat**  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2
     for( x = 0; x < size; x += 1) {
       GLfloat val = 0;
       for( y = 0; y < size; y += 1) {
-	//cout << "i: " << i << " y: " << y << " x: " << x << endl; 
-//	cout << "*m1: " << *m1 << endl;
 	GLfloat num1 = m1[i][y];
 	GLfloat num2 = m2[y][x];
-//	cout << "val: " << val << endl;
 	val += num1*num2;
       }
-  //    cout << "yo niggg" << endl;
-     // cout << "val: " << val << " i: " << i << " x: " << x << endl;
       r[i][x] = val;
     }
   }
 
-
-  cout << "exiting multiply..." << endl;
- 
   return r;
 }
 
-
-GLfloat** convertToDubz(int rows, int cols, GLfloat *)
-{
-		
-}
