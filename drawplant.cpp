@@ -13,7 +13,7 @@
 #include <cmath>
 #include <assert.h>
 #include <iostream>
-
+#include "helper.h"
 #include "common.h"
 #include "drawplant.h"
 #include "readppm.h"
@@ -85,6 +85,7 @@ void drawBranch(void) {
  */
 void drawPlant(void) {
 
+	matrix_multiply();
 	/* Load a hard-coded rotation matrix of -30 degrees about positive z */
 	/* This matrix is only here as an example, and can be removed */
 	load2DMatrix(
