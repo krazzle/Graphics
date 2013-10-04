@@ -97,10 +97,17 @@ void drawPlant(void) {
 			 {0, 0, 1}};
 
 	cout << "enterint multiply...";
-	GLfloat** result = multiply(3, 3, (GLfloat**)mat, 3, 3, (GLfloat **)mat);
+	//GLfloat** result = multiply(3, 3, (GLfloat**)mat, 3, 3, (GLfloat **)mat);
 
+	Glfloat trans[3][3] = {
+	  {1, 0, 0},
+	  {0, 1, 0},
+	  {0, 0, 1}
+
+	};
+	
 	load2DMatrix(
-		result[0][0], result[0][1], result[0][2],
+		     result[0][0], result[0][1], result[0][2],
 		result[1][0], result[1][1], result[1][2],
 		result[2][0], result[2][1], result[2][2]
 );	
