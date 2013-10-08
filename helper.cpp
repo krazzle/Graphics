@@ -47,3 +47,6 @@ GLfloat**  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2
   return r;
 }
 
+
+
+// make a thing to make the matricies
