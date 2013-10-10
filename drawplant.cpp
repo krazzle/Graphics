@@ -20,7 +20,7 @@
 #include "l-system-operators.h"
 #include <stdio.h>
 #include <vector>
-
+#include <string>
 using namespace std;
 
 /* Takes a 2D matrix in row-major order, and loads the 3D matrix which
@@ -80,8 +80,8 @@ void drawBranch(void) {
 	glEnd();
 }
 
-void drawLSystem(char str[], int len){
-	
+void drawLSystem(string str) {  
+
 	GLfloat one[] = {1,0,0};
 	GLfloat two[] = {0,1,0};
 	GLfloat three[] = {0,0,1};
@@ -91,27 +91,52 @@ void drawLSystem(char str[], int len){
 
 	//the reason for placeholder is because translate/rotate return GLfloat** objects and I couldnt cast that to GLfloat *mat[]	
 	//if you can come up with a better solution that would be greeeeeeat :D
-	GLfloat **placeholder = (GLfloat**)malloc(sizeof(mat));
-	printf("before copy\n");
-	copyMatrix(3,3,mat,placeholder);
-
+	
+	//GLfloat **placeholder = (GLfloat**)malloc(sizeof(mat));
+	GLfloat **placeholder = new GLfloat*[3];
 	int i;
+	for ( i = 0; i < 3; i += 1) 
+	  placeholder[i] = new GLfloat[3];
+
+
+	printf("before copy\n");
+	cout << "about to enter copyMatrix1" << endl;
+	copyMatrix(3,3,mat,placeholder);
+	cout << "out of copyMatrix1" << endl;
+
+	//int i;
 	GLfloat left_theta = 30;
 	GLfloat right_theta = 330;
-	for(i = 0; i < len; i++){
+	for(i = 0; i < str.length(); i++){
 		char temp = str[i];
 		switch(temp){
-			case 'F':drawBranch(); placeholder = translate(placeholder); 
-				printf("drawing branch at: \n");printMatrix((GLfloat**)mat);
-				break;
-			case '[':push(placeholder); break;
-			case ']':placeholder = pop(); break;
-			case '-':placeholder = rotate(placeholder, left_theta, 0, 0); break;
-			case '+':placeholder = rotate(placeholder, right_theta, 0, 0); break;
-			case 'T':drawLeaf();
-				printf("drawing leaf at: \n"); printMatrix((GLfloat**)mat);
-				break;
-			default: break;
+			case 'F':
+			  drawBranch(); 
+			  placeholder = translate(placeholder); 
+			  printf("drawing branch at: \n");
+			  printMatrix((GLfloat**)mat);
+			  break;
+			case '[':
+			  push(placeholder); 
+			  cout << "push push push push" << endl;
+			  break;
+			case ']':
+			  placeholder = pop(); 
+			  cout << "***************pop pop pop pop********" << endl;
+			  break;
+			case '-':
+			  placeholder = rotate(placeholder, left_theta, 0, 0); 
+			  break;
+			case '+':
+			  placeholder = rotate(placeholder, right_theta, 0, 0); 
+			  break;
+			case 'T':
+			  drawLeaf();
+			  printf("drawing leaf at: \n"); 
+			  printMatrix((GLfloat**)mat);
+			  break;
+			default: 
+			  break;
 
 		}
 	}
@@ -130,7 +155,16 @@ void printMatrix(GLfloat** mat){
  */
 void drawPlant() {
 		
-	drawLSystem("FT", 2);
+
+  //drawLSystem("FT");
+  //drawLSystem("FFT");
+  //drawLSystem("F-T");
+  //drawLSystem("F+T");
+  // these two are fucking up. i think it's not popping properly and redrawing over the
+  // rotated matrix
+  //drawLSystem("F[-FT]T");
+  //drawLSystem("F[-FT]FT");
+  drawLSystem("F[-FT][+FT]FT");
 	/*
 	GLfloat degreesToRads = (2*3.14159)/180;
 	GLfloat theta = 0.0;

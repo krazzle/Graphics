@@ -21,12 +21,23 @@ using namespace std;
 stack<GLfloat**> matrixStack; 
 
 void push(GLfloat **mat) {
-  matrixStack.push(mat);
+  GLfloat **deepCopy = new GLfloat*[3];
+  int i;
+  for ( i = 0 ; i < 3; i += 1)
+    deepCopy[i] = new GLfloat[3];
+  copyMatrix(3, 3, mat, deepCopy);
+  matrixStack.push(deepCopy);
 }
 
 GLfloat** pop() {
-  GLfloat **result = (GLfloat**)malloc(9*sizeof(GLfloat));
-  result = matrixStack.top();
+  /*
+  //GLfloat **result = (GLfloat**)malloc(9*sizeof(GLfloat));
+  //GLfloat **result = new GLfloat*[3];
+  int i;
+  for ( i = 0 ; i < 3; i += 1)
+    result[i] = new GLfloat[3];
+  */
+  GLfloat **result = matrixStack.top();
   matrixStack.pop();
   load2DMatrixWrapper(result);
   return result;
@@ -34,7 +45,9 @@ GLfloat** pop() {
 
 
 GLfloat** translate(GLfloat **mat) {
-   
+  
+  cout << "in translate" << endl;
+  
   //translational matrix for a branch with length of 6.0
   GLfloat trans1[3] = {1, 0, 0};
   GLfloat trans2[3] = {0, 1, 6.0};
@@ -48,6 +61,8 @@ GLfloat** translate(GLfloat **mat) {
   printf("ehhh\n");
 
   GLfloat** result = multiply(rows, columns, mat, rows, columns, trans);
+  
+  cout << "out of multiply" << endl;
 
   load2DMatrix(
 	       result[0][0], result[0][1], result[0][2],
@@ -56,6 +71,9 @@ GLfloat** translate(GLfloat **mat) {
 	       );	 
   // copy matrices
   copyMatrix(rows, columns, result, mat);
+
+  cout << "geting out of translate" << endl;
+  
   return result;
 }
 
@@ -116,13 +134,15 @@ GLfloat** rotate(GLfloat **mat, GLfloat x, GLfloat y, GLfloat z) {
 
 void copyMatrix(int rows, int columns, GLfloat **m1, GLfloat **m2) {
 
-         printf("m1[%d][%d]: %f\n",2, 0,m1[2][0]);
- 
+  //printf("m1[%d][%d]: %f\n",2, 0,m1[2][0]);
+  cout << "rows: " << rows << endl;
+  cout << "columns: " << columns << endl;
+  
   int i, j;
   for ( i = 0; i < rows; i++) {
     for ( j = 0; j < columns; j++) {
       printf("m2[%d][%d]: %f m1[%d][%d]: %f\n",i, j,m2[i][j], i, j, m1[i][j]);
-
+      
       m2[i][j] = m1[i][j];
     }
   }
