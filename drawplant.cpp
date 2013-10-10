@@ -17,6 +17,8 @@
 #include "common.h"
 #include "drawplant.h"
 #include "readppm.h"
+#include "lsystem.h"
+#include <stdio.h>
 
 using namespace std;
 
@@ -77,14 +79,51 @@ void drawBranch(void) {
 	glEnd();
 }
 
+void drawLSystem(char str[], int len){
+	
+	GLfloat vec1[3] = {1, 0, 0};
+        GLfloat vec2[3] = {0, 1, 0};
+        GLfloat vec3[3] = {0, 0, 1};
+	GLfloat *mat[3] = {vec1,vec2,vec3};
+	load2DMatrixWrapper((GLfloat**)mat);
+	
+	int i;
+	GLfloat left_theta = 30;
+	GLfloat right_theta = 330;
+	for(i = 0; i < len; i++){
+		char temp = str[i];
+		switch(temp){
+			case 'F':drawBranch(); translate((GLfloat**)mat, 0,6); 
+				printf("drawing branch at: \n");printMatrix((GLfloat**)mat);
+				break;
+			case '[':push((GLfloat**)mat); break;
+			case ']':pop((GLfloat**)mat); break;
+			case '-':rotate((GLfloat**)mat, left_theta); break;
+			case '+':rotate((GLfloat**)mat, right_theta); break;
+			case 'T':drawLeaf();
+				printf("drawing leaf at: \n"); printMatrix((GLfloat**)mat);
+				break;
+			default: break;
+
+		}
+	}
+}
+
+
+void printMatrix(GLfloat** mat){
+	printf("[%f,%f,%f]\n[%f,%f,%f]\n[%f,%f,%f]\n", mat[0][0], mat[0][1], mat[0][2], mat[1][0], mat[1][1], mat[1][2], mat[2][0],mat[2][1], mat[2][2]);
+}
+
 /*
  * Draws the plant.
  *
  * ADD YOUR CODE and modify the function to take an L-system depth and
  * any other necessary arguments.
  */
-void drawPlant(void) {
-	
+void drawPlant() {
+		
+	drawLSystem("-FT", 3);
+	/*
 	GLfloat degreesToRads = (2*3.14159)/180;
 	GLfloat theta = 0.0;
 	GLfloat amplitude = 1.0;
@@ -124,7 +163,9 @@ void drawPlant(void) {
 		drawBranch();
 		theta+=30;
 		
-	}
+	}*/
+
+	
 
 }
 

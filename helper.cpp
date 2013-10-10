@@ -15,18 +15,10 @@
 
 using namespace std;
 
-GLfloat**  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2Columns, GLfloat **m2) { 
+void  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2Columns, GLfloat **m2) { 
   
   // check if valid multiplication
   assert(m1Columns == m2Rows);
-
-  // GLfloat** r = (GLfloat**)malloc(m1Columns*m2Rows);
-
-  GLfloat** r = new GLfloat*[m2Rows];
-  int s;
-  for(s = 0; s < m2Rows; s += 1) 
-    r[s] = new GLfloat[m1Columns];
-
   
 // dem loopz
   int i, x, y;
@@ -40,10 +32,8 @@ GLfloat**  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2
 	GLfloat num2 = m2[y][x];
 	val += num1*num2;
       }
-      r[i][x] = val;
+      m2[i][x] = val;
     }
   }
-
-  return r;
 }
 
