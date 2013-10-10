@@ -15,8 +15,9 @@
 
 using namespace std;
 
-void  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2Columns, GLfloat **m2) { 
+GLfloat**  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2Columns, GLfloat **m2) { 
   
+  GLfloat **result = (GLfloat**)malloc(m1Columns*m2Rows*sizeof(GLfloat));
   // check if valid multiplication
   assert(m1Columns == m2Rows);
   
@@ -32,9 +33,10 @@ void  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2Colum
 	GLfloat num2 = m2[y][x];
 	val += num1*num2;
       }
-      m2[i][x] = val;
+      result[i][x] = val;
     }
   }
+  return result;
 }
 
 

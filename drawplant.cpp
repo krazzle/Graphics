@@ -17,8 +17,9 @@
 #include "common.h"
 #include "drawplant.h"
 #include "readppm.h"
-//#include "lsystem.h"
+#include "l-system-operators.h"
 #include <stdio.h>
+#include <vector>
 
 using namespace std;
 
@@ -81,25 +82,32 @@ void drawBranch(void) {
 
 void drawLSystem(char str[], int len){
 	
-	GLfloat vec1[3] = {1, 0, 0};
-        GLfloat vec2[3] = {0, 1, 0};
-        GLfloat vec3[3] = {0, 0, 1};
-	GLfloat *mat[3] = {vec1,vec2,vec3};
-	load2DMatrixWrapper((GLfloat**)mat);
+	GLfloat one[] = {1,0,0};
+	GLfloat two[] = {0,1,0};
+	GLfloat three[] = {0,0,1};
+	GLfloat *mat[] = {one,two,three};	
 	
+	load2DMatrixWrapper((GLfloat**)mat);
+
+	//the reason for placeholder is because translate/rotate return GLfloat** objects and I couldnt cast that to GLfloat *mat[]	
+	//if you can come up with a better solution that would be greeeeeeat :D
+	GLfloat **placeholder = (GLfloat**)malloc(sizeof(mat));
+	printf("before copy\n");
+	copyMatrix(3,3,mat,placeholder);
+
 	int i;
 	GLfloat left_theta = 30;
 	GLfloat right_theta = 330;
 	for(i = 0; i < len; i++){
 		char temp = str[i];
 		switch(temp){
-			case 'F':drawBranch(); translate((GLfloat**)mat, 0,6); 
+			case 'F':drawBranch(); placeholder = translate(placeholder); 
 				printf("drawing branch at: \n");printMatrix((GLfloat**)mat);
 				break;
-			case '[':push((GLfloat**)mat); break;
-			case ']':pop((GLfloat**)mat); break;
-			case '-':rotate((GLfloat**)mat, left_theta); break;
-			case '+':rotate((GLfloat**)mat, right_theta); break;
+			case '[':push(placeholder); break;
+			case ']':placeholder = pop(); break;
+			case '-':placeholder = rotate(placeholder, left_theta, 0, 0); break;
+			case '+':placeholder = rotate(placeholder, right_theta, 0, 0); break;
 			case 'T':drawLeaf();
 				printf("drawing leaf at: \n"); printMatrix((GLfloat**)mat);
 				break;
@@ -122,7 +130,7 @@ void printMatrix(GLfloat** mat){
  */
 void drawPlant() {
 		
-	drawLSystem("-FT", 3);
+	drawLSystem("FT", 2);
 	/*
 	GLfloat degreesToRads = (2*3.14159)/180;
 	GLfloat theta = 0.0;
