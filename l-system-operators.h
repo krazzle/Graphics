@@ -12,7 +12,7 @@
 #include "helper.h"
 
 
-GLfloat** translate(GLfloat **mat);
+GLfloat** translate(GLfloat **mat, GLfloat size);
 GLfloat** pop();
 void push(GLfloat **mat);
 GLfloat** rotate(GLfloat **mat, GLfloat x, GLfloat y, GLfloat z);

@@ -44,13 +44,13 @@ GLfloat** pop() {
 }
 
 
-GLfloat** translate(GLfloat **mat) {
+GLfloat** translate(GLfloat **mat, GLfloat size) {
   
-  cout << "in translate" << endl;
+  //cout << "in translate" << endl;
   
   //translational matrix for a branch with length of 6.0
   GLfloat trans1[3] = {1, 0, 0};
-  GLfloat trans2[3] = {0, 1, 6.0};
+  GLfloat trans2[3] = {0, 1, size};
   GLfloat trans3[3] = {0, 0, 1};
   GLfloat *trans[3] = {trans1, trans2, trans3};
   
@@ -58,11 +58,11 @@ GLfloat** translate(GLfloat **mat) {
   int rows = 3;
   int columns = 3;
 
-  printf("ehhh\n");
+  //printf("ehhh\n");
 
   GLfloat** result = multiply(rows, columns, mat, rows, columns, trans);
   
-  cout << "out of multiply" << endl;
+  //cout << "out of multiply" << endl;
 
   load2DMatrix(
 	       result[0][0], result[0][1], result[0][2],
@@ -72,7 +72,7 @@ GLfloat** translate(GLfloat **mat) {
   // copy matrices
   copyMatrix(rows, columns, result, mat);
 
-  cout << "geting out of translate" << endl;
+  //cout << "geting out of translate" << endl;
   
   return result;
 }
@@ -135,13 +135,13 @@ GLfloat** rotate(GLfloat **mat, GLfloat x, GLfloat y, GLfloat z) {
 void copyMatrix(int rows, int columns, GLfloat **m1, GLfloat **m2) {
 
   //printf("m1[%d][%d]: %f\n",2, 0,m1[2][0]);
-  cout << "rows: " << rows << endl;
-  cout << "columns: " << columns << endl;
+ // cout << "rows: " << rows << endl;
+ // cout << "columns: " << columns << endl;
   
   int i, j;
   for ( i = 0; i < rows; i++) {
     for ( j = 0; j < columns; j++) {
-      printf("m2[%d][%d]: %f m1[%d][%d]: %f\n",i, j,m2[i][j], i, j, m1[i][j]);
+    //  printf("m2[%d][%d]: %f m1[%d][%d]: %f\n",i, j,m2[i][j], i, j, m1[i][j]);
       
       m2[i][j] = m1[i][j];
     }

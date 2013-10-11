@@ -23,6 +23,17 @@
 #include <string>
 using namespace std;
 
+std::string L0 = "F[-F1]F[+F2]F0";
+std::string L1 = "F[-F1]F[+FT]F1";
+std::string L2 = "F[-FT]F[+F2]F2";
+
+GLfloat one[] = {1,0,0};
+GLfloat two[] = {0,1,0};
+GLfloat three[] = {0,0,1};
+GLfloat *mat[] = {one,two,three};
+
+GLfloat **placeholder = new GLfloat*[3];
+
 /* Takes a 2D matrix in row-major order, and loads the 3D matrix which
    does the same trasformation into the OpenGL MODELVIEW matrix, in
    column-major order. */
@@ -62,7 +73,7 @@ void drawLeaf(void) {
 	glVertex2f(1.0,0.7);
 	glVertex2f(1.3,1.8);
 	glVertex2f(1.0,2.8);
-	glVertex2f(0.0,4.0);
+	glVertex2f(0.0,3.0);
 	glVertex2f(-1.0,2.8);
 	glVertex2f(-1.3,1.8);
 	glVertex2f(-1.0,0.7);
@@ -74,55 +85,36 @@ void drawBranch(void) {
 	glColor3f(0.54,0.27,0.07); 
 	glBegin(GL_POLYGON);
 	glVertex2f(1.0,0.0);
-	glVertex2f(1.0,6.0);
-	glVertex2f(-1.0,6.0);
+	glVertex2f(1.0,4.0);
+	glVertex2f(-1.0,4.0);
 	glVertex2f(-1.0,0.0);
 	glEnd();
 }
 
-void drawLSystem(string str) {  
+void drawLSystem(string str, int depth) {  
 
-	GLfloat one[] = {1,0,0};
-	GLfloat two[] = {0,1,0};
-	GLfloat three[] = {0,0,1};
-	GLfloat *mat[] = {one,two,three};	
-	
-	load2DMatrixWrapper((GLfloat**)mat);
+	//cout << str << endl;
+	//cout << depth << endl;
 
-	//the reason for placeholder is because translate/rotate return GLfloat** objects and I couldnt cast that to GLfloat *mat[]	
-	//if you can come up with a better solution that would be greeeeeeat :D
-	
-	//GLfloat **placeholder = (GLfloat**)malloc(sizeof(mat));
-	GLfloat **placeholder = new GLfloat*[3];
 	int i;
-	for ( i = 0; i < 3; i += 1) 
-	  placeholder[i] = new GLfloat[3];
-
-
-	printf("before copy\n");
-	cout << "about to enter copyMatrix1" << endl;
-	copyMatrix(3,3,mat,placeholder);
-	cout << "out of copyMatrix1" << endl;
-
-	//int i;
-	GLfloat left_theta = 30;
-	GLfloat right_theta = 330;
+	GLfloat left_theta = 20;
+	GLfloat right_theta = 340;
 	for(i = 0; i < str.length(); i++){
 		char temp = str[i];
 		switch(temp){
 			case 'F':
 			  drawBranch(); 
-			  placeholder = translate(placeholder); 
-			  printf("drawing branch at: \n");
-			  printMatrix((GLfloat**)mat);
+			  placeholder = translate(placeholder, 4); 
+			//  printf("drawing branch at: \n");
+			//  printMatrix((GLfloat**)mat);
 			  break;
 			case '[':
 			  push(placeholder); 
-			  cout << "push push push push" << endl;
+			 // cout << "push push push push" << endl;
 			  break;
 			case ']':
 			  placeholder = pop(); 
-			  cout << "***************pop pop pop pop********" << endl;
+			 // cout << "***************pop pop pop pop********" << endl;
 			  break;
 			case '-':
 			  placeholder = rotate(placeholder, left_theta, 0, 0); 
@@ -132,8 +124,26 @@ void drawLSystem(string str) {
 			  break;
 			case 'T':
 			  drawLeaf();
-			  printf("drawing leaf at: \n"); 
-			  printMatrix((GLfloat**)mat);
+			 // printf("drawing leaf at: \n"); 
+			//  printMatrix((GLfloat**)mat);
+			  break;
+			case '0':
+			  if(depth == 1)
+			    drawLeaf();
+ 			  else
+			    drawLSystem(L0, depth-1);
+			  break;
+			case '1':
+			  if(depth == 1)
+			    drawLeaf();
+			  else
+			    drawLSystem(L1, depth-1);
+			  break;
+ 			case '2':
+			  if(depth == 1)
+			    drawLeaf();
+			  else
+			    drawLSystem(L2, depth-1);
 			  break;
 			default: 
 			  break;
@@ -154,61 +164,14 @@ void printMatrix(GLfloat** mat){
  * any other necessary arguments.
  */
 void drawPlant() {
-		
+  int i;
+  for ( i = 0; i < 3; i += 1)
+    placeholder[i] = new GLfloat[3];
 
-  //drawLSystem("FT");
-  //drawLSystem("FFT");
-  //drawLSystem("F-T");
-  //drawLSystem("F+T");
-  // these two are fucking up. i think it's not popping properly and redrawing over the
-  // rotated matrix
-  //drawLSystem("F[-FT]T");
-  //drawLSystem("F[-FT]FT");
-  drawLSystem("F[-FT][+FT]FT");
-	/*
-	GLfloat degreesToRads = (2*3.14159)/180;
-	GLfloat theta = 0.0;
-	GLfloat amplitude = 1.0;
-	int i;
-	for(i = 0; i < 20; i+=2){
-	
-		GLfloat frac1 = (GLfloat)((rand() % 10)+1);
-		GLfloat frac2 = (GLfloat)((rand() % 5) +1);
-		amplitude = frac1/frac2;
-		//identity matrix
-		GLfloat vec1[3] = {1, 0, 0};
-		GLfloat vec2[3] = {0, 1, 0};
-		GLfloat vec3[3] = {0, 0, 1};
-		GLfloat* mat[3] = {vec1, vec2, vec3};
-	
-		//translational matrix
-		GLfloat trans1[3] = {1, 0, i};
-		GLfloat trans2[3] = {0, 1, i};
-		GLfloat trans3[3] = {0, 0, 1};
-		GLfloat *trans[3] = {trans1, trans2, trans3};
-		
-		//rotational matrix
-		GLfloat rot1[3] = { cos(theta*degreesToRads), -sin(theta*degreesToRads), 0};
-		GLfloat rot2[3] = { sin(theta*degreesToRads), cos(theta*degreesToRads), 0};
-		GLfloat rot3[3] = { 0, 0, 1};
-		GLfloat *rot[3] = {rot1, rot2, rot3};	
-		GLfloat** result = multiply(3, 3, trans, 3, 3, rot);
-	
-	
-		load2DMatrix(
-			     result[0][0], result[0][1], result[0][2],
-			result[1][0], result[1][1], result[1][2],
-			result[2][0], result[2][1], result[2][2]
-		);	 
-	 
-		drawLeaf();
-		drawBranch();
-		theta+=30;
-		
-	}*/
+  copyMatrix(3,3,mat,placeholder);
 
-	
-
+  load2DMatrixWrapper((GLfloat**)mat);
+  drawLSystem(L0, 3);
 }
 
 /* end of drawplant.c */
