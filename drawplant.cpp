@@ -97,8 +97,8 @@ void drawLSystem(string str, int depth) {
 	//cout << depth << endl;
 
 	int i;
-	GLfloat left_theta = 20;
-	GLfloat right_theta = 340;
+	GLfloat left_theta = 20 + (rand()%10);
+	GLfloat right_theta = 340 + (rand()%10);
 	for(i = 0; i < str.length(); i++){
 		char temp = str[i];
 		switch(temp){
