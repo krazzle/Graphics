@@ -44,7 +44,22 @@ int main (int argc, char** argv) {
 }
 
 void init() {
-  glClearColor(0.0, 0.0, 0.0, 0.0);  
+  /* GLfloat mat_diffuse[] = { 0.7, 0.7, 0.7, 1.0 };
+   GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+   GLfloat mat_shininess[] = { 100 };
+*/
+   glClearColor (0.0, 0.0, 0.0, 0.0);
+ /*  glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+   glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+
+   glEnable(GL_LIGHTING);
+   glEnable(GL_LIGHT0);
+   glEnable(GL_DEPTH_TEST);
+   glEnable(GL_AUTO_NORMAL);
+   glEnable(GL_NORMALIZE);
+*/
+//  glClearColor(0.0, 0.0, 0.0, 0.0);  
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(-40.0, 40.0, -40.0, 40.0, -10.0, 10.0);

@@ -23,16 +23,20 @@
 #include <string>
 using namespace std;
 
+std::string Test = "F[+FT]FT";
 std::string L0 = "F[-F1]F[+F2]F0";
-std::string L1 = "F[-F1]F[+FT]F1";
+std::string L1 = "F[-F1]F[+F2]F1";
 std::string L2 = "F[-FT]F[+F2]F2";
 
-GLfloat one[] = {1,0,0};
-GLfloat two[] = {0,1,0};
-GLfloat three[] = {0,0,1};
-GLfloat *mat[] = {one,two,three};
+int max_depth = 3;
 
-GLfloat **placeholder = new GLfloat*[3];
+GLfloat one[] = {1,0,0,0};
+GLfloat two[] = {0,1,0,0};
+GLfloat three[] = {0,0,1,0};
+GLfloat four[] = {0,0,0,1};
+GLfloat *mat[] = {one,two,three, four};
+
+GLfloat **placeholder = new GLfloat*[4];
 
 /* Takes a 2D matrix in row-major order, and loads the 3D matrix which
    does the same trasformation into the OpenGL MODELVIEW matrix, in
@@ -62,32 +66,84 @@ void load3DMatrix(
 		GLfloat m20, GLfloat m21, GLfloat m22, GLfloat m23,
 		GLfloat m30, GLfloat m31, GLfloat m32, GLfloat m33) {
 
-	/* ADD YOUR CODE */
+	GLfloat M3D[16];
+	M3D[0] = m00; M3D[1] = m10; M3D[2] = m20; M3D[3] = m30;
+	M3D[4] = m01; M3D[5] = m11; M3D[6] = m21; M3D[7] = m31;
+	M3D[8] = m02; M3D[9] = m12; M3D[10] = m22; M3D[11] = m32;
+	M3D[12] = m03; M3D[13] = m13; M3D[14] = m21; M3D[15] = m33;
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(M3D);
 }
 
 void drawLeaf(void) {
 	/* ADD YOUR CODE to make the 2D leaf a 3D extrusion */
-	glColor3f(0.1,0.9,0.1); 
+	glColor3f(0.1,.5,0.1); 
 	glBegin(GL_POLYGON);
-	glVertex2f(0.0,0.0);
-	glVertex2f(1.0,0.7);
-	glVertex2f(1.3,1.8);
-	glVertex2f(1.0,2.8);
-	glVertex2f(0.0,3.0);
-	glVertex2f(-1.0,2.8);
-	glVertex2f(-1.3,1.8);
-	glVertex2f(-1.0,0.7);
+	glVertex3f(0,0,0);
+	glVertex3f(1.5,.5,0);
+	glVertex3f(.5,.3,0);
+	glVertex3f(1.8,2.1,0);
+	glVertex3f(.4,1.2,0);	
+	glVertex3f(0,3,0);
+	glVertex3f(-1.5,.5,0);
+        glVertex3f(-.5,.3,0);
+        glVertex3f(-1.8,2.1,0);
+        glVertex3f(-.4,1.2,0);
+	glVertex3f(0,0,.1);
+        glVertex3f(1.5,.5,.1);
+        glVertex3f(.5,.3,.2);
+        glVertex3f(1.8,2.1,.2);
+        glVertex3f(.4,1.2,.2);
+        glVertex3f(0,3,.2);
+        glVertex3f(-1.5,.5,.2);
+        glVertex3f(-.5,.3,.2);
+        glVertex3f(-1.8,2.1,.1);
+        glVertex3f(-.4,1.2,0.1);
+
 	glEnd();
+	
+	glColor3f(.5,1,.5);
+        glBegin(GL_LINE_LOOP);
+        glVertex3f(0,0,0);
+        glVertex3f(1.5,.5,0);
+        glVertex3f(.5,.3,0);
+        glVertex3f(1.8,2.1,0);
+        glVertex3f(.4,1.2,0);
+        glVertex3f(0,3,0);
+        glVertex3f(-1.5,.5,0);
+        glVertex3f(-.5,.3,0);
+        glVertex3f(-1.8,2.1,0);
+        glVertex3f(-.4,1.2,0);
+        glEnd();
+
 }
 
-void drawBranch(void) {
+void drawBranch(GLfloat percent) {
 	/* ADD YOUR CODE to make the 2D branch a 3D extrusion */
-	glColor3f(0.54,0.27,0.07); 
+//	cout << "drawing branch" << endl;	
+	
+	/*int width, height;
+	unsigned char* image = SOIL_load_image("img.png", &width, &height, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	*/
+
+	glColor3f(0.54,0.27,0.07);
+	
+	GLfloat height = 4.0*percent;
+	GLfloat width = 1.0*percent;
+	GLfloat depth = .5*percent;	
+
 	glBegin(GL_POLYGON);
-	glVertex2f(1.0,0.0);
-	glVertex2f(1.0,4.0);
-	glVertex2f(-1.0,4.0);
-	glVertex2f(-1.0,0.0);
+	glVertex3f(width,0.0,-depth);
+	glVertex3f(width,height,-depth);
+	glVertex3f(-width,height,-depth);
+	glVertex3f(-width,0.0,-depth);
+	glVertex3f(width,0.0,depth);
+        glVertex3f(width,height,depth);
+        glVertex3f(-width,height,depth);
+        glVertex3f(-width,0.0,depth);
+
 	glEnd();
 }
 
@@ -95,18 +151,20 @@ void drawLSystem(string str, int depth) {
 
 	//cout << str << endl;
 	//cout << depth << endl;
+	int scale = max_depth - depth + 1;
+        GLfloat percent = 1/((GLfloat)scale);
 
 	int i;
-	GLfloat left_theta = 20 + (rand()%10);
-	GLfloat right_theta = 340 + (rand()%10);
+	GLfloat left_theta = 19;
+	GLfloat right_theta = 341;
 	for(i = 0; i < str.length(); i++){
 		char temp = str[i];
 		switch(temp){
 			case 'F':
-			  drawBranch(); 
-			  placeholder = translate(placeholder, 4); 
-			//  printf("drawing branch at: \n");
-			//  printMatrix((GLfloat**)mat);
+			  drawBranch(percent);
+			  placeholder = translate(placeholder, percent); 
+			 // printf("drawing branch at: \n");
+			 // printMatrix(placeholder);
 			  break;
 			case '[':
 			  push(placeholder); 
@@ -117,15 +175,15 @@ void drawLSystem(string str, int depth) {
 			 // cout << "***************pop pop pop pop********" << endl;
 			  break;
 			case '-':
-			  placeholder = rotate(placeholder, left_theta, 0, 0); 
+			  placeholder = rotate(placeholder,0,0, left_theta);
 			  break;
 			case '+':
-			  placeholder = rotate(placeholder, right_theta, 0, 0); 
+			  placeholder = rotate(placeholder,0,0, right_theta); 
 			  break;
 			case 'T':
 			  drawLeaf();
 			 // printf("drawing leaf at: \n"); 
-			//  printMatrix((GLfloat**)mat);
+			 // printMatrix(placeholder);
 			  break;
 			case '0':
 			  if(depth == 1)
@@ -154,7 +212,7 @@ void drawLSystem(string str, int depth) {
 
 
 void printMatrix(GLfloat** mat){
-	printf("[%f,%f,%f]\n[%f,%f,%f]\n[%f,%f,%f]\n", mat[0][0], mat[0][1], mat[0][2], mat[1][0], mat[1][1], mat[1][2], mat[2][0],mat[2][1], mat[2][2]);
+	printf("[%f,%f,%f,%f]\n[%f,%f,%f,%f]\n[%f,%f,%f,%f]\n[%f,%f,%f,%f]\n", mat[0][0], mat[0][1], mat[0][2],mat[0][3], mat[1][0], mat[1][1], mat[1][2],mat[1][3], mat[2][0],mat[2][1], mat[2][2], mat[2][3], mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
 }
 
 /*
@@ -165,13 +223,13 @@ void printMatrix(GLfloat** mat){
  */
 void drawPlant() {
   int i;
-  for ( i = 0; i < 3; i += 1)
-    placeholder[i] = new GLfloat[3];
+  for ( i = 0; i < 4; i += 1)
+    placeholder[i] = new GLfloat[4];
 
-  copyMatrix(3,3,mat,placeholder);
+  copyMatrix(4,4,mat,placeholder);
 
-  load2DMatrixWrapper((GLfloat**)mat);
-  drawLSystem(L0, 3);
+  load3DMatrixWrapper((GLfloat**)mat);
+  drawLSystem(L0, max_depth);
 }
 
 /* end of drawplant.c */
