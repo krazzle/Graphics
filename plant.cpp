@@ -17,6 +17,8 @@
 #include <math.h>
 #include <assert.h>
 
+#include "helper.h"
+#include "l-system-operators.h"
 #include "common.h"
 #include "drawplant.h"
 
@@ -26,10 +28,12 @@ int W=800;		/* window width */
 int H=600;		/* window height */
 int X_OFF = 10;	/* window x offset */
 int Y_OFF = 10;	/* window y offset */
+int depth = 3;
 
 /* local function declarations */
 void display(void);
 void init(void);
+void myKeyHandler(unsigned char ch, int x, int y);
 
 int main (int argc, char** argv) {
   glutInit(&argc,argv);
@@ -39,6 +43,7 @@ int main (int argc, char** argv) {
   glutCreateWindow("plant");
   init();
   glutDisplayFunc(display);
+  glutKeyboardFunc(myKeyHandler);
   glutMainLoop();
   return 0;
 }
@@ -72,7 +77,7 @@ void display() {
 
 
 	/* See drawplant.c for the definition of this routine */
-	drawPlant();
+	drawPlant(depth);
 
 
     glFlush();  /* Flush all executed OpenGL ops finish */
@@ -83,5 +88,25 @@ void display() {
      */
     glutSwapBuffers();
 }
+
+void myKeyHandler(unsigned char ch, int x, int y) {
+        switch(ch) {
+                case 'a':
+                        printf("increasing depth.\n");
+			depth++;
+			display();
+                        break;
+		case 's':
+			printf("decreasing depth.\n");
+			if(depth > 1)
+				depth--;
+			display();
+			break;
+		default:
+			printf("heeeeyyy\n");
+			break;
+	}
+}
+
 
 /* end of plant.c */

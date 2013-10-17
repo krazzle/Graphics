@@ -28,7 +28,7 @@ std::string L0 = "F[-F1]F[+F2]F0";
 std::string L1 = "F[-F1]F[+F2]F1";
 std::string L2 = "F[-FT]F[+F2]F2";
 
-int max_depth = 3;
+int max_depth = 1;
 
 GLfloat one[] = {1,0,0,0};
 GLfloat two[] = {0,1,0,0};
@@ -127,24 +127,6 @@ void drawBranch(GLfloat percent) {
 	unsigned char* image = SOIL_load_image("img.png", &width, &height, 0, SOIL_LOAD_RGB);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	*/
-
-	glColor3f(0.54,0.27,0.07);
-	
-	GLfloat height = 4.0*percent;
-	GLfloat width = 1.0*percent;
-	GLfloat depth = .5*percent;	
-
-	glBegin(GL_POLYGON);
-	glVertex3f(width,0.0,-depth);
-	glVertex3f(width,height,-depth);
-	glVertex3f(-width,height,-depth);
-	glVertex3f(-width,0.0,-depth);
-	glVertex3f(width,0.0,depth);
-        glVertex3f(width,height,depth);
-        glVertex3f(-width,height,depth);
-        glVertex3f(-width,0.0,depth);
-
-	glEnd();
 }
 
 void drawLSystem(string str, int depth) {  
@@ -221,7 +203,8 @@ void printMatrix(GLfloat** mat){
  * ADD YOUR CODE and modify the function to take an L-system depth and
  * any other necessary arguments.
  */
-void drawPlant() {
+void drawPlant(int depth) {
+  max_depth = depth;
   int i;
   for ( i = 0; i < 4; i += 1)
     placeholder[i] = new GLfloat[4];
@@ -229,7 +212,7 @@ void drawPlant() {
   copyMatrix(4,4,mat,placeholder);
 
   load3DMatrixWrapper((GLfloat**)mat);
-  drawLSystem(L0, max_depth);
+  drawLSystem(L0, depth);
 }
 
 /* end of drawplant.c */
