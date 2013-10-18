@@ -102,6 +102,9 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 				depth--;
 			display();
 			break;
+		case '/':
+			
+		case '?':
 		default:
 			printf("heeeeyyy\n");
 			break;

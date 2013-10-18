@@ -115,7 +115,18 @@ void drawLeaf(void) {
         glVertex3f(-.5,.3,0);
         glVertex3f(-1.8,2.1,0);
         glVertex3f(-.4,1.2,0);
-        glEnd();
+        glVertex3f(0,0,.1);
+        glVertex3f(1.5,.5,.1);
+        glVertex3f(.5,.3,.2);
+        glVertex3f(1.8,2.1,.2);
+        glVertex3f(.4,1.2,.2);
+        glVertex3f(0,3,.2);
+        glVertex3f(-1.5,.5,.2);
+        glVertex3f(-.5,.3,.2);
+        glVertex3f(-1.8,2.1,.1);
+        glVertex3f(-.4,1.2,0.1);
+
+	glEnd();
 
 }
 
@@ -127,6 +138,35 @@ void drawBranch(GLfloat percent) {
 	unsigned char* image = SOIL_load_image("img.png", &width, &height, 0, SOIL_LOAD_RGB);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	*/
+	glColor3f(0.54,0.27,0.07);
+  
+	GLfloat height = 4.0*percent;
+  	GLfloat width = 1.0*percent;
+  	GLfloat depth = .5*percent;  
+
+  	glBegin(GL_POLYGON);
+  	glVertex3f(width,0.0,-depth);
+  	glVertex3f(width,height,-depth);
+  	glVertex3f(-width,height,-depth);
+  	glVertex3f(-width,0.0,-depth);
+  	glVertex3f(width,0.0,depth);
+       	glVertex3f(width,height,depth);
+        glVertex3f(-width,height,depth);
+        glVertex3f(-width,0.0,depth);
+   	glEnd();
+	
+	glColor3f(1,1,0);
+	glBegin(GL_LINE_LOOP);
+        glVertex3f(width,0.0,-depth);
+        glVertex3f(width,height,-depth);
+        glVertex3f(-width,height,-depth);
+        glVertex3f(-width,0.0,-depth);
+        glVertex3f(width,0.0,depth);
+        glVertex3f(width,height,depth);
+        glVertex3f(-width,height,depth);
+        glVertex3f(-width,0.0,depth);
+        glEnd();
+
 }
 
 void drawLSystem(string str, int depth) {  
