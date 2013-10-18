@@ -77,56 +77,17 @@ GLfloat** translate(GLfloat **mat, GLfloat percent) {
 GLfloat** rotate(GLfloat **mat, GLfloat x, GLfloat y, GLfloat z) {
   
   	GLfloat degreesToRads = (2*3.141592654)/180;
-	GLfloat **result;
 	GLfloat rX = x*degreesToRads;
 	GLfloat rY = y*degreesToRads;
 	GLfloat rZ = z*degreesToRads;
 
-//	if ( y == 0.0 and z == 0.0) {
-	  // two dimensional rotation
-/*	  GLfloat rot1[4] = {cos(rY)*cos(rZ), cos(rY)*sin(rZ), -sin(rY), 0};
-	  GLfloat rot2[4] = {sin(rX)*sin(rY)*cos(rZ)-cos(rX)*sin(rZ),sin(rX)*sin(rY)*sin(rZ)+cos(rX)*cos(rZ), sin(rX)*cos(rZ), 0};
-	  GLfloat rot3[4] = {cos(rX)*sin(rY)*cos(rZ) + sin(rX)*sin(rZ), cos(rX)*sin(rY)*sin(rZ)-sin(rX)*cos(rZ), cos(rX)*cos(rY), 0};
-	  GLfloat rot4[4] = {0,0,0,1};
-	  GLfloat *rot[4] = {rot1, rot2, rot3, rot4};	
-	  result = multiply(4, 4, mat, 4, 4 , rot);	  */
-//	  load3DMatrixWrapper(result); 
-//	}
-/*	else {
-	  // three dimensional rotation
-	  */ 
-  	  if ( z != 0.0) {
-            GLfloat rot1[4] = {cos(rZ), -sin(rZ), 0, 0 };
-            GLfloat rot2[4] = {sin(rZ), cos(rZ), 0, 0};
-            GLfloat rot3[4] = {0, 0, 1, 0};
-            GLfloat rot4[4] = {0, 0, 0, 1};
-	    GLfloat *rot[4] = {rot1, rot2, rot3, rot4};
-            result = multiply(4, 4, mat, 4, 4, rot); 
-	    copyMatrix(4,4,result,mat);
-          }
-
-	  if ( y != 0.0) {
-	    GLfloat rot1[4] = {cos(rY),  0, sin(rY), 0};
-	    GLfloat rot2[4] = {   0,     1,    0,    0};
-	    GLfloat rot3[4] = {-sin(rY), 0, cos(rY), 0};
-	    GLfloat rot4[4] = {   0,     0,    0,    1};
-
-	    GLfloat *rot[4] = {rot1, rot2, rot3, rot4};
-	    result = multiply(4, 4, mat, 4, 4, rot);
-	    copyMatrix(4,4,result,mat);
-	  }
-	  if ( x != 0.0) {
-            GLfloat rot1[4] = {1,    0,        0,    0};
-            GLfloat rot2[4] = {0, cos(rX), -sin(rX), 0};
-            GLfloat rot3[4] = {0, sin(rX),  cos(rX), 0};
-            GLfloat rot4[4] = {0,    0,        0,    1};
-            
-	    GLfloat *rot[4] = {rot1, rot2, rot3, rot4 };
-            result = multiply(4, 4, mat, 4, 4, rot);
-	    copyMatrix(4,4,result,mat);
-          }
-	  
-	load3DMatrixWrapper(result);
+	GLfloat rot1[4] = {cos(rY)*cos(rZ), cos(rY)*sin(rZ), -sin(rY), 0};
+	GLfloat rot2[4] = {sin(rX)*sin(rY)*cos(rZ)-cos(rX)*sin(rZ),sin(rX)*sin(rY)*sin(rZ)+cos(rX)*cos(rZ), sin(rX)*cos(rZ), 0};
+	GLfloat rot3[4] = {cos(rX)*sin(rY)*cos(rZ) + sin(rX)*sin(rZ), cos(rX)*sin(rY)*sin(rZ)-sin(rX)*cos(rZ), cos(rX)*cos(rY), 0};
+	GLfloat rot4[4] = {0,0,0,1};
+	GLfloat *rot[4] = {rot1, rot2, rot3, rot4};	
+	GLfloat** result = multiply(4, 4, mat, 4, 4 , rot);	  
+	load3DMatrixWrapper(result); 
 	
 	return result;
 }

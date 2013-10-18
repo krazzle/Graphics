@@ -284,11 +284,10 @@ void drawPlant(int depth, GLfloat thetaOffset){
     placeholder[i] = new GLfloat[4];
 
   //printf("thetaoffset: %f\n", thetaOffset);
-  //rotate(mat, 0, thetaOffset, 0);
   copyMatrix(4,4,mat,placeholder);
 
-//  rotate(placeholder, 0, thetaOffset,0);
-  load3DMatrixWrapper((GLfloat**)mat);
+  placeholder = rotate(placeholder, 0, thetaOffset,0);
+  //load3DMatrixWrapper(mat);
   drawLSystem(L0, depth, thetaOffset);
 }
 
