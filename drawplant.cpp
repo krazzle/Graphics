@@ -23,6 +23,8 @@
 #include <string>
 using namespace std;
 
+extern GLfloat thetaOffset;
+
 std::string Test = "F[+FT]FT";
 std::string L0 = "F[-F1]F[+F2]F0";
 std::string L1 = "F[-F1]F[+F2]F1";
@@ -169,6 +171,22 @@ void drawBranch(GLfloat percent) {
 
 }
 
+void drawSeed(void) {
+  
+  glColor3f(0.54,0.27,0.07);
+  
+  glBegin(GL_POLYGON);
+  glVertex3f(1, 0, 0);
+  glVertex3f(.7, 1, 0);
+  glVertex3f(0, 2, 0);
+  glVertex3f(-.7, 1, 0);
+  glVertex3f(-1, 0, 0);
+  glVertex3f(-.4, -.9, 0);
+  glVertex3f(.4, -.9,0);
+  glEnd();
+  
+}
+
 void drawLSystem(string str, int depth) {  
 
 	//cout << str << endl;
@@ -179,6 +197,13 @@ void drawLSystem(string str, int depth) {
 	int i;
 	GLfloat left_theta = 19;
 	GLfloat right_theta = 341;
+      
+
+	if(depth == 0) {
+	  drawSeed();
+	  return;
+	}
+
 	for(i = 0; i < str.length(); i++){
 		char temp = str[i];
 		switch(temp){
@@ -233,6 +258,13 @@ void drawLSystem(string str, int depth) {
 }
 
 
+void rotatePlant(void) {
+  
+  
+  
+}
+
+
 void printMatrix(GLfloat** mat){
 	printf("[%f,%f,%f,%f]\n[%f,%f,%f,%f]\n[%f,%f,%f,%f]\n[%f,%f,%f,%f]\n", mat[0][0], mat[0][1], mat[0][2],mat[0][3], mat[1][0], mat[1][1], mat[1][2],mat[1][3], mat[2][0],mat[2][1], mat[2][2], mat[2][3], mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
 }
@@ -244,10 +276,13 @@ void printMatrix(GLfloat** mat){
  * any other necessary arguments.
  */
 void drawPlant(int depth) {
+ 
   max_depth = depth;
   int i;
   for ( i = 0; i < 4; i += 1)
     placeholder[i] = new GLfloat[4];
+
+  rotate(placeholder, 0, thetaOffset, 0);
 
   copyMatrix(4,4,mat,placeholder);
 

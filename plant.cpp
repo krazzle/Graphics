@@ -29,7 +29,7 @@ int H=600;		/* window height */
 int X_OFF = 10;	/* window x offset */
 int Y_OFF = 10;	/* window y offset */
 int depth = 3;
-
+GLfloat  thetaOffset = 0;
 /* local function declarations */
 void display(void);
 void init(void);
@@ -90,25 +90,28 @@ void display() {
 }
 
 void myKeyHandler(unsigned char ch, int x, int y) {
-        switch(ch) {
-                case 'a':
-                        printf("increasing depth.\n");
-			depth++;
-			display();
-                        break;
-		case 's':
-			printf("decreasing depth.\n");
-			if(depth > 1)
-				depth--;
-			display();
-			break;
-		case '/':
-			
-		case '?':
-		default:
-			printf("heeeeyyy\n");
-			break;
-	}
+  switch(ch) {
+  case 'a':
+    printf("increasing depth.\n");
+    depth++;
+    display();
+    break;
+  case 's':
+    printf("decreasing depth.\n");
+    if(depth > 0)
+      depth--;
+    display();
+    break;
+  case '/':
+    thetaOffset += -5;
+    break;
+  case '?':
+    thetaOffset += 5;
+    break;
+  default:
+    printf("heeeeyyy\n");
+    break;
+  }
 }
 
 
