@@ -12,8 +12,8 @@ void load2DMatrix(
                 GLfloat m00, GLfloat m01, GLfloat m02,
                 GLfloat m10, GLfloat m11, GLfloat m12,
                 GLfloat m20, GLfloat m21, GLfloat m22) ;
-void drawPlant(int depth);
-void drawLSystem(char str[], int len);
+void drawPlant(int depth, GLfloat thetaOffset);
+void drawLSystem(char str[], int len, GLfloat thetaOffset);
 void printMatrix(GLfloat **mat);
 
 #endif	/* _DRAWPLANT_H_ */

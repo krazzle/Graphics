@@ -77,7 +77,7 @@ void display() {
 
 
 	/* See drawplant.c for the definition of this routine */
-	drawPlant(depth);
+	drawPlant(depth,thetaOffset);
 
 
     glFlush();  /* Flush all executed OpenGL ops finish */
@@ -104,9 +104,11 @@ void myKeyHandler(unsigned char ch, int x, int y) {
     break;
   case '/':
     thetaOffset += -5;
+    display();
     break;
   case '?':
     thetaOffset += 5;
+    display();
     break;
   default:
     printf("heeeeyyy\n");

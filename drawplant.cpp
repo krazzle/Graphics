@@ -23,7 +23,7 @@
 #include <string>
 using namespace std;
 
-extern GLfloat thetaOffset;
+//extern GLfloat thetaOffset;
 
 std::string Test = "F[+FT]FT";
 std::string L0 = "F[-F1]F[+F2]F0";
@@ -187,7 +187,7 @@ void drawSeed(void) {
   
 }
 
-void drawLSystem(string str, int depth) {  
+void drawLSystem(string str, int depth, GLfloat thetaOffset) {  
 
 	//cout << str << endl;
 	//cout << depth << endl;
@@ -222,10 +222,10 @@ void drawLSystem(string str, int depth) {
 			 // cout << "***************pop pop pop pop********" << endl;
 			  break;
 			case '-':
-			  placeholder = rotate(placeholder,0,0, left_theta);
+			  placeholder = rotate(placeholder,0,thetaOffset, left_theta);
 			  break;
 			case '+':
-			  placeholder = rotate(placeholder,0,0, right_theta); 
+			  placeholder = rotate(placeholder,0,thetaOffset, right_theta); 
 			  break;
 			case 'T':
 			  drawLeaf();
@@ -236,19 +236,19 @@ void drawLSystem(string str, int depth) {
 			  if(depth == 1)
 			    drawLeaf();
  			  else
-			    drawLSystem(L0, depth-1);
+			    drawLSystem(L0, depth-1,thetaOffset);
 			  break;
 			case '1':
 			  if(depth == 1)
 			    drawLeaf();
 			  else
-			    drawLSystem(L1, depth-1);
+			    drawLSystem(L1, depth-1, thetaOffset);
 			  break;
  			case '2':
 			  if(depth == 1)
 			    drawLeaf();
 			  else
-			    drawLSystem(L2, depth-1);
+			    drawLSystem(L2, depth-1, thetaOffset);
 			  break;
 			default: 
 			  break;
@@ -275,19 +275,21 @@ void printMatrix(GLfloat** mat){
  * ADD YOUR CODE and modify the function to take an L-system depth and
  * any other necessary arguments.
  */
-void drawPlant(int depth) {
- 
+
+
+void drawPlant(int depth, GLfloat thetaOffset){
   max_depth = depth;
   int i;
   for ( i = 0; i < 4; i += 1)
     placeholder[i] = new GLfloat[4];
 
-  rotate(placeholder, 0, thetaOffset, 0);
-
+  //printf("thetaoffset: %f\n", thetaOffset);
+  //rotate(mat, 0, thetaOffset, 0);
   copyMatrix(4,4,mat,placeholder);
 
+//  rotate(placeholder, 0, thetaOffset,0);
   load3DMatrixWrapper((GLfloat**)mat);
-  drawLSystem(L0, depth);
+  drawLSystem(L0, depth, thetaOffset);
 }
 
 /* end of drawplant.c */
