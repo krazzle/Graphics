@@ -24,6 +24,8 @@
 using namespace std;
 
 //extern GLfloat thetaOffset;
+extern GLUnurbsObj *theNurb;
+
 
 std::string Test = "F[+FT]FT";
 std::string L0 = "F[-F1]F[+F2]F0";
@@ -37,6 +39,13 @@ GLfloat two[] = {0,1,0,0};
 GLfloat three[] = {0,0,1,0};
 GLfloat four[] = {0,0,0,1};
 GLfloat *mat[] = {one,two,three, four};
+
+GLfloat leafpoints2[4][4][3] = {
+{{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
+{{-1.5, 1, 0}, {-0.5, 1, -1}, {0.5, 1, -1},  {1.5, 1, 0}},
+{{-1.5, 2,  0},  {-0.5, 2, -1}, {0.5,2, -1},   {1.5, 2,  0}},
+{{0, 3,  0}, {0, 3,  0}, {0, 3, 0},   {0, 3,  0}}};
+
 
 GLfloat **placeholder = new GLfloat*[4];
 
@@ -78,60 +87,78 @@ void load3DMatrix(
 	glLoadMatrixf(M3D);
 }
 
-void drawLeaf(void) {
+void drawLeaf(GLfloat **mat) {
 	/* ADD YOUR CODE to make the 2D leaf a 3D extrusion */
-	glColor3f(0.1,.5,0.1); 
-	glBegin(GL_POLYGON);
-	glVertex3f(0,0,0);
-	glVertex3f(1.5,.5,0);
-	glVertex3f(.5,.3,0);
-	glVertex3f(1.8,2.1,0);
-	glVertex3f(.4,1.2,0);	
-	glVertex3f(0,3,0);
-	glVertex3f(-1.5,.5,0);
-        glVertex3f(-.5,.3,0);
-        glVertex3f(-1.8,2.1,0);
-        glVertex3f(-.4,1.2,0);
-	glVertex3f(0,0,.1);
-        glVertex3f(1.5,.5,.1);
-        glVertex3f(.5,.3,.2);
-        glVertex3f(1.8,2.1,.2);
-        glVertex3f(.4,1.2,.2);
-        glVertex3f(0,3,.2);
-        glVertex3f(-1.5,.5,.2);
-        glVertex3f(-.5,.3,.2);
-        glVertex3f(-1.8,2.1,.1);
-        glVertex3f(-.4,1.2,0.1);
+	glColor3f(.5,.8,.5); 
+   	GLfloat cpts[7][3];
+	int ncpts = 0;
 
-	glEnd();
-	
-	glColor3f(.5,1,.5);
-        glBegin(GL_LINE_LOOP);
-        glVertex3f(0,0,0);
-        glVertex3f(1.5,.5,0);
-        glVertex3f(.5,.3,0);
-        glVertex3f(1.8,2.1,0);
-        glVertex3f(.4,1.2,0);
-        glVertex3f(0,3,0);
-        glVertex3f(-1.5,.5,0);
-        glVertex3f(-.5,.3,0);
-        glVertex3f(-1.8,2.1,0);
-        glVertex3f(-.4,1.2,0);
-        glVertex3f(0,0,.1);
-        glVertex3f(1.5,.5,.1);
-        glVertex3f(.5,.3,.2);
-        glVertex3f(1.8,2.1,.2);
-        glVertex3f(.4,1.2,.2);
-        glVertex3f(0,3,.2);
-        glVertex3f(-1.5,.5,.2);
-        glVertex3f(-.5,.3,.2);
-        glVertex3f(-1.8,2.1,.1);
-        glVertex3f(-.4,1.2,0.1);
+	//render 4 points
+	//and 4 points. they share points. 
+	GLfloat x = 0;
+	GLfloat y = 0;
+	GLfloat z = 0;
 
-	glEnd();
+        GLfloat random_num = (GLfloat)(rand()%2);
+        GLfloat other_rand = 1-random_num;
 
+	GLfloat random_concav = (GLfloat)(rand()%2);
+	GLfloat other_rand_concav = 1 - random_concav;
+	random_concav*=2;
+	other_rand_concav*=2;
+
+	//printf("drawing leaf starting at (%f,%f,%f)\n", x, y, z);
+	cpts[0][0] = x; cpts[0][1] = y; cpts[0][2] = z;
+	cpts[1][0] = (x+1.5)*random_num; cpts[1][1] = y+1; cpts[1][2] = z;
+	cpts[2][0] = x+1.5; cpts[2][1] = y+2;cpts[2][2] = z;
+	cpts[3][0] = x; cpts[3][1] = y+3; cpts[3][2]= z;
+	cpts[4][0] = (x-1.5)*other_rand; cpts[4][1] = y+2; cpts[4][2] = z;
+	cpts[5][0] = x-1.5; cpts[5][1] = y+1; cpts[5][2] = z;
+	cpts[6][0] = x; cpts[6][1] = y; cpts[6][2] = z;
+
+	ncpts = 7;
+    	int i;
+
+  	for(i=0; i<ncpts-3; i +=3)
+    	{
+        // Draw the curve using OpenGL evaluators 
+        	glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, cpts[i]);
+        	glMapGrid1f(30, 0.0, 1.0);
+        	glEvalMesh1(GL_LINE, 0, 30);
+    	}
+
+	GLfloat leafpoints[4][4][3] = {
+		{{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
+		{{-1.5, 1, 0},              {-0.5, 1, 1-random_concav}, {0.5, 1, 1-random_concav},  {1.5*random_num, 1, 0}},
+		{{-1.5*other_rand, 2,  0},  {-0.5, 2, 1-random_concav}, {0.5, 2, 1-random_concav},   {1.5, 2,  0}},
+		{{0, 3,  0}, {0, 3,  0}, {0, 3, 0},   {0, 3,  0}}};
+
+	glColor3f(.3,.5,.2);
+	int j;
+	glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0, 1, 12, 4, &leafpoints[0][0][0]);
+   	for (j = 0; j <= 8; j++) {
+      		glBegin(GL_POLYGON);
+      		for (i = 0; i <= 10; i++)
+         		glEvalCoord2f((GLfloat)i/10.0, (GLfloat)j/8.0);
+      		glEnd();
+      		glBegin(GL_POLYGON);
+      		for (i = 0; i <= 10; i++)
+        		glEvalCoord2f((GLfloat)j/8.0, (GLfloat)i/10.0);
+      		glEnd();
+   	}
+   /*	glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0,1, 12, 4, &leafpoints2[0][0][0]);
+	for (j = 0; j <= 8; j++) {
+      		glBegin(GL_POLYGON);
+      		for (i = 0; i <= 10; i++)
+         		glEvalCoord2f((GLfloat)i/10.0, (GLfloat)j/8.0);
+      		glEnd();
+      		glBegin(GL_POLYGON);
+      		for (i = 0; i <= 10; i++)
+         		glEvalCoord2f((GLfloat)j/8.0, (GLfloat)i/10.0);
+      		glEnd();
+   	}*/
+	glFlush();
 }
-
 void drawBranch(GLfloat percent) {
 	/* ADD YOUR CODE to make the 2D branch a 3D extrusion */
 //	cout << "drawing branch" << endl;	
@@ -141,34 +168,59 @@ void drawBranch(GLfloat percent) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	*/
 	glColor3f(0.54,0.27,0.07);
-  
-	GLfloat height = 4.0*percent;
+  	/*GLfloat pi = 3.14159;
+	
+	int i,j;
+	GLfloat treepoints[4][4][3] = 
+	{{{1,0,0},{1,7,0},{cos(pi/4),7,sin(pi/4)},{cos(pi/4),0,sin(pi/4)}},
+	{{cos((7*pi)/4),0,sin((7*pi)/4)},{cos((7*pi)/4),7,sin((7*pi)/4)},{0,7,-1},{0,0,-1}},
+	{{0,0,1},{0,7,1},{cos((3*pi)/4), 7, sin((3*pi)/4)},{cos((3*pi)/4), 0, sin((3*pi)/4)}},
+	{{cos((5*pi)/4),0,sin((5*pi)/4)},{cos((5*pi)/4),7,sin((5*pi)/4)},{-1,7,0},{-1,0,0}}};
+	glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0, 1, 12, 4, &treepoints[0][0][0]);
+        for (j = 0; j <= 8; j++) {
+                glBegin(GL_POLYGON);
+                for (i = 0; i <= 30; i++)
+                        glEvalCoord2f((GLfloat)i/30.0, (GLfloat)j/8.0);
+                glEnd();
+                glBegin(GL_POLYGON);
+                for (i = 0; i <= 30; i++)
+                        glEvalCoord2f((GLfloat)j/8.0, (GLfloat)i/30.0);
+                glEnd();
+        }*/
+
+	
+	//GLUquadricObj*p;
+	//p=gluNewQuadric();
+	//gluQuadricDrawStyle(p,GLU_LINE);
+	//gluCylinder(p,0,1,7,10,10);
+
+	GLfloat height = 7.0*percent;
   	GLfloat width = 1.0*percent;
   	GLfloat depth = .5*percent;  
 
   	glBegin(GL_POLYGON);
   	glVertex3f(width,0.0,-depth);
-  	glVertex3f(width,height,-depth);
-  	glVertex3f(-width,height,-depth);
+  	glVertex3f(width*.75,height,-depth*.75);
+  	glVertex3f(-width*.75,height,-depth*.75);
   	glVertex3f(-width,0.0,-depth);
   	glVertex3f(width,0.0,depth);
-       	glVertex3f(width,height,depth);
-        glVertex3f(-width,height,depth);
+       	glVertex3f(width*.75,height,depth*.75);
+        glVertex3f(-width*.75,height,depth*.75);
         glVertex3f(-width,0.0,depth);
    	glEnd();
 	
-	glColor3f(1,1,0);
+	/*glColor3f(.8,.4,.2);
 	glBegin(GL_LINE_LOOP);
         glVertex3f(width,0.0,-depth);
-        glVertex3f(width,height,-depth);
-        glVertex3f(-width,height,-depth);
+        glVertex3f(width*.75,height,-depth*.75);
+        glVertex3f(-width*.75,height,-depth*.75);
         glVertex3f(-width,0.0,-depth);
         glVertex3f(width,0.0,depth);
-        glVertex3f(width,height,depth);
-        glVertex3f(-width,height,depth);
+        glVertex3f(width*.75,height,depth*.75);
+        glVertex3f(-width*.75,height,depth*.75);
         glVertex3f(-width,0.0,depth);
-        glEnd();
-
+        glEnd();*/
+	
 }
 
 void drawSeed(void) {
@@ -209,7 +261,7 @@ void drawLSystem(string str, int depth, GLfloat thetaOffset) {
 		switch(temp){
 			case 'F':
 			  drawBranch(percent);
-			  placeholder = translate(placeholder, percent); 
+			  placeholder = translate(placeholder, percent, 0, 7, 0); 
 			 // printf("drawing branch at: \n");
 			 // printMatrix(placeholder);
 			  break;
@@ -222,31 +274,31 @@ void drawLSystem(string str, int depth, GLfloat thetaOffset) {
 			 // cout << "***************pop pop pop pop********" << endl;
 			  break;
 			case '-':
-			  placeholder = rotate(placeholder,0,thetaOffset, left_theta);
+			  placeholder = rotate(placeholder,0,0, left_theta);
 			  break;
 			case '+':
-			  placeholder = rotate(placeholder,0,thetaOffset, right_theta); 
+			  placeholder = rotate(placeholder,0,0, right_theta); 
 			  break;
 			case 'T':
-			  drawLeaf();
+			  drawLeaf(placeholder);
 			 // printf("drawing leaf at: \n"); 
 			 // printMatrix(placeholder);
 			  break;
 			case '0':
 			  if(depth == 1)
-			    drawLeaf();
+			    drawLeaf(placeholder);
  			  else
 			    drawLSystem(L0, depth-1,thetaOffset);
 			  break;
 			case '1':
 			  if(depth == 1)
-			    drawLeaf();
+			    drawLeaf(placeholder);
 			  else
 			    drawLSystem(L1, depth-1, thetaOffset);
 			  break;
  			case '2':
 			  if(depth == 1)
-			    drawLeaf();
+			    drawLeaf(placeholder);
 			  else
 			    drawLSystem(L2, depth-1, thetaOffset);
 			  break;
@@ -258,11 +310,7 @@ void drawLSystem(string str, int depth, GLfloat thetaOffset) {
 }
 
 
-void rotatePlant(void) {
-  
-  
-  
-}
+
 
 
 void printMatrix(GLfloat** mat){
@@ -287,6 +335,7 @@ void drawPlant(int depth, GLfloat thetaOffset){
   copyMatrix(4,4,mat,placeholder);
 
   placeholder = rotate(placeholder, 0, thetaOffset,0);
+  placeholder = translate(placeholder, 1, 0,-15,0);
   //load3DMatrixWrapper(mat);
   drawLSystem(L0, depth, thetaOffset);
 }

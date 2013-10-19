@@ -28,8 +28,10 @@ int W=800;		/* window width */
 int H=600;		/* window height */
 int X_OFF = 10;	/* window x offset */
 int Y_OFF = 10;	/* window y offset */
-int depth = 3;
+int depth = 1;
 GLfloat  thetaOffset = 0;
+GLUnurbsObj *theNurb;
+
 /* local function declarations */
 void display(void);
 void init(void);
@@ -44,26 +46,33 @@ int main (int argc, char** argv) {
   init();
   glutDisplayFunc(display);
   glutKeyboardFunc(myKeyHandler);
+  glEnable(GL_MAP1_VERTEX_3);
   glutMainLoop();
   return 0;
 }
 
 void init() {
-  /* GLfloat mat_diffuse[] = { 0.7, 0.7, 0.7, 1.0 };
-   GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-   GLfloat mat_shininess[] = { 100 };
-*/
-   glClearColor (0.0, 0.0, 0.0, 0.0);
- /*  glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-   glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+   //GLfloat mat_diffuse[] = { 0.7, 0.7, 0.7, 1.0 };
+   //GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+   //GLfloat mat_shininess[] = { 100 };
 
-   glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
-   glEnable(GL_DEPTH_TEST);
-   glEnable(GL_AUTO_NORMAL);
-   glEnable(GL_NORMALIZE);
-*/
+   glClearColor (0.0, 0.0, 0.0, 0.0);
+   //glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+   //glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+   //glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+
+   //glEnable(GL_LIGHTING);
+  // glEnable(GL_LIGHT0);
+  // glEnable(GL_DEPTH_TEST);
+  // glEnable(GL_AUTO_NORMAL);
+  // glEnable(GL_NORMALIZE);
+  glEnable(GL_MAP2_VERTEX_3);
+   glMapGrid2f(20, 0.0, 1.0, 20, 0.0, 1.0);
+
+   theNurb = gluNewNurbsRenderer();
+   gluNurbsProperty(theNurb, GLU_SAMPLING_TOLERANCE, 25.0);
+   gluNurbsProperty(theNurb, GLU_DISPLAY_MODE, GLU_FILL);
+	
 //  glClearColor(0.0, 0.0, 0.0, 0.0);  
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
