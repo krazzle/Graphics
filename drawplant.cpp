@@ -18,6 +18,7 @@
 #include "drawplant.h"
 #include "readppm.h"
 #include "l-system-operators.h"
+#include <shape.h>
 #include <stdio.h>
 #include <vector>
 #include <string>
@@ -28,7 +29,7 @@ extern GLUnurbsObj *theNurb;
 
 
 std::string Test = "F[+FT]F[-FT]F[=FT]FT";
-std::string L0 = "F[-F1]F[+F2]F[=F3]F0";
+std::string L0 = "FF[+F2]F[-F1][=F3]F0";
 std::string L1 = "F[-F1]F[+F2]F[=FT]F1";
 std::string L2 = "F[-FT]F[+F2]F[=F3]F2";
 std::string L3 = "F[-F1]F[+FT]F[=F3]F3";
@@ -244,9 +245,9 @@ void drawBranch(GLfloat percent) {
                 treedata);
 	
 
-//	glEnable(GL_TEXTURE_2D);
-   	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-   	//glBindTexture(GL_TEXTURE_2D, texName);
+	glEnable(GL_TEXTURE_2D);
+   	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+   	glBindTexture(GL_TEXTURE_2D, texName);
 
 
 	GLfloat height = 7.0*percent;
@@ -254,16 +255,19 @@ void drawBranch(GLfloat percent) {
   	GLfloat depth = .5*percent;  
 
   	glColor3f(.5,.3,.2);
-	glBegin(GL_POLYGON);
+	//glutCylinder cyl = new GlutCylinder(true, 1.0, 7.0, 15, 10, 5);
+	//cyl.position(new Vector(0,0,0), new Vector(0,7,0), 1.0);
+	//yl.draw();
+	/*glBegin(GL_POLYGON);
 	//glTexCoord2f(0,0);
-	//glVertex3f(-width, 0, );
+	//glVertex3f(-width, 0, 0);
 	//glTexCoord2f(0,1);
 	//glVertex3f(-width*.75, height,0);
 	//glTexCoord2f(1,0);
 	//glVertex3f(width*.75,height,0);
 	//glTexCoord2f(1,1);
 	//glVertex3f(width,0,0);
-  	glVertex3f(width,0.0,-depth);
+ 	glVertex3f(width,0.0,-depth);
   	glVertex3f(width*.75,height,-depth*.75);
   	glVertex3f(-width*.75,height,-depth*.75);
   	glVertex3f(-width,0.0,-depth);
@@ -271,7 +275,7 @@ void drawBranch(GLfloat percent) {
        	glVertex3f(width*.75,height,depth*.75);
         glVertex3f(-width*.75,height,depth*.75);
         glVertex3f(-width,0.0,depth);
-   	glEnd();
+   	glEnd();*/
 	
 	/*glColor3f(.8,.4,.2);
 	glBegin(GL_LINE_LOOP);
