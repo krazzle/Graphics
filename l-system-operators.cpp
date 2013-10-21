@@ -71,6 +71,7 @@ GLfloat** translate(GLfloat **mat, GLfloat percent) {
 
   //cout << "geting out of translate" << endl;
   
+
   return result;
 }
 
