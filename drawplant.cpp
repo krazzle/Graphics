@@ -18,7 +18,7 @@
 #include "drawplant.h"
 #include "readppm.h"
 #include "l-system-operators.h"
-#include <openglut.h>
+//#include <openglut.h>
 #include <stdio.h>
 #include <vector>
 #include <string>
@@ -255,7 +255,9 @@ void drawBranch(GLfloat percent) {
   	GLfloat depth = .5*percent;  
 
   	glColor3f(.5,.3,.2);
-	glutSolidCylinder(1, 7, 15, 15);
+	glutCylinder(1.0, 7.0, 15, 15);
+//	glutSolidCylinder(1, 7, 15, 15);
+	//glutWireTorus(0.1, 0.4, 10, 20);
 	//glutCylinder cyl = new GlutCylinder(true, 1.0, 7.0, 15, 10, 5);
 	//cyl.position(new Vector(0,0,0), new Vector(0,7,0), 1.0);
 	//yl.draw();
