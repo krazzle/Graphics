@@ -160,14 +160,11 @@ void drawLeaf(GLfloat **mat) {
         	glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, cpts[i]);
         	glMapGrid1f(30, 0.0, 1.0);
         	glEvalMesh1(GL_LINE, 0, 30);
-    	}
-
-	GLfloat leafpoints[4][4][3] = {
-		{{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
-		{{-1.5, 1, 0},              {-1.5, 1, -.5}, {.5, 1, -.5},  {1.5*random_num, 1, 0}},
-		{{-1.5*other_rand, 2,  0},  {-.5, 2, -.5}, {.5, 2, -.5},   {1.5, 2,  0}},
-		{{0, 4,  0}, {0, 4,  0}, {0, 4, 0},   {0, 4,  0}}};
-
+    	}GLfloat leafpoints[4][4][3] = {
+                {{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
+                {{-1.5, 1, 0},              {-1.5, 2, -.5}, {.5, 2, -.5},  {1.5*random_num, 1, 0}},
+                {{-1.5*other_rand, 2,  0},  {-.5, 2, -.5}, {.5, 2, -.5},   {1.5, 2,  0}},
+                {{0, 4,  0}, {0, 4,  0}, {0, 4, 0},   {0, 4,  0}}};
 		
 //	glColor3f(.3,.5,.2);
 	int j;
@@ -221,20 +218,70 @@ void drawBranch(GLfloat percent) {
 	}
 }
 
-void drawSeed(void) {
+void drawSeed(GLfloat ** mat) {
   
-  glColor3f(0.54,0.27,0.07);
+  	glColor3f(0.54,0.27,0.07);
+  	GLfloat seedpoints[4][4][3] = {
+                {{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
+                {{-1.5, 1, 0}, {-1.5, 1, -2}, {.5, 1, -2},  {1.5, 1, 0}},
+                {{-1.5, 2,  0},{-.5, 2, -2}, {.5, 2, -2},   {1.5, 2,  0}},
+                {{0, 4,  0}, {0, 4,  0}, {0, 4, 0},   {0, 4,  0}}};
   
-  glBegin(GL_POLYGON);
-  glVertex3f(1, 0, 0);
-  glVertex3f(.7, 1, 0);
-  glVertex3f(0, 2, 0);
-  glVertex3f(-.7, 1, 0);
-  glVertex3f(-1, 0, 0);
-  glVertex3f(-.4, -.9, 0);
-  glVertex3f(.4, -.9,0);
-  glEnd();
-  
+        GLfloat seedpoints2[4][4][3] = {
+                {{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
+                {{-1.5, 1, 0}, {-1.5, 1, 2}, {.5, 1, 2},  {1.5, 1, 0}},
+                {{-1.5, 2,  0},{-.5, 2, 2}, {.5, 2, 2},   {1.5, 2,  0}},
+                {{0, 4,  0}, {0, 4,  0}, {0, 4, 0},   {0, 4,  0}}};
+
+        int i, j;
+        glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0, 1, 12, 4, &seedpoints[0][0][0]);
+        for (j = 0; j <= 15; j++) {
+		glBegin(GL_POLYGON);
+                for (i = 0; i <= 20; i++){
+			if (i > 10)
+				glColor3f(.74, .47, .27);
+			else
+				glColor3f(.54, .27, .07);
+                        glEvalCoord2f((GLfloat)i/20, (GLfloat)j/15);
+                }
+                glEnd();
+                glBegin(GL_POLYGON);
+                for (i = 0; i <= 20; i++){
+			if(i > 10)
+				glColor3f(.74, .47, .27);
+			else
+				glColor3f(.54, .27, .07);
+                        glEvalCoord2f((GLfloat)j/15, (GLfloat)i/20);
+                }
+                glEnd();
+        }
+        glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0, 1, 12, 4, &seedpoints2[0][0][0]);
+        for (j = 0; j <= 15; j++) {
+                glBegin(GL_POLYGON);
+                for (i = 0; i <= 20; i++){
+                        if (i > 10)
+                                glColor3f(.74, .47, .27);
+                        else
+                                glColor3f(.54, .27, .07);
+
+                        glEvalCoord2f((GLfloat)i/20, (GLfloat)j/15);
+                }
+                glEnd();
+                glBegin(GL_POLYGON);
+                for (i = 0; i <= 20; i++){
+                        if (i > 10)
+                                glColor3f(.74, .47, .27);
+                        else
+                                glColor3f(.54, .27, .07);
+
+                        glEvalCoord2f((GLfloat)j/15, (GLfloat)i/20);
+                }
+                glEnd();
+        }
+
+        glFlush();
+	glutSolidTeapot(2);
+
 }
 
 void drawLSystem(string str, int depth) {  
@@ -263,7 +310,7 @@ void drawLSystem(string str, int depth) {
       
 
     if(depth == 0) {
-        drawSeed();
+        drawSeed(placeholder);
         return;
     }
 
