@@ -27,18 +27,22 @@ using namespace std;
 extern GLUnurbsObj *theNurb;
 
 
-std::string Test = "F[+FT]FT";
-std::string L0 = "F[-F1]F[+F2]F0";
-std::string L1 = "F[-F1]F[+F2]F1";
-std::string L2 = "F[-FT]F[+F2]F2";
+std::string Test = "F[+FT]F[-FT]F[=FT]FT";
+std::string L0 = "F[-F1]F[+F2]F[=F3]F0";
+std::string L1 = "F[-F1]F[+F2]F[=FT]F1";
+std::string L2 = "F[-FT]F[+F2]F[=F3]F2";
+std::string L3 = "F[-F1]F[+FT]F[=F3]F3";
 
-int max_depth = 1;
+int max_depth = 4;
 
 GLfloat one[] = {1,0,0,0};
 GLfloat two[] = {0,1,0,0};
 GLfloat three[] = {0,0,1,0};
 GLfloat four[] = {0,0,0,1};
 GLfloat *mat[] = {one,two,three, four};
+unsigned char * treedata;
+unsigned int width, height;
+static GLuint texName;
 
 GLfloat leafpoints2[4][4][3] = {
 {{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
@@ -86,6 +90,42 @@ void load3DMatrix(
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(M3D);
 }
+
+void loadBMP(const char* filepath){
+
+// Data read from the header of the BMP file
+    unsigned char header[54]; // Each BMP file begins by a 54-bytes header
+    unsigned int dataPos;     // Position in the file where the actual data begins
+    unsigned int imageSize;   // = width*height*3
+// Actual RGB data
+    //unsigned char * data;
+    // Open the file
+    FILE* file = fopen(filepath,"rb");
+    if (!file)  {printf("Image could not be opened\n"); }
+    if ( fread(header, 1, 54, file)!=54 ){ // If not 54 bytes read : problem
+        printf("Not a correct BMP file\n");
+        //return false;
+    }
+    if ( header[0]!='B' || header[1]!='M' ){
+        printf("Not a correct BMP file\n");
+        //return 0;
+    }
+    dataPos    = *(int*)&(header[0x0A]);
+    imageSize  = *(int*)&(header[0x22]);
+    width      = *(int*)&(header[0x12]);
+    height     = *(int*)&(header[0x16]);
+    if (imageSize==0)    imageSize=width*height*3; // 3 : one byte for each Red, Green and Blue component
+    if (dataPos==0)      dataPos=54; // The BMP header is done that way
+    treedata = new unsigned char [imageSize];
+
+   // Read the actual data from the file into the buffer
+    fread(treedata,1,imageSize,file);
+
+    //Everything is in memory now, the file can be closed
+    fclose(file);
+
+}
+
 
 void drawLeaf(GLfloat **mat) {
 	/* ADD YOUR CODE to make the 2D leaf a 3D extrusion */
@@ -167,7 +207,7 @@ void drawBranch(GLfloat percent) {
 	unsigned char* image = SOIL_load_image("img.png", &width, &height, 0, SOIL_LOAD_RGB);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	*/
-	glColor3f(0.54,0.27,0.07);
+	//glColor3f(0.54,0.27,0.07);
   	/*GLfloat pi = 3.14159;
 	
 	int i,j;
@@ -193,12 +233,36 @@ void drawBranch(GLfloat percent) {
 	//p=gluNewQuadric();
 	//gluQuadricDrawStyle(p,GLU_LINE);
 	//gluCylinder(p,0,1,7,10,10);
+	
+   //FIBITMAP *currImage = FreeImage_Load(FIF_PNG, "texture_test.png", PNG_DEFAULT);
+  // SLD_Surface *currImage = SLD_LoadBMP("texture_test.bmp");
+  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, checkImageWidth, checkImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, currImage);
+	glGenTextures(1, &texName);   
+ 	loadBMP("tree_texture.bmp");
+    	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width,
+                height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                treedata);
+	
+
+//	glEnable(GL_TEXTURE_2D);
+   	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+   	//glBindTexture(GL_TEXTURE_2D, texName);
+
 
 	GLfloat height = 7.0*percent;
   	GLfloat width = 1.0*percent;
   	GLfloat depth = .5*percent;  
 
-  	glBegin(GL_POLYGON);
+  	glColor3f(.5,.3,.2);
+	glBegin(GL_POLYGON);
+	//glTexCoord2f(0,0);
+	//glVertex3f(-width, 0, );
+	//glTexCoord2f(0,1);
+	//glVertex3f(-width*.75, height,0);
+	//glTexCoord2f(1,0);
+	//glVertex3f(width*.75,height,0);
+	//glTexCoord2f(1,1);
+	//glVertex3f(width,0,0);
   	glVertex3f(width,0.0,-depth);
   	glVertex3f(width*.75,height,-depth*.75);
   	glVertex3f(-width*.75,height,-depth*.75);
@@ -239,74 +303,77 @@ void drawSeed(void) {
   
 }
 
-void drawLSystem(string str, int depth, GLfloat thetaOffset) {  
+void drawLSystem(string str, int depth) {  
 
-	//cout << str << endl;
-	//cout << depth << endl;
-	int scale = max_depth - depth + 1;
-        GLfloat percent = 1/((GLfloat)scale);
+//cout << str << endl;
+//cout << depth << endl;
+    int scale = max_depth - depth + 1;   
+    GLfloat percent = 1/((GLfloat)scale);
 
-	int i;
-	GLfloat left_theta = 19;
-	GLfloat right_theta = 341;
+    int rand_plus = (GLfloat)(rand()%15)+15;
+    int rand_minus = (GLfloat)(rand()%15)+15;
+
+    int i;
+    GLfloat plus_x = 15;
+    GLfloat plus_y = 0;
+    GLfloat plus_z = 15;
+
+    
+    GLfloat minus_x = 15;
+    GLfloat minus_y = 0;
+    GLfloat minus_z = -15;
+ 
+    GLfloat equals_x = -15;
+    GLfloat equals_y = 0;
+    GLfloat equals_z = 0;
       
 
-	if(depth == 0) {
-	  drawSeed();
-	  return;
-	}
+    if(depth == 0) {
+        drawSeed();
+        return;
+    }
 
-	for(i = 0; i < str.length(); i++){
-		char temp = str[i];
-		switch(temp){
-			case 'F':
-			  drawBranch(percent);
-			  placeholder = translate(placeholder, percent, 0, 7, 0); 
-			 // printf("drawing branch at: \n");
-			 // printMatrix(placeholder);
-			  break;
-			case '[':
-			  push(placeholder); 
-			 // cout << "push push push push" << endl;
-			  break;
-			case ']':
-			  placeholder = pop(); 
-			 // cout << "***************pop pop pop pop********" << endl;
-			  break;
-			case '-':
-			  placeholder = rotate(placeholder,0,0, left_theta);
-			  break;
-			case '+':
-			  placeholder = rotate(placeholder,0,0, right_theta); 
-			  break;
-			case 'T':
+    for(i = 0; i < str.length(); i++){
+	char temp = str[i];
+	switch(temp){
+	    case 'F': drawBranch(percent);
+	              placeholder = translate(placeholder, percent, 0, 7, 0);
+	              break;
+	    case '[': push(placeholder); 
+		      break;
+	    case ']': placeholder = pop(); 
+		      break;
+	    case '-': placeholder = rotate(placeholder, minus_x, minus_y, minus_z);
+		      break;
+	    case '+': placeholder = rotate(placeholder, plus_x, plus_y, plus_z); 
+		      break;
+  	    case '=': placeholder = rotate(placeholder, equals_x, equals_y, equals_z);
+		      break;
+	    case 'T': drawLeaf(placeholder);
+		      break;
+	    case '0': if(depth == 1)
+		          drawLeaf(placeholder);
+ 		      else
+		          drawLSystem(L0, depth-1);
+		      break;
+	    case '1': if(depth == 1)
+		          drawLeaf(placeholder);
+		      else
+		          drawLSystem(L1, depth-1);
+		      break;
+ 	    case '2': if(depth == 1)
+		          drawLeaf(placeholder);
+		      else
+		          drawLSystem(L2, depth-1);
+		      break;
+	    case '3': if(depth == 1)
 			  drawLeaf(placeholder);
-			 // printf("drawing leaf at: \n"); 
-			 // printMatrix(placeholder);
-			  break;
-			case '0':
-			  if(depth == 1)
-			    drawLeaf(placeholder);
- 			  else
-			    drawLSystem(L0, depth-1,thetaOffset);
-			  break;
-			case '1':
-			  if(depth == 1)
-			    drawLeaf(placeholder);
-			  else
-			    drawLSystem(L1, depth-1, thetaOffset);
-			  break;
- 			case '2':
-			  if(depth == 1)
-			    drawLeaf(placeholder);
-			  else
-			    drawLSystem(L2, depth-1, thetaOffset);
-			  break;
-			default: 
-			  break;
-
-		}
+		      else
+			  drawLSystem(L3, depth-1);
+	 	      break;
+	    default:  break;
 	}
+    }
 }
 
 
@@ -335,9 +402,9 @@ void drawPlant(int depth, GLfloat thetaOffset){
   copyMatrix(4,4,mat,placeholder);
 
   placeholder = rotate(placeholder, 0, thetaOffset,0);
-  placeholder = translate(placeholder, 1, 0,-15,0);
+  placeholder = translate(placeholder, 1, 0,-25,0);
   //load3DMatrixWrapper(mat);
-  drawLSystem(L0, depth, thetaOffset);
+  drawLSystem(L0, depth);
 }
 
 /* end of drawplant.c */

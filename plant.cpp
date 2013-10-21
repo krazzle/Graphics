@@ -28,7 +28,7 @@ int W=800;		/* window width */
 int H=600;		/* window height */
 int X_OFF = 10;	/* window x offset */
 int Y_OFF = 10;	/* window y offset */
-int depth = 1;
+int depth = 4;
 GLfloat  thetaOffset = 0;
 GLUnurbsObj *theNurb;
 
@@ -72,7 +72,23 @@ void init() {
    theNurb = gluNewNurbsRenderer();
    gluNurbsProperty(theNurb, GLU_SAMPLING_TOLERANCE, 25.0);
    gluNurbsProperty(theNurb, GLU_DISPLAY_MODE, GLU_FILL);
-	
+
+
+	   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+   //glGenTextures(1, &texName);
+   //glBindTexture(GL_TEXTURE_2D, texName);
+
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                   GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                   GL_NEAREST);
+
+   //FIBITMAP *currImage = FreeImage_Load(FIF_PNG, "texture_test.png", PNG_DEFAULT);
+  // SLD_Surface *currImage = SLD_LoadBMP("texture_test.bmp");
+  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, checkImageWidth, checkImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, currImage)	
 //  glClearColor(0.0, 0.0, 0.0, 0.0);  
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
