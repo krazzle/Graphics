@@ -237,6 +237,20 @@ void drawSeed(void) {
   
 }
 
+void drawStar(void) {
+  
+  glColor3f(1.0, 1.0, 1.0);
+  glBegin(GL_POLYGON);
+  glVertex3f(1, 0, 0);
+  glVertex3f(.7, 1, 0);
+  glVertex3f(0, 2, 0);
+  glVertex3f(-.7, 1, 0);
+  glVertex3f(-1, 0, 0);
+  glVertex3f(-.4, -.9, 0);
+  glVertex3f(.4, -.9,0);
+  glEnd();
+}
+
 void drawLSystem(string str, int depth) {  
 
 //cout << str << endl;
@@ -338,6 +352,7 @@ void drawPlant(int depth, GLfloat thetaOffset){
   placeholder = rotate(placeholder, 0, thetaOffset,0);
   placeholder = translate(placeholder, 1, 0,-25,0);
   //load3DMatrixWrapper(mat);
+  drawStar();
   drawLSystem(L0, depth);
 }
 
