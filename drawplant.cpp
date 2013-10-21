@@ -18,25 +18,65 @@
 #include "drawplant.h"
 #include "readppm.h"
 #include "l-system-operators.h"
+//#include <openglut.h>
 #include <stdio.h>
 #include <vector>
 #include <string>
 using namespace std;
 
 //extern GLfloat thetaOffset;
+extern GLUnurbsObj *theNurb;
 
-std::string Test = "F[+FT]FT";
-std::string L0 = "F[-F1]F[+F2]F0";
-std::string L1 = "F[-F1]F[+F2]F1";
-std::string L2 = "F[-FT]F[+F2]F2";
 
-int max_depth = 1;
+std::string Test = "F[+FT]F[-FT]F[=FT]FT";
+std::string L0 = "FF[+F2]F[-F1][=F3]F0";
+std::string L1 = "F[-F1]F[+F2]F[=FT]FT";
+std::string L2 = "F[-FT]F[+F2]F[=F3]F1";
+std::string L3 = "F[-F2]F[+FT]F[=F3]F3";
+
+int max_depth = 4;
 
 GLfloat one[] = {1,0,0,0};
 GLfloat two[] = {0,1,0,0};
 GLfloat three[] = {0,0,1,0};
 GLfloat four[] = {0,0,0,1};
 GLfloat *mat[] = {one,two,three, four};
+unsigned char * treedata;
+unsigned int width, height;
+static GLuint texName;
+
+GLfloat branch_vertices[] = {
+    -1,  0,  1,
+     1,  0,  1,
+    -.75, 7,  .75,
+     .75, 7,  .75,
+    -1,  0, -1,
+     1,  0, -1,
+    -.75, 7, -.75,
+     .75, 7, -.75,
+};
+
+GLfloat branch_colors[] = {
+    0.645, 0.57, 0.49,
+    0.80, 0.69, 0.58,
+    0.645, 0.57, 0.49,
+    0.80, 0.69, 0.58,
+    0.645, 0.57, 0.49,
+    0.80, 0.69, 0.58,
+    0.645, 0.57, 0.49,
+    0.80, 0.69, 0.58,
+};
+
+GLuint branch_indices[] = {
+    0, 2, 3, 1,
+    2, 6, 7, 3,
+    7, 6, 4, 5,
+    4, 0, 1, 5,
+    1, 3, 7, 5,
+    0, 4, 6, 2,
+};
+
+
 
 GLfloat **placeholder = new GLfloat*[4];
 
@@ -78,97 +118,107 @@ void load3DMatrix(
 	glLoadMatrixf(M3D);
 }
 
-void drawLeaf(void) {
-	/* ADD YOUR CODE to make the 2D leaf a 3D extrusion */
-	glColor3f(0.1,.5,0.1); 
-	glBegin(GL_POLYGON);
-	glVertex3f(0,0,0);
-	glVertex3f(1.5,.5,0);
-	glVertex3f(.5,.3,0);
-	glVertex3f(1.8,2.1,0);
-	glVertex3f(.4,1.2,0);	
-	glVertex3f(0,3,0);
-	glVertex3f(-1.5,.5,0);
-        glVertex3f(-.5,.3,0);
-        glVertex3f(-1.8,2.1,0);
-        glVertex3f(-.4,1.2,0);
-	glVertex3f(0,0,.1);
-        glVertex3f(1.5,.5,.1);
-        glVertex3f(.5,.3,.2);
-        glVertex3f(1.8,2.1,.2);
-        glVertex3f(.4,1.2,.2);
-        glVertex3f(0,3,.2);
-        glVertex3f(-1.5,.5,.2);
-        glVertex3f(-.5,.3,.2);
-        glVertex3f(-1.8,2.1,.1);
-        glVertex3f(-.4,1.2,0.1);
-
-	glEnd();
+void drawBeehive(GLfloat **mat){
 	
-	glColor3f(.5,1,.5);
-        glBegin(GL_LINE_LOOP);
-        glVertex3f(0,0,0);
-        glVertex3f(1.5,.5,0);
-        glVertex3f(.5,.3,0);
-        glVertex3f(1.8,2.1,0);
-        glVertex3f(.4,1.2,0);
-        glVertex3f(0,3,0);
-        glVertex3f(-1.5,.5,0);
-        glVertex3f(-.5,.3,0);
-        glVertex3f(-1.8,2.1,0);
-        glVertex3f(-.4,1.2,0);
-        glVertex3f(0,0,.1);
-        glVertex3f(1.5,.5,.1);
-        glVertex3f(.5,.3,.2);
-        glVertex3f(1.8,2.1,.2);
-        glVertex3f(.4,1.2,.2);
-        glVertex3f(0,3,.2);
-        glVertex3f(-1.5,.5,.2);
-        glVertex3f(-.5,.3,.2);
-        glVertex3f(-1.8,2.1,.1);
-        glVertex3f(-.4,1.2,0.1);
-
-	glEnd();
-
 }
 
+void drawLeaf(GLfloat **mat) {
+	/* ADD YOUR CODE to make the 2D leaf a 3D extrusion */
+	glColor3f(.5,.3,0); 
+   	GLfloat cpts[7][3];
+	int ncpts = 0;
+
+	//render 4 points
+	//and 4 points. they share points. 
+	GLfloat x = 0;
+	GLfloat y = 0;
+	GLfloat z = 0;
+
+        GLfloat random_num = (GLfloat)(rand()%2);
+        GLfloat other_rand = 1-random_num;
+
+	GLfloat random_concav = (GLfloat)(rand()%2);
+	GLfloat other_rand_concav = 1 - random_concav;
+	random_concav*=2;
+	other_rand_concav*=4;
+
+	//printf("drawing leaf starting at (%f,%f,%f)\n", x, y, z);
+	cpts[0][0] = x; cpts[0][1] = y; cpts[0][2] = z;
+	cpts[1][0] = (x+1.5)*random_num; cpts[1][1] = y+1; cpts[1][2] = z;
+	cpts[2][0] = x+1.5; cpts[2][1] = y+2;cpts[2][2] = z;
+	cpts[3][0] = x; cpts[3][1] = y+4; cpts[3][2]= z;
+	cpts[4][0] = (x-1.5)*other_rand; cpts[4][1] = y+2; cpts[4][2] = z;
+	cpts[5][0] = x-1.5; cpts[5][1] = y+1; cpts[5][2] = z;
+	cpts[6][0] = x; cpts[6][1] = y; cpts[6][2] = z;
+
+	ncpts = 7;
+    	int i;
+
+  	for(i=0; i<ncpts-3; i +=3)
+    	{
+        // Draw the curve using OpenGL evaluators 
+        	glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, cpts[i]);
+        	glMapGrid1f(30, 0.0, 1.0);
+        	glEvalMesh1(GL_LINE, 0, 30);
+    	}
+
+	GLfloat leafpoints[4][4][3] = {
+		{{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
+		{{-1.5, 1, 0},              {-1.5, 1, -.5}, {.5, 1, -.5},  {1.5*random_num, 1, 0}},
+		{{-1.5*other_rand, 2,  0},  {-.5, 2, -.5}, {.5, 2, -.5},   {1.5, 2,  0}},
+		{{0, 4,  0}, {0, 4,  0}, {0, 4, 0},   {0, 4,  0}}};
+
+		
+//	glColor3f(.3,.5,.2);
+	int j;
+	glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0, 1, 12, 4, &leafpoints[0][0][0]);
+   	for (j = 0; j <= 15; j++) {	
+      		glBegin(GL_POLYGON);
+      		for (i = 0; i <= 10; i++){
+			if(i > 5)
+				glColor3f(.82, .41, .11);
+			else
+				glColor3f(.96, .64, .37);
+         		glEvalCoord2f((GLfloat)i/10, (GLfloat)j/15);
+		}
+      		glEnd();
+      		glBegin(GL_POLYGON);
+      		for (i = 0; i <= 10; i++){
+			if(i > 5)
+                                glColor3f(.82, .41, .11);
+                        else
+                                glColor3f(.96, .64, .37);
+        		glEvalCoord2f((GLfloat)j/15, (GLfloat)i/10);
+		}
+      		glEnd();
+   	}
+
+//	        glColor3f(.3,.5,.2);
+	glFlush();
+}
 void drawBranch(GLfloat percent) {
-	/* ADD YOUR CODE to make the 2D branch a 3D extrusion */
-//	cout << "drawing branch" << endl;	
-	
-	/*int width, height;
-	unsigned char* image = SOIL_load_image("img.png", &width, &height, 0, SOIL_LOAD_RGB);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	*/
-	glColor3f(0.54,0.27,0.07);
-  
-	GLfloat height = 4.0*percent;
-  	GLfloat width = 1.0*percent;
-  	GLfloat depth = .5*percent;  
 
-  	glBegin(GL_POLYGON);
-  	glVertex3f(width,0.0,-depth);
-  	glVertex3f(width,height,-depth);
-  	glVertex3f(-width,height,-depth);
-  	glVertex3f(-width,0.0,-depth);
-  	glVertex3f(width,0.0,depth);
-       	glVertex3f(width,height,depth);
-        glVertex3f(-width,height,depth);
-        glVertex3f(-width,0.0,depth);
-   	glEnd();
-	
-	glColor3f(1,1,0);
-	glBegin(GL_LINE_LOOP);
-        glVertex3f(width,0.0,-depth);
-        glVertex3f(width,height,-depth);
-        glVertex3f(-width,height,-depth);
-        glVertex3f(-width,0.0,-depth);
-        glVertex3f(width,0.0,depth);
-        glVertex3f(width,height,depth);
-        glVertex3f(-width,height,depth);
-        glVertex3f(-width,0.0,depth);
-        glEnd();
-
+  	//glColor3f(.5,.3,.2);
+	int num_indices;
+	int i;
+	int index1,  index2,  index3, index4;
+	num_indices = sizeof(branch_indices)/sizeof(GLuint);
+	for(i = 0; i < num_indices; i+=4){
+		index1 = branch_indices[i]*3;
+		index2 = branch_indices[i+1]*3;
+		index3 = branch_indices[i+2]*3;
+		index4 = branch_indices[i+3]*3;
+		glBegin(GL_QUADS);
+		glColor3fv(  &(branch_colors[index1]) );
+                glVertex3f(branch_vertices[index1]*percent, branch_vertices[index1+1]*percent, branch_vertices[index1+2]*percent);
+                glColor3fv(  &(branch_colors[index2]) );
+                glVertex3f(branch_vertices[index2]*percent, branch_vertices[index2+1]*percent, branch_vertices[index2+2]*percent);
+                glColor3fv(  &(branch_colors[index3]) );
+                glVertex3f(branch_vertices[index3]*percent, branch_vertices[index3+1]*percent, branch_vertices[index3+2]*percent);
+                glColor3fv(  &(branch_colors[index4]) );
+                glVertex3f(branch_vertices[index4]*percent, branch_vertices[index4+1]*percent, branch_vertices[index4+2]*percent);
+                glEnd();
+	}
 }
 
 void drawSeed(void) {
@@ -187,82 +237,81 @@ void drawSeed(void) {
   
 }
 
-void drawLSystem(string str, int depth, GLfloat thetaOffset) {  
+void drawLSystem(string str, int depth) {  
 
-	//cout << str << endl;
-	//cout << depth << endl;
-	int scale = max_depth - depth + 1;
-        GLfloat percent = 1/((GLfloat)scale);
+//cout << str << endl;
+//cout << depth << endl;
+    int scale = max_depth - depth + 1;   
+    GLfloat percent = 1/((GLfloat)scale);
 
-	int i;
-	GLfloat left_theta = 19;
-	GLfloat right_theta = 341;
+    int rand_plus = (GLfloat)(rand()%15)+15;
+    int rand_minus = (GLfloat)(rand()%15)+15;
+
+    int i;
+    GLfloat plus_x = 17;
+    GLfloat plus_y = 2;
+    GLfloat plus_z = 13;
+
+    
+    GLfloat minus_x = 14;
+    GLfloat minus_y = 0;
+    GLfloat minus_z = -15;
+ 
+    GLfloat equals_x = -16;
+    GLfloat equals_y = 14;
+    GLfloat equals_z = 2;
       
 
-	if(depth == 0) {
-	  drawSeed();
-	  return;
-	}
+    if(depth == 0) {
+        drawSeed();
+        return;
+    }
 
-	for(i = 0; i < str.length(); i++){
-		char temp = str[i];
-		switch(temp){
-			case 'F':
-			  drawBranch(percent);
-			  placeholder = translate(placeholder, percent); 
-			 // printf("drawing branch at: \n");
-			 // printMatrix(placeholder);
-			  break;
-			case '[':
-			  push(placeholder); 
-			 // cout << "push push push push" << endl;
-			  break;
-			case ']':
-			  placeholder = pop(); 
-			 // cout << "***************pop pop pop pop********" << endl;
-			  break;
-			case '-':
-			  placeholder = rotate(placeholder,0,thetaOffset, left_theta);
-			  break;
-			case '+':
-			  placeholder = rotate(placeholder,0,thetaOffset, right_theta); 
-			  break;
-			case 'T':
-			  drawLeaf();
-			 // printf("drawing leaf at: \n"); 
-			 // printMatrix(placeholder);
-			  break;
-			case '0':
-			  if(depth == 1)
-			    drawLeaf();
- 			  else
-			    drawLSystem(L0, depth-1,thetaOffset);
-			  break;
-			case '1':
-			  if(depth == 1)
-			    drawLeaf();
-			  else
-			    drawLSystem(L1, depth-1, thetaOffset);
-			  break;
- 			case '2':
-			  if(depth == 1)
-			    drawLeaf();
-			  else
-			    drawLSystem(L2, depth-1, thetaOffset);
-			  break;
-			default: 
-			  break;
-
-		}
+    for(i = 0; i < str.length(); i++){
+	char temp = str[i];
+	switch(temp){
+	    case 'F': drawBranch(percent);
+	              placeholder = translate(placeholder, percent, 0, 7, 0);
+	              break;
+	    case '[': push(placeholder); 
+		      break;
+	    case ']': placeholder = pop(); 
+		      break;
+	    case '-': placeholder = rotate(placeholder, minus_x, minus_y, minus_z);
+		      break;
+	    case '+': placeholder = rotate(placeholder, plus_x, plus_y, plus_z); 
+		      break;
+  	    case '=': placeholder = rotate(placeholder, equals_x, equals_y, equals_z);
+		      break;
+	    case 'T': drawLeaf(placeholder);
+		      break;
+	    case '0': if(depth == 1)
+		          drawLeaf(placeholder);
+ 		      else
+		          drawLSystem(L0, depth-1);
+		      break;
+	    case '1': if(depth == 1)
+		          drawLeaf(placeholder);
+		      else
+		          drawLSystem(L1, depth-1);
+		      break;
+ 	    case '2': if(depth == 1)
+		          drawLeaf(placeholder);
+		      else
+		          drawLSystem(L2, depth-1);
+		      break;
+	    case '3': if(depth == 1)
+			  drawLeaf(placeholder);
+		      else
+			  drawLSystem(L3, depth-1);
+	 	      break;
+	    default:  break;
 	}
+    }
 }
 
 
-void rotatePlant(void) {
-  
-  
-  
-}
+
 
 
 void printMatrix(GLfloat** mat){
@@ -287,8 +336,9 @@ void drawPlant(int depth, GLfloat thetaOffset){
   copyMatrix(4,4,mat,placeholder);
 
   placeholder = rotate(placeholder, 0, thetaOffset,0);
+  placeholder = translate(placeholder, 1, 0,-25,0);
   //load3DMatrixWrapper(mat);
-  drawLSystem(L0, depth, thetaOffset);
+  drawLSystem(L0, depth);
 }
 
 /* end of drawplant.c */

@@ -44,14 +44,14 @@ GLfloat** pop() {
 }
 
 
-GLfloat** translate(GLfloat **mat, GLfloat percent) {
+GLfloat** translate(GLfloat **mat, GLfloat percent, GLfloat x, GLfloat y, GLfloat z) {
   
   //cout << "in translate" << endl;
   
   //translational matrix for a branch with length of 6.0
-  GLfloat trans1[4] = {1, 0, 0, 0};
-  GLfloat trans2[4] = {0, 1, 0, 4*percent};
-  GLfloat trans3[4] = {0, 0, 1, 0};
+  GLfloat trans1[4] = {1, 0, 0, x*percent};
+  GLfloat trans2[4] = {0, 1, 0, y*percent};
+  GLfloat trans3[4] = {0, 0, 1, z*percent};
   GLfloat trans4[4] = {0, 0, 0, 1};
   GLfloat *trans[4] = {trans1, trans2, trans3, trans4};
   

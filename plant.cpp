@@ -30,14 +30,15 @@ int W=800;		/* window width */
 int H=600;		/* window height */
 int X_OFF = 10;	/* window x offset */
 int Y_OFF = 10;	/* window y offset */
-int depth = 3;
-GLfloat  thetaOffset = 0;
+int depth = 4;
+GLfloat  thetaOffset = -40;
 int perspective = 0;      // if 0, using perspective projection matrix,
                           // if 1, using orthographic projection matrix
 int rising = 0;           // if 0, decrease depth during animation,
                           // if 1, increase depth during anitmation
 int growingAnimation = 0; // if 0, do not use growing animation
                           // if 1, use growing animation
+GLUnurbsObj *theNurb;
 
 /* local function declarations */
 void display(void);
@@ -53,26 +54,49 @@ int main (int argc, char** argv) {
   init();
   glutDisplayFunc(display);
   glutKeyboardFunc(myKeyHandler);
+  glEnable(GL_MAP1_VERTEX_3);
   glutMainLoop();
   return 0;
 }
 
 void init() {
-  /* GLfloat mat_diffuse[] = { 0.7, 0.7, 0.7, 1.0 };
-   GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-   GLfloat mat_shininess[] = { 100 };
-*/
-   glClearColor (0.0, 0.0, 0.0, 0.0);
- /*  glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-   glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+   //GLfloat mat_diffuse[] = { 0.7, 0.7, 0.7, 1.0 };
+   //GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+   //GLfloat mat_shininess[] = { 100 };
 
-   glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
-   glEnable(GL_DEPTH_TEST);
-   glEnable(GL_AUTO_NORMAL);
-   glEnable(GL_NORMALIZE);
-*/
+   glClearColor (0.0, 0.0, 0.0, 0.0);
+   //glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+   //glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+   //glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+
+   //glEnable(GL_LIGHTING);
+  // glEnable(GL_LIGHT0);
+  // glEnable(GL_DEPTH_TEST);
+  // glEnable(GL_AUTO_NORMAL);
+  // glEnable(GL_NORMALIZE);
+  glEnable(GL_MAP2_VERTEX_3);
+   glMapGrid2f(20, 0.0, 1.0, 20, 0.0, 1.0);
+
+   theNurb = gluNewNurbsRenderer();
+   gluNurbsProperty(theNurb, GLU_SAMPLING_TOLERANCE, 25.0);
+   gluNurbsProperty(theNurb, GLU_DISPLAY_MODE, GLU_FILL);
+
+
+	   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+   //glGenTextures(1, &texName);
+   //glBindTexture(GL_TEXTURE_2D, texName);
+
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                   GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                   GL_NEAREST);
+
+   //FIBITMAP *currImage = FreeImage_Load(FIF_PNG, "texture_test.png", PNG_DEFAULT);
+  // SLD_Surface *currImage = SLD_LoadBMP("texture_test.bmp");
+  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, checkImageWidth, checkImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, currImage)	
 //  glClearColor(0.0, 0.0, 0.0, 0.0);  
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
