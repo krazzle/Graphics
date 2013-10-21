@@ -30,9 +30,9 @@ extern GLUnurbsObj *theNurb;
 
 std::string Test = "F[+FT]F[-FT]F[=FT]FT";
 std::string L0 = "FF[+F2]F[-F1][=F3]F0";
-std::string L1 = "F[-F1]F[+F2]F[=FT]F1";
-std::string L2 = "F[-FT]F[+F2]F[=F3]F2";
-std::string L3 = "F[-F1]F[+FT]F[=F3]F3";
+std::string L1 = "F[-F1]F[+F2]F[=FT]FT";
+std::string L2 = "F[-FT]F[+F2]F[=F3]F1";
+std::string L3 = "F[-F2]F[+FT]F[=F3]F3";
 
 int max_depth = 4;
 
@@ -45,11 +45,37 @@ unsigned char * treedata;
 unsigned int width, height;
 static GLuint texName;
 
-GLfloat leafpoints2[4][4][3] = {
-{{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
-{{-1.5, 1, 0}, {-0.5, 1, -1}, {0.5, 1, -1},  {1.5, 1, 0}},
-{{-1.5, 2,  0},  {-0.5, 2, -1}, {0.5,2, -1},   {1.5, 2,  0}},
-{{0, 3,  0}, {0, 3,  0}, {0, 3, 0},   {0, 3,  0}}};
+GLfloat branch_vertices[] = {
+    -1,  0,  1,
+     1,  0,  1,
+    -.75, 7,  .75,
+     .75, 7,  .75,
+    -1,  0, -1,
+     1,  0, -1,
+    -.75, 7, -.75,
+     .75, 7, -.75,
+};
+
+GLfloat branch_colors[] = {
+    0.645, 0.57, 0.49,
+    0.80, 0.69, 0.58,
+    0.645, 0.57, 0.49,
+    0.80, 0.69, 0.58,
+    0.645, 0.57, 0.49,
+    0.80, 0.69, 0.58,
+    0.645, 0.57, 0.49,
+    0.80, 0.69, 0.58,
+};
+
+GLuint branch_indices[] = {
+    0, 2, 3, 1,
+    2, 6, 7, 3,
+    7, 6, 4, 5,
+    4, 0, 1, 5,
+    1, 3, 7, 5,
+    0, 4, 6, 2,
+};
+
 
 
 GLfloat **placeholder = new GLfloat*[4];
@@ -92,45 +118,13 @@ void load3DMatrix(
 	glLoadMatrixf(M3D);
 }
 
-void loadBMP(const char* filepath){
-
-// Data read from the header of the BMP file
-    unsigned char header[54]; // Each BMP file begins by a 54-bytes header
-    unsigned int dataPos;     // Position in the file where the actual data begins
-    unsigned int imageSize;   // = width*height*3
-// Actual RGB data
-    //unsigned char * data;
-    // Open the file
-    FILE* file = fopen(filepath,"rb");
-    if (!file)  {printf("Image could not be opened\n"); }
-    if ( fread(header, 1, 54, file)!=54 ){ // If not 54 bytes read : problem
-        printf("Not a correct BMP file\n");
-        //return false;
-    }
-    if ( header[0]!='B' || header[1]!='M' ){
-        printf("Not a correct BMP file\n");
-        //return 0;
-    }
-    dataPos    = *(int*)&(header[0x0A]);
-    imageSize  = *(int*)&(header[0x22]);
-    width      = *(int*)&(header[0x12]);
-    height     = *(int*)&(header[0x16]);
-    if (imageSize==0)    imageSize=width*height*3; // 3 : one byte for each Red, Green and Blue component
-    if (dataPos==0)      dataPos=54; // The BMP header is done that way
-    treedata = new unsigned char [imageSize];
-
-   // Read the actual data from the file into the buffer
-    fread(treedata,1,imageSize,file);
-
-    //Everything is in memory now, the file can be closed
-    fclose(file);
-
+void drawBeehive(GLfloat **mat){
+	
 }
-
 
 void drawLeaf(GLfloat **mat) {
 	/* ADD YOUR CODE to make the 2D leaf a 3D extrusion */
-	glColor3f(.5,.8,.5); 
+	glColor3f(.5,.3,0); 
    	GLfloat cpts[7][3];
 	int ncpts = 0;
 
@@ -146,13 +140,13 @@ void drawLeaf(GLfloat **mat) {
 	GLfloat random_concav = (GLfloat)(rand()%2);
 	GLfloat other_rand_concav = 1 - random_concav;
 	random_concav*=2;
-	other_rand_concav*=2;
+	other_rand_concav*=4;
 
 	//printf("drawing leaf starting at (%f,%f,%f)\n", x, y, z);
 	cpts[0][0] = x; cpts[0][1] = y; cpts[0][2] = z;
 	cpts[1][0] = (x+1.5)*random_num; cpts[1][1] = y+1; cpts[1][2] = z;
 	cpts[2][0] = x+1.5; cpts[2][1] = y+2;cpts[2][2] = z;
-	cpts[3][0] = x; cpts[3][1] = y+3; cpts[3][2]= z;
+	cpts[3][0] = x; cpts[3][1] = y+4; cpts[3][2]= z;
 	cpts[4][0] = (x-1.5)*other_rand; cpts[4][1] = y+2; cpts[4][2] = z;
 	cpts[5][0] = x-1.5; cpts[5][1] = y+1; cpts[5][2] = z;
 	cpts[6][0] = x; cpts[6][1] = y; cpts[6][2] = z;
@@ -170,128 +164,61 @@ void drawLeaf(GLfloat **mat) {
 
 	GLfloat leafpoints[4][4][3] = {
 		{{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
-		{{-1.5, 1, 0},              {-0.5, 1, 1-random_concav}, {0.5, 1, 1-random_concav},  {1.5*random_num, 1, 0}},
-		{{-1.5*other_rand, 2,  0},  {-0.5, 2, 1-random_concav}, {0.5, 2, 1-random_concav},   {1.5, 2,  0}},
-		{{0, 3,  0}, {0, 3,  0}, {0, 3, 0},   {0, 3,  0}}};
+		{{-1.5, 1, 0},              {-1.5, 1, -.5}, {.5, 1, -.5},  {1.5*random_num, 1, 0}},
+		{{-1.5*other_rand, 2,  0},  {-.5, 2, -.5}, {.5, 2, -.5},   {1.5, 2,  0}},
+		{{0, 4,  0}, {0, 4,  0}, {0, 4, 0},   {0, 4,  0}}};
 
-	glColor3f(.3,.5,.2);
+		
+//	glColor3f(.3,.5,.2);
 	int j;
 	glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0, 1, 12, 4, &leafpoints[0][0][0]);
-   	for (j = 0; j <= 8; j++) {
+   	for (j = 0; j <= 15; j++) {	
       		glBegin(GL_POLYGON);
-      		for (i = 0; i <= 10; i++)
-         		glEvalCoord2f((GLfloat)i/10.0, (GLfloat)j/8.0);
+      		for (i = 0; i <= 10; i++){
+			if(i > 5)
+				glColor3f(.82, .41, .11);
+			else
+				glColor3f(.96, .64, .37);
+         		glEvalCoord2f((GLfloat)i/10, (GLfloat)j/15);
+		}
       		glEnd();
       		glBegin(GL_POLYGON);
-      		for (i = 0; i <= 10; i++)
-        		glEvalCoord2f((GLfloat)j/8.0, (GLfloat)i/10.0);
+      		for (i = 0; i <= 10; i++){
+			if(i > 5)
+                                glColor3f(.82, .41, .11);
+                        else
+                                glColor3f(.96, .64, .37);
+        		glEvalCoord2f((GLfloat)j/15, (GLfloat)i/10);
+		}
       		glEnd();
    	}
-   /*	glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0,1, 12, 4, &leafpoints2[0][0][0]);
-	for (j = 0; j <= 8; j++) {
-      		glBegin(GL_POLYGON);
-      		for (i = 0; i <= 10; i++)
-         		glEvalCoord2f((GLfloat)i/10.0, (GLfloat)j/8.0);
-      		glEnd();
-      		glBegin(GL_POLYGON);
-      		for (i = 0; i <= 10; i++)
-         		glEvalCoord2f((GLfloat)j/8.0, (GLfloat)i/10.0);
-      		glEnd();
-   	}*/
+
+//	        glColor3f(.3,.5,.2);
 	glFlush();
 }
 void drawBranch(GLfloat percent) {
-	/* ADD YOUR CODE to make the 2D branch a 3D extrusion */
-//	cout << "drawing branch" << endl;	
-	
-	/*int width, height;
-	unsigned char* image = SOIL_load_image("img.png", &width, &height, 0, SOIL_LOAD_RGB);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	*/
-	//glColor3f(0.54,0.27,0.07);
-  	/*GLfloat pi = 3.14159;
-	
-	int i,j;
-	GLfloat treepoints[4][4][3] = 
-	{{{1,0,0},{1,7,0},{cos(pi/4),7,sin(pi/4)},{cos(pi/4),0,sin(pi/4)}},
-	{{cos((7*pi)/4),0,sin((7*pi)/4)},{cos((7*pi)/4),7,sin((7*pi)/4)},{0,7,-1},{0,0,-1}},
-	{{0,0,1},{0,7,1},{cos((3*pi)/4), 7, sin((3*pi)/4)},{cos((3*pi)/4), 0, sin((3*pi)/4)}},
-	{{cos((5*pi)/4),0,sin((5*pi)/4)},{cos((5*pi)/4),7,sin((5*pi)/4)},{-1,7,0},{-1,0,0}}};
-	glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0, 1, 12, 4, &treepoints[0][0][0]);
-        for (j = 0; j <= 8; j++) {
-                glBegin(GL_POLYGON);
-                for (i = 0; i <= 30; i++)
-                        glEvalCoord2f((GLfloat)i/30.0, (GLfloat)j/8.0);
+
+  	//glColor3f(.5,.3,.2);
+	int num_indices;
+	int i;
+	int index1,  index2,  index3, index4;
+	num_indices = sizeof(branch_indices)/sizeof(GLuint);
+	for(i = 0; i < num_indices; i+=4){
+		index1 = branch_indices[i]*3;
+		index2 = branch_indices[i+1]*3;
+		index3 = branch_indices[i+2]*3;
+		index4 = branch_indices[i+3]*3;
+		glBegin(GL_QUADS);
+		glColor3fv(  &(branch_colors[index1]) );
+                glVertex3f(branch_vertices[index1]*percent, branch_vertices[index1+1]*percent, branch_vertices[index1+2]*percent);
+                glColor3fv(  &(branch_colors[index2]) );
+                glVertex3f(branch_vertices[index2]*percent, branch_vertices[index2+1]*percent, branch_vertices[index2+2]*percent);
+                glColor3fv(  &(branch_colors[index3]) );
+                glVertex3f(branch_vertices[index3]*percent, branch_vertices[index3+1]*percent, branch_vertices[index3+2]*percent);
+                glColor3fv(  &(branch_colors[index4]) );
+                glVertex3f(branch_vertices[index4]*percent, branch_vertices[index4+1]*percent, branch_vertices[index4+2]*percent);
                 glEnd();
-                glBegin(GL_POLYGON);
-                for (i = 0; i <= 30; i++)
-                        glEvalCoord2f((GLfloat)j/8.0, (GLfloat)i/30.0);
-                glEnd();
-        }*/
-
-	
-	//GLUquadricObj*p;
-	//p=gluNewQuadric();
-	//gluQuadricDrawStyle(p,GLU_LINE);
-	//gluCylinder(p,0,1,7,10,10);
-	
-   //FIBITMAP *currImage = FreeImage_Load(FIF_PNG, "texture_test.png", PNG_DEFAULT);
-  // SLD_Surface *currImage = SLD_LoadBMP("texture_test.bmp");
-  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, checkImageWidth, checkImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, currImage);
-	glGenTextures(1, &texName);   
- 	loadBMP("tree_texture.bmp");
-    	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width,
-                height, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                treedata);
-	
-
-	glEnable(GL_TEXTURE_2D);
-   	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-   	glBindTexture(GL_TEXTURE_2D, texName);
-
-
-	GLfloat height = 7.0*percent;
-  	GLfloat width = 1.0*percent;
-  	GLfloat depth = .5*percent;  
-
-  	glColor3f(.5,.3,.2);
-	glutCylinder(1.0, 7.0, 15, 15);
-//	glutSolidCylinder(1, 7, 15, 15);
-	//glutWireTorus(0.1, 0.4, 10, 20);
-	//glutCylinder cyl = new GlutCylinder(true, 1.0, 7.0, 15, 10, 5);
-	//cyl.position(new Vector(0,0,0), new Vector(0,7,0), 1.0);
-	//yl.draw();
-	/*glBegin(GL_POLYGON);
-	//glTexCoord2f(0,0);
-	//glVertex3f(-width, 0, 0);
-	//glTexCoord2f(0,1);
-	//glVertex3f(-width*.75, height,0);
-	//glTexCoord2f(1,0);
-	//glVertex3f(width*.75,height,0);
-	//glTexCoord2f(1,1);
-	//glVertex3f(width,0,0);
- 	glVertex3f(width,0.0,-depth);
-  	glVertex3f(width*.75,height,-depth*.75);
-  	glVertex3f(-width*.75,height,-depth*.75);
-  	glVertex3f(-width,0.0,-depth);
-  	glVertex3f(width,0.0,depth);
-       	glVertex3f(width*.75,height,depth*.75);
-        glVertex3f(-width*.75,height,depth*.75);
-        glVertex3f(-width,0.0,depth);
-   	glEnd();*/
-	
-	/*glColor3f(.8,.4,.2);
-	glBegin(GL_LINE_LOOP);
-        glVertex3f(width,0.0,-depth);
-        glVertex3f(width*.75,height,-depth*.75);
-        glVertex3f(-width*.75,height,-depth*.75);
-        glVertex3f(-width,0.0,-depth);
-        glVertex3f(width,0.0,depth);
-        glVertex3f(width*.75,height,depth*.75);
-        glVertex3f(-width*.75,height,depth*.75);
-        glVertex3f(-width,0.0,depth);
-        glEnd();*/
-	
+	}
 }
 
 void drawSeed(void) {
@@ -321,18 +248,18 @@ void drawLSystem(string str, int depth) {
     int rand_minus = (GLfloat)(rand()%15)+15;
 
     int i;
-    GLfloat plus_x = 15;
-    GLfloat plus_y = 0;
-    GLfloat plus_z = 15;
+    GLfloat plus_x = 17;
+    GLfloat plus_y = 2;
+    GLfloat plus_z = 13;
 
     
-    GLfloat minus_x = 15;
+    GLfloat minus_x = 14;
     GLfloat minus_y = 0;
     GLfloat minus_z = -15;
  
-    GLfloat equals_x = -15;
-    GLfloat equals_y = 0;
-    GLfloat equals_z = 0;
+    GLfloat equals_x = -16;
+    GLfloat equals_y = 14;
+    GLfloat equals_z = 2;
       
 
     if(depth == 0) {

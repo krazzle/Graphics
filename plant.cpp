@@ -29,7 +29,7 @@ int H=600;		/* window height */
 int X_OFF = 10;	/* window x offset */
 int Y_OFF = 10;	/* window y offset */
 int depth = 4;
-GLfloat  thetaOffset = 0;
+GLfloat  thetaOffset = -40;
 GLUnurbsObj *theNurb;
 
 /* local function declarations */
