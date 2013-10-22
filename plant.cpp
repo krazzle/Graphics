@@ -30,7 +30,7 @@ int W=800;		/* window width */
 int H=600;		/* window height */
 int X_OFF = 10;	/* window x offset */
 int Y_OFF = 10;	/* window y offset */
-int depth = 4;
+int depth = 5;
 GLfloat  thetaOffset = -40;
 int perspective = 0;      // if 0, using perspective projection matrix,
                           // if 1, using orthographic projection matrix
@@ -38,6 +38,7 @@ int rising = 0;           // if 0, decrease depth during animation,
                           // if 1, increase depth during anitmation
 int growingAnimation = 0; // if 0, do not use growing animation
                           // if 1, use growing animation
+int season = 0;
 GLUnurbsObj *theNurb;
 
 /* local function declarations */
@@ -108,9 +109,8 @@ void display() {
   glEnable(GL_DEPTH_TEST);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
-  
   /* See drawplant.c for the definition of this routine */
-  drawPlant(depth,thetaOffset);
+  drawPlant(depth,thetaOffset, season);
   glFlush();  /* Flush all executed OpenGL ops finish */
 
 
@@ -124,7 +124,7 @@ void display() {
 	depth += -1;
     }
     else {
-      if (depth == 8) {
+      if (depth == 6) {
 	rising = 0;
 	depth += -1;
       }
@@ -182,6 +182,19 @@ void myKeyHandler(unsigned char ch, int x, int y) {
     break;
   case '?':
     thetaOffset += 5;
+    display();
+    break;
+  case 'e':
+    season++;
+    if(season == 4)
+	season = 0;
+    switch(season){
+        case 0: printf("It's fall!\n");break;
+	case 1: printf("It's winter!\n");break;
+	case 2: printf("It's summer!\n");break;
+	case 3: printf("It's spring!\n"); break;
+	default: break;
+    }
     display();
     break;
   case 'p':
