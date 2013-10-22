@@ -389,6 +389,18 @@ void printMatrix(GLfloat** mat){
 
 void drawPlant(int depth, GLfloat thetaOffset){
   max_depth = depth;
+
+  load3DMatrix(1, 0, 0, 0,
+	       0, 1, 0, 0,
+	       0, 0, 1, 0,
+	       0, 0, 0, 1
+	       );
+  int pic_w, pic_h;
+  GLubyte* pixels;
+  pixels = readPPMfile("autum.ppm", &pic_w, &pic_h);
+  glRasterPos3f(-40, -40, -5);
+  glDrawPixels(pic_w, pic_h, GL_RGB, GL_UNSIGNED_BYTE, pixels); 
+
   int i;
   for ( i = 0; i < 4; i += 1)
     placeholder[i] = new GLfloat[4];
@@ -399,7 +411,28 @@ void drawPlant(int depth, GLfloat thetaOffset){
   placeholder = rotate(placeholder, 0, thetaOffset,0);
   placeholder = translate(placeholder, 1, 0,-25,0);
   //load3DMatrixWrapper(mat);
-  drawStar();
+  //drawStar();
+  
+  /*
+  int pic_w, pic_h;
+  GLubyte* pixels;
+  pixels = readPPMfile("autum.ppm", &pic_w, &pic_h);
+  cout << "pic_w: " << pic_w << " pic_h: " << pic_h << endl;
+  */
+  /*
+  glEnable( GL_ALPHA_TEST );
+  glAlphaFunc( GL_GREATER, 0.5 );
+  //glDrawPixels(pic_w, pic_h, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, pixels);
+  //glDrawPixels(pic_w, pic_h, GL_RGBA, GL_UNSIGNED_BYTE, pixels);  
+  glDrawPixels(pic_w, pic_h, GL_RGB, GL_UNSIGNED_BYTE, pixels);  
+  //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  */
+  /*
+  glDrawPixels(pic_w, pic_h, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, pixels);        
+  glEnable( GL_STENCIL_TEST );
+  glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
+  glDrawPixels(pic_w, pic_h, GL_RGB, GL_UNSIGNED_BYTE, pixels); 
+  */
   drawLSystem(L0, depth);
 }
 
