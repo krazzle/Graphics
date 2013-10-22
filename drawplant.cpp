@@ -120,6 +120,7 @@ void load3DMatrix(
 
 GLfloat** drawFlower(GLfloat **mat){
 	push(mat);
+	//mat = rotate(mat, 180, 180, 180);
 	GLfloat theta = 72;
 	int i;
 	for(i = 0; i <= 360; i+=theta){
