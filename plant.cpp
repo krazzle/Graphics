@@ -17,7 +17,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "mouse.h"
+//#include "mouse.h"
 #include "helper.h"
 #include "l-system-operators.h"
 #include "common.h"
@@ -37,6 +37,12 @@ GLUnurbsObj *theNurb;
 void display(void);
 void init(void);
 void myKeyHandler(unsigned char ch, int x, int y);
+void myMouseButton(int button, int state, int x, int y);
+void myMouseMotion(int x, int y);
+#define MOUSE_ROTATE_YX         0
+#define MOUSE_ROTATE_YZ         1
+#define MOUSE_ZOOM                      2
+
 
 int main (int argc, char** argv) {
   glutInit(&argc,argv);
@@ -47,12 +53,50 @@ int main (int argc, char** argv) {
   init();
   glutDisplayFunc(display);
   glutKeyboardFunc(myKeyHandler);
-  glutMouseButton(myMouseButton);
-  glutMouseMotion(myMouseMotion);
+  glutMouseFunc(myMouseButton);
+  glutMotionFunc(myMouseMotion);
   glEnable(GL_MAP1_VERTEX_3);
   glutMainLoop();
   return 0;
 }
+
+/* The current mode the mouse is in, based on what button(s) is pressed */
+int mouse_mode;
+
+/* The last position of the mouse since the last callback */
+int m_last_x, m_last_y;
+
+
+void myMouseButton(int button, int state, int x, int y) {
+        if (state == GLUT_DOWN) {
+                m_last_x = x;
+                m_last_y = y;
+
+                if (button == GLUT_LEFT_BUTTON) {
+                        mouse_mode = MOUSE_ROTATE_YX;
+                } else if (button == GLUT_MIDDLE_BUTTON) {
+                        mouse_mode = MOUSE_ROTATE_YZ;
+                } else if (button == GLUT_RIGHT_BUTTON) {
+                        mouse_mode = MOUSE_ZOOM;
+                }
+        }
+}
+
+void myMouseMotion(int x, int y) {
+        double d_x;
+        d_x = x - m_last_x;
+        m_last_x = x;
+        if (mouse_mode == MOUSE_ROTATE_YX) {
+		printf("d_x: %f\n", d_x);
+                if(d_x)
+			thetaOffset -= 2;
+		else 
+			thetaOffset +=2;
+        }
+        display();
+}
+
+
 
 void init() {
    //GLfloat mat_diffuse[] = { 0.7, 0.7, 0.7, 1.0 };
