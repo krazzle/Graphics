@@ -17,6 +17,7 @@
 #include <math.h>
 #include <assert.h>
 
+#include "mouse.h"
 #include "helper.h"
 #include "l-system-operators.h"
 #include "common.h"
@@ -46,6 +47,8 @@ int main (int argc, char** argv) {
   init();
   glutDisplayFunc(display);
   glutKeyboardFunc(myKeyHandler);
+  glutMouseButton(myMouseButton);
+  glutMouseMotion(myMouseMotion);
   glEnable(GL_MAP1_VERTEX_3);
   glutMainLoop();
   return 0;
