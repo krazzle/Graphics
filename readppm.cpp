@@ -82,7 +82,9 @@ GLubyte* readPPMfile(char* filename, int *wp, int *hp) {
 		exit(1);
 	}
 
-	fprintf(stderr,"reading %d columns %d rows \n",w,h);
+
+	
+	//fprintf(stderr,"reading %d columns %d rows \n",w,h);
 
 	pixels = (GLubyte*) malloc(w*h*3*sizeof(GLubyte));
 	for (i=0; i<h; i++) {

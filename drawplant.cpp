@@ -1,6 +1,4 @@
-/*
- * drawplant.cpp
- * -------------
+ /* -------------
  * Contains the drawing routine and related helper functions for the
  * L-system fractal plant.  Starter code for Project 2.
  *
@@ -24,11 +22,13 @@
 #include <string>
 using namespace std;
 
+#define ORANGE = 0;
+#define GREEN = 1;
 //extern GLfloat thetaOffset;
 extern GLUnurbsObj *theNurb;
+int curr_season;
 
-
-std::string Test = "F[+FT]F[-FT]F[=FT]FT";
+std::string Test = "F[+F?]F[-FT]F[=FT]FT";
 std::string L0 = "FF[+F2]F[-F1][=F3]F0";
 std::string L1 = "F[-F1]F[+F2]F[=FT]FT";
 std::string L2 = "F[-FT]F[+F2]F[=F3]F1";
@@ -118,11 +118,25 @@ void load3DMatrix(
 	glLoadMatrixf(M3D);
 }
 
-void drawBeehive(GLfloat **mat){
-	
+GLfloat** drawFlower(GLfloat **mat){
+	push(mat);
+	//mat = rotate(mat, 180, 180, 180);
+	GLfloat theta = 72;
+	int i;
+	for(i = 0; i <= 360; i+=theta){
+		mat = rotate(mat, 0, 0, theta);
+		GLfloat flowerpoints[4][4][3] = {
+                	{{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
+                	{{-1, .75, 0}, {-.5, .75, .5}, {.5, .75, .5},  {1, .75, 0}},
+                	{{-1, 1.5,  0},  {-.5, 1.5, .5}, {.5, 1.5, .5},   {1, 1.5,  0}},
+                	{{0, 2,  0}, {0, 2,  0}, {0, 2, 0},   {0, 2,  0}}};
+		bsplineMap(&flowerpoints[0][0][0], 0, .81, .82, .87, 1.0, 1.0, 10, 15);
+	}
+
+	return pop();
 }
 
-void drawLeaf(GLfloat **mat) {
+void drawLeaf(GLfloat **mat, int color) {
 	/* ADD YOUR CODE to make the 2D leaf a 3D extrusion */
 	glColor3f(.5,.3,0); 
    	GLfloat cpts[7][3];
@@ -160,39 +174,46 @@ void drawLeaf(GLfloat **mat) {
         	glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, cpts[i]);
         	glMapGrid1f(30, 0.0, 1.0);
         	glEvalMesh1(GL_LINE, 0, 30);
-    	}GLfloat leafpoints[4][4][3] = {
+    	}
+	GLfloat leafpoints[4][4][3] = {
                 {{0, 0, 0}, {0, 0, 0}, {0, 0, 0},  {0, 0, 0}},
                 {{-1.5, 1, 0},              {-1.5, 2, -.5}, {.5, 2, -.5},  {1.5*random_num, 1, 0}},
                 {{-1.5*other_rand, 2,  0},  {-.5, 2, -.5}, {.5, 2, -.5},   {1.5, 2,  0}},
                 {{0, 4,  0}, {0, 4,  0}, {0, 4, 0},   {0, 4,  0}}};
-		
-//	glColor3f(.3,.5,.2);
-	int j;
-	glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0, 1, 12, 4, &leafpoints[0][0][0]);
-   	for (j = 0; j <= 15; j++) {	
-      		glBegin(GL_POLYGON);
-      		for (i = 0; i <= 10; i++){
-			if(i > 5)
-				glColor3f(.82, .41, .11);
-			else
-				glColor3f(.96, .64, .37);
-         		glEvalCoord2f((GLfloat)i/10, (GLfloat)j/15);
-		}
-      		glEnd();
-      		glBegin(GL_POLYGON);
-      		for (i = 0; i <= 10; i++){
-			if(i > 5)
-                                glColor3f(.82, .41, .11);
-                        else
-                                glColor3f(.96, .64, .37);
-        		glEvalCoord2f((GLfloat)j/15, (GLfloat)i/10);
-		}
-      		glEnd();
-   	}
-
-//	        glColor3f(.3,.5,.2);
+	
+	if(color == 0)
+		bsplineMap(&leafpoints[0][0][0], .82, .41, .11, .96, .64, .37, 10, 15);
+	else
+		bsplineMap(&leafpoints[0][0][0], .33, .42, .18, .74, .71, .42, 10, 15);
 	glFlush();
 }
+
+void bsplineMap(GLfloat* data, GLfloat r1, GLfloat g1, GLfloat b1, GLfloat r2, GLfloat g2, GLfloat b2, int i_max, int j_max){
+	int j, i;
+        glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0, 1, 12, 4, data);
+        for (j = 0; j <= j_max; j++) {
+                glBegin(GL_POLYGON);
+                for (i = 0; i <= i_max; i++){
+                        if(i > i_max/2)
+                                glColor3f(r1, g1, b1);
+                        else
+                                glColor3f(r2, g2, b2);
+                        glEvalCoord2f((GLfloat)i/i_max, (GLfloat)j/j_max);
+                }
+                glEnd();
+                glBegin(GL_POLYGON);
+                for (i = 0; i <= i_max; i++){
+                        if(i > i_max/2)
+                                glColor3f(r1, g1, b1);
+                        else
+                                glColor3f(r2, g2, b2);
+                        glEvalCoord2f((GLfloat)j/j_max, (GLfloat)i/i_max);
+                }
+                glEnd();
+        }
+
+}
+
 void drawBranch(GLfloat percent) {
 
   	//glColor3f(.5,.3,.2);
@@ -233,54 +254,18 @@ void drawSeed(GLfloat ** mat) {
                 {{-1.5, 2,  0},{-.5, 2, 2}, {.5, 2, 2},   {1.5, 2,  0}},
                 {{0, 4,  0}, {0, 4,  0}, {0, 4, 0},   {0, 4,  0}}};
 
-        int i, j;
-        glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0, 1, 12, 4, &seedpoints[0][0][0]);
-        for (j = 0; j <= 15; j++) {
-		glBegin(GL_POLYGON);
-                for (i = 0; i <= 20; i++){
-			if (i > 10)
-				glColor3f(.74, .47, .27);
-			else
-				glColor3f(.54, .27, .07);
-                        glEvalCoord2f((GLfloat)i/20, (GLfloat)j/15);
-                }
-                glEnd();
-                glBegin(GL_POLYGON);
-                for (i = 0; i <= 20; i++){
-			if(i > 10)
-				glColor3f(.74, .47, .27);
-			else
-				glColor3f(.54, .27, .07);
-                        glEvalCoord2f((GLfloat)j/15, (GLfloat)i/20);
-                }
-                glEnd();
-        }
-        glMap2f(GL_MAP2_VERTEX_3, 0, 1, 3, 4, 0, 1, 12, 4, &seedpoints2[0][0][0]);
-        for (j = 0; j <= 15; j++) {
-                glBegin(GL_POLYGON);
-                for (i = 0; i <= 20; i++){
-                        if (i > 10)
-                                glColor3f(.74, .47, .27);
-                        else
-                                glColor3f(.54, .27, .07);
-
-                        glEvalCoord2f((GLfloat)i/20, (GLfloat)j/15);
-                }
-                glEnd();
-                glBegin(GL_POLYGON);
-                for (i = 0; i <= 20; i++){
-                        if (i > 10)
-                                glColor3f(.74, .47, .27);
-                        else
-                                glColor3f(.54, .27, .07);
-
-                        glEvalCoord2f((GLfloat)j/15, (GLfloat)i/20);
-                }
-                glEnd();
-        }
+	bsplineMap(&seedpoints[0][0][0], .74, .47, .27, .54, .27, .07, 20, 15);
+	bsplineMap(&seedpoints2[0][0][0], .74, .47, .27, .54, .27, .07, 20, 15);
 
         glFlush();
-	glutSolidTeapot(2);
+
+	GLfloat pi = 3.14159;
+	load3DMatrix(-cos(pi/4), -sin(pi/4), 0, 15, 
+		     -sin(pi/4), cos(pi/4), 0, 2, 
+		     0, 0, 1, 0, 
+		     0, 0, 0, 1);
+	glColor3f(.59, .98, .59);
+	glutWireTeapot(7);
 
 }
 
@@ -296,6 +281,23 @@ void drawStar(void) {
   glVertex3f(-.4, -.9, 0);
   glVertex3f(.4, -.9,0);
   glEnd();
+}
+
+GLfloat** drawThing(GLfloat** mat){
+	if(curr_season == 0){
+		drawLeaf(mat, 0);
+		return mat;
+	}
+	else if(curr_season == 1){
+		return mat;
+	}
+	else if(curr_season == 2){
+		return drawFlower(mat);
+	}
+	else{
+		drawLeaf(mat, 1);
+		return mat;
+	}
 }
 
 void drawLSystem(string str, int depth) {  
@@ -344,25 +346,27 @@ void drawLSystem(string str, int depth) {
 		      break;
   	    case '=': placeholder = rotate(placeholder, equals_x, equals_y, equals_z);
 		      break;
-	    case 'T': drawLeaf(placeholder);
+	    case 'T': if(curr_season != 2){placeholder = drawThing(placeholder);}
+		      break;
+	    case '?': placeholder = drawThing(placeholder);
 		      break;
 	    case '0': if(depth == 1)
-		          drawLeaf(placeholder);
+		          placeholder = drawThing(placeholder);
  		      else
 		          drawLSystem(L0, depth-1);
 		      break;
 	    case '1': if(depth == 1)
-		          drawLeaf(placeholder);
+		          placeholder = drawThing(placeholder);
 		      else
 		          drawLSystem(L1, depth-1);
 		      break;
  	    case '2': if(depth == 1)
-		          drawLeaf(placeholder);
+		          placeholder = drawThing(placeholder);
 		      else
 		          drawLSystem(L2, depth-1);
 		      break;
 	    case '3': if(depth == 1)
-			  drawLeaf(placeholder);
+			  placeholder = drawThing(placeholder);
 		      else
 			  drawLSystem(L3, depth-1);
 	 	      break;
@@ -387,9 +391,28 @@ void printMatrix(GLfloat** mat){
  */
 
 
-void drawPlant(int depth, GLfloat thetaOffset){
+void drawPlant(int depth, GLfloat thetaOffset, int season){
   max_depth = depth;
 
+  char* seasonStr;
+
+  switch(season) {
+  case 0:
+    seasonStr = "fall.ppm";
+    break;
+  case 1:
+    seasonStr = "winter.ppm";
+    break;
+  case 2:
+    seasonStr = "spring.ppm";
+    break;
+  case 3:
+    seasonStr = "summer.ppm";
+    break;
+  default:
+    seasonStr = "fall.ppm";
+    break;
+  }
   load3DMatrix(1, 0, 0, 0,
 	       0, 1, 0, 0,
 	       0, 0, 1, 0,
@@ -397,9 +420,11 @@ void drawPlant(int depth, GLfloat thetaOffset){
 	       );
   int pic_w, pic_h;
   GLubyte* pixels;
-  pixels = readPPMfile("autum.ppm", &pic_w, &pic_h);
+  pixels = readPPMfile(seasonStr, &pic_w, &pic_h);
   glRasterPos3f(-40, -40, -5);
   glDrawPixels(pic_w, pic_h, GL_RGB, GL_UNSIGNED_BYTE, pixels); 
+  
+  curr_season = season;
 
   int i;
   for ( i = 0; i < 4; i += 1)
@@ -409,30 +434,8 @@ void drawPlant(int depth, GLfloat thetaOffset){
   copyMatrix(4,4,mat,placeholder);
 
   placeholder = rotate(placeholder, 0, thetaOffset,0);
-  placeholder = translate(placeholder, 1, 0,-25,0);
-  //load3DMatrixWrapper(mat);
-  //drawStar();
+  placeholder = translate(placeholder, 1, 0,-32,0);
   
-  /*
-  int pic_w, pic_h;
-  GLubyte* pixels;
-  pixels = readPPMfile("autum.ppm", &pic_w, &pic_h);
-  cout << "pic_w: " << pic_w << " pic_h: " << pic_h << endl;
-  */
-  /*
-  glEnable( GL_ALPHA_TEST );
-  glAlphaFunc( GL_GREATER, 0.5 );
-  //glDrawPixels(pic_w, pic_h, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, pixels);
-  //glDrawPixels(pic_w, pic_h, GL_RGBA, GL_UNSIGNED_BYTE, pixels);  
-  glDrawPixels(pic_w, pic_h, GL_RGB, GL_UNSIGNED_BYTE, pixels);  
-  //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  */
-  /*
-  glDrawPixels(pic_w, pic_h, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, pixels);        
-  glEnable( GL_STENCIL_TEST );
-  glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
-  glDrawPixels(pic_w, pic_h, GL_RGB, GL_UNSIGNED_BYTE, pixels); 
-  */
   drawLSystem(L0, depth);
 }
 
