@@ -34,12 +34,17 @@ GLfloat ftop    =  40.0;
 GLfloat zNear   =  40.0;
 GLfloat zFar    = -40.0;
 
+GLfloat cpts[30][3];
+int ncpts = 0;
+
+
 /* local function declarations */
 void init(void);
 void display(void);
 void myKeyHandler(unsigned char ch, int x, int y);
 void myMouseButton(int button, int state, int x, int y);
 void endSubdiv(int status);
+void displayPointsAndLines();
 
 int main (int argc, char** argv) {
   glutInit(&argc,argv);
@@ -73,7 +78,7 @@ void display() {
 	 * Note: Only one should be called at a time (based on the
 	 * display mode).
 	 */
-
+	//displayPointsAndLines();
 	drawSurface();
 
     glFlush();  /* Flush all executed OpenGL ops finish */
@@ -100,13 +105,59 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 	return;
 }
 
+void displayPointsAndLines(){
+	glColor3f(1.0,0.0,0.0);
+	glPointSize(5);
+	int i;
+	glBegin(GL_LINES);
+        for (i = 0; i < ncpts; i++)
+                glVertex3fv(cpts[i]);
+        glEnd();
+
+	
+	glBegin(GL_POINTS);
+    	for (i = 0; i < ncpts; i++)
+        	glVertex3fv(cpts[i]);
+    	glEnd();
+}
+
 void myMouseButton(int button, int state, int x, int y) {
-	if (state == GLUT_DOWN) {
+	/*if (state == GLUT_DOWN) {
 		if (button == GLUT_LEFT_BUTTON) {
 			// Add a point, if there is room
 			printf("x: %3d, y: %3d\n", x, y);
 		}
-	}
+	}*/
+	float wx, wy;
+
+    /* We are only interested in left clicks */
+    	if (button != GLUT_LEFT_BUTTON || state != GLUT_DOWN)
+       		return;
+
+    /* Translate back to our coordinate system */
+    	wx = (2.0 * x) / (float)(W - 1) - 1.0;
+    	wy = (2.0 * (H - 1 - y)) / (float)(H - 1) - 1.0;
+
+
+    /* See if we have room for any more control points */
+    	if (ncpts == 30)
+        	return;
+
+    /* Save the point */
+    	cpts[ncpts][0] = wx;
+    	cpts[ncpts][1] = wy;
+    	cpts[ncpts][2] = 0.0;
+    	ncpts++;
+
+    /* Draw the point */
+    	glColor3f(0.0, 0.0, 0.0);
+    	glPointSize(5.0);
+    	glBegin(GL_POINTS);
+    	glVertex3f(wx, wy, 0.0);
+    	glEnd();
+
+    	glFlush();
+
 }
 
 void endSubdiv(int status) {
