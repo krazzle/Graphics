@@ -1,4 +1,4 @@
-f#ifndef _DATA_H_
+#ifndef _DATA_H_
 #define _DATA_H_
 
 /* Globals declared in data.cpp */
