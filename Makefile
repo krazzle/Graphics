@@ -1,11 +1,12 @@
 ###########################################################
 # Project 1 Makefile
 
-CC = g++
+CC = gcc
 CFLAGS = -Wall -ggdb
-INCLUDE = -I/usr/include
-LIBDIR = -L/usr/lib/x86_64-linux-gnu
+INCLUDE = -I/lusr/X11/include -I/lusr/include
+LIBDIR = -L/lusr/X11/lib -L/lusr/lib
 # Libraries that use native graphics hardware --
+# appropriate for Linux machines in Taylor basement
 LIBS = -lglut -lGLU -lGL -lpthread -lm
 
 ###########################################################
@@ -23,8 +24,8 @@ endif
 # Uncomment the following line if you are using Mesa
 #LIBS = -lglut -lMesaGLU -lMesaGL -lm
 
-plant: drawplant.cpp drawplant.h plant.cpp readppm.cpp helper.cpp helper.h l-system-operators.cpp l-system-operators.h
-	${CC} ${CFLAGS} ${INCLUDE} -o plant ${LIBDIR} drawplant.cpp plant.cpp readppm.cpp helper.cpp helper.h l-system-operators.cpp l-system-operators.h ${LIBS}
+subdiv: subdiv.cpp drawing.cpp data.cpp drawing.h data.h
+	${CC} ${CFLAGS} ${INCLUDE} -o subdiv ${LIBDIR} subdiv.cpp drawing.cpp data.cpp ${LIBS}
 
 clean:
-	rm -f plant *.o core
+	rm -f subdiv *.o core
