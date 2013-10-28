@@ -109,61 +109,56 @@ void displayPointsAndLines(){
 	glColor3f(1.0,0.0,0.0);
 	glPointSize(5);
 	int i;
-	glBegin(GL_LINES);
+	glBegin(GL_LINE_STRIP);
         for (i = 0; i < ncpts; i++) {
-	  printf("%f %f\n", cpts[i][0], cpts[i][1]);
+	//  printf("%f %f\n", cpts[i][0], cpts[i][1]);
 	  glVertex3fv(cpts[i]);
 	}
         glEnd();
 
-	
+	glColor3f(0.0,0.0,1.0);
 	glBegin(GL_POINTS);
     	for (i = 0; i < ncpts; i++)
         	glVertex3fv(cpts[i]);
     	glEnd();
 }
 
-void myMouseButton(int button, int state, int x, int y) {
-  /*if (state == GLUT_DOWN) {
-    if (button == GLUT_LEFT_BUTTON) {
-    // Add a point, if there is room
-    printf("x: %3d, y: %3d\n", x, y);
-    }
-    }*/
-  float wx, wy;
+void myMouseButton(int button, int state, int x, int y) { 
+	float wx, wy;
 
-  printf("x: %d y: %d\n", x, y);
-  
-  /* We are only interested in left clicks */
-  if (button != GLUT_LEFT_BUTTON || state != GLUT_DOWN)
-    return;
-  
-  /* Translate back to our coordinate system */
-  wx = (2.0 * x) / (float)(W - 1) - 1.0;
-  wy = (2.0 * (H - 1 - y)) / (float)(H - 1) - 1.0;
-  
-  
-  /* See if we have room for any more control points */
-  if (ncpts == 30)
-    return;
-  
-  /* Save the point */
-  cpts[ncpts][0] = wx;
-  cpts[ncpts][1] = wy;
-  cpts[ncpts][2] = 0.0;
-  ncpts++;
-  
-  /* Draw the point */
-  glColor3f(1.0, 1.0, 1.0);
-  glPointSize(5.0);
-  glBegin(GL_POINTS);
-  glVertex3f(wx, wy, 0.0);
-  glEnd();
-  
-  glFlush();
-  
-  display();
-  printf("exiting mymousebutton\n");
+    /* We are only interested in left clicks */
+
+	//    	if (button != GLUT_LEFT_BUTTON || state != GLUT_DOWN)
+	//		return;
+	if (state != GLUT_DOWN)
+	  return;
+	
+	if (button == GLUT_RIGHT_BUTTON) {
+	  ncpts += -1; 
+	}
+	else {
+    /* Translate back to our coordinate system */
+    	wx = (2.0 * x) / (float)(W - 1) - 1.0;
+    	wy = (2.0 * (H - 1 - y)) / (float)(H - 1) - 1.0;
+	
+	wx*= fright;
+	wy*= ftop;
+    /* See if we have room for any more control points */
+    	if (ncpts == 30)
+        	return;
+
+    /* Save the point */
+    	cpts[ncpts][0] = wx;
+    	cpts[ncpts][1] = wy;
+    	cpts[ncpts][2] = 0.0;
+    	ncpts++;
+	}
+
+    /* Draw the point */
+
+    	glFlush();
+
+	display();
 }
 
 void endSubdiv(int status) {
