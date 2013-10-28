@@ -106,6 +106,12 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 }
 
 void displayPointsAndLines(){
+	glColor3f(1.0,1.0,1.0);
+	glBegin(GL_LINES);
+	glVertex3f(0, -40, 0);
+	glVertex3f(0, 40, 0);
+	glEnd();
+
 	glColor3f(1.0,0.0,0.0);
 	glPointSize(5);
 	int i;
@@ -137,21 +143,21 @@ void myMouseButton(int button, int state, int x, int y) {
 	  ncpts += -1; 
 	}
 	else {
-    /* Translate back to our coordinate system */
-    	wx = (2.0 * x) / (float)(W - 1) - 1.0;
-    	wy = (2.0 * (H - 1 - y)) / (float)(H - 1) - 1.0;
-	
-	wx*= fright;
-	wy*= ftop;
-    /* See if we have room for any more control points */
-    	if (ncpts == 30)
-        	return;
 
-    /* Save the point */
-    	cpts[ncpts][0] = wx;
-    	cpts[ncpts][1] = wy;
-    	cpts[ncpts][2] = 0.0;
-    	ncpts++;
+		if((x < ((W/2) + 5)) && (x > ((W/2) - 5)))
+			x = W/2;
+
+    		wx = (2.0 * x) / (float)(W - 1) - 1.0;
+    		wy = (2.0 * (H - 1 - y)) / (float)(H - 1) - 1.0;
+	
+		wx*= fright;
+		wy*= ftop;
+    		if (ncpts == 30)
+        		return;
+    		cpts[ncpts][0] = wx;
+    		cpts[ncpts][1] = wy;
+    		cpts[ncpts][2] = 0.0;
+    		ncpts++;
 	}
 
     /* Draw the point */
