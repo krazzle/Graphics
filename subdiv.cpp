@@ -111,7 +111,7 @@ void displayPointsAndLines(){
 	int i;
 	glBegin(GL_LINES);
         for (i = 0; i < ncpts; i++) {
-	  printf("%f %f\n", cpts[i][0], cpts[i][1]);
+	//  printf("%f %f\n", cpts[i][0], cpts[i][1]);
 	  glVertex3fv(cpts[i]);
 	}
         glEnd();
@@ -123,13 +123,7 @@ void displayPointsAndLines(){
     	glEnd();
 }
 
-void myMouseButton(int button, int state, int x, int y) {
-	/*if (state == GLUT_DOWN) {
-		if (button == GLUT_LEFT_BUTTON) {
-			// Add a point, if there is room
-			printf("x: %3d, y: %3d\n", x, y);
-		}
-	}*/
+void myMouseButton(int button, int state, int x, int y) { 
 	float wx, wy;
 
     /* We are only interested in left clicks */
@@ -139,8 +133,9 @@ void myMouseButton(int button, int state, int x, int y) {
     /* Translate back to our coordinate system */
     	wx = (2.0 * x) / (float)(W - 1) - 1.0;
     	wy = (2.0 * (H - 1 - y)) / (float)(H - 1) - 1.0;
-
-
+	
+	wx*= fright;
+	wy*= ftop;
     /* See if we have room for any more control points */
     	if (ncpts == 30)
         	return;
@@ -161,7 +156,6 @@ void myMouseButton(int button, int state, int x, int y) {
     	glFlush();
 
 	display();
-	printf("exiting mymousebutton\n");
 }
 
 void endSubdiv(int status) {
