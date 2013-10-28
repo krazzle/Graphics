@@ -34,7 +34,7 @@ GLfloat ftop    =  40.0;
 GLfloat zNear   =  40.0;
 GLfloat zFar    = -40.0;
 
-GLfloat cpts[30][3];
+GLfloat cpts[30][3][3];
 int ncpts = 0;
 
 
@@ -95,6 +95,9 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 		case 'q':
 			endSubdiv(0);
 			break;
+	case 'w': 
+	  phil();
+	  break;
 		default:
 			/* Unrecognized keypress */
 		return;
@@ -103,6 +106,24 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 	glutPostRedisplay();
 
 	return;
+}
+
+void phil(void) {
+  
+  GLfloat ** m = new GLfloat*[4];
+  int a;
+  for ( a = 0; a < 4; a += 1)
+    m[a] = new GLfloat[4];
+  m[0][0] = cos(
+
+
+  int i;
+  for ( i = 0; i < nctps; i += 1) { 
+    
+    
+    
+    
+  }
 }
 
 void displayPointsAndLines(){
@@ -118,14 +139,14 @@ void displayPointsAndLines(){
 	glBegin(GL_LINE_STRIP);
         for (i = 0; i < ncpts; i++) {
 	//  printf("%f %f\n", cpts[i][0], cpts[i][1]);
-	  glVertex3fv(cpts[i]);
+	  glVertex3fv(cpts[i][0]);
 	}
         glEnd();
 
 	glColor3f(0.0,0.0,1.0);
 	glBegin(GL_POINTS);
     	for (i = 0; i < ncpts; i++)
-        	glVertex3fv(cpts[i]);
+        	glVertex3fv(cpts[i][0]);
     	glEnd();
 }
 
@@ -154,9 +175,9 @@ void myMouseButton(int button, int state, int x, int y) {
 		wy*= ftop;
     		if (ncpts == 30)
         		return;
-    		cpts[ncpts][0] = wx;
-    		cpts[ncpts][1] = wy;
-    		cpts[ncpts][2] = 0.0;
+    		cpts[ncpts][0][0] = wx;
+    		cpts[ncpts][0][1] = wy;
+    		cpts[ncpts][0][2] = 0.0;
     		ncpts++;
 	}
 
