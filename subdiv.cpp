@@ -68,26 +68,26 @@ void init() {
 }
 
 void display() {
-	glEnable(GL_DEPTH_TEST);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-	/*
-	 * See drawing.c for the definition of these routines.
-	 *
-	 * Note: Only one should be called at a time (based on the
-	 * display mode).
-	 */
-	displayPointsAndLines();
-	drawSurface();
-
-    glFlush();  /* Flush all executed OpenGL ops finish */
-
-    /*
-     * Since we are using double buffers, we need to call the swap
-     * function every time we are done drawing.
-     */
-    glutSwapBuffers();
+  glEnable(GL_DEPTH_TEST);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  
+  
+  /*
+   * See drawing.c for the definition of these routines.
+   *
+   * Note: Only one should be called at a time (based on the
+   * display mode).
+   */
+  displayPointsAndLines();
+  drawSurface();
+  
+  glFlush();  /* Flush all executed OpenGL ops finish */
+  
+  /*
+   * Since we are using double buffers, we need to call the swap
+   * function every time we are done drawing.
+   */
+  glutSwapBuffers();
 }
 
 void myKeyHandler(unsigned char ch, int x, int y) {
