@@ -124,44 +124,46 @@ void displayPointsAndLines(){
 }
 
 void myMouseButton(int button, int state, int x, int y) {
-	/*if (state == GLUT_DOWN) {
-		if (button == GLUT_LEFT_BUTTON) {
-			// Add a point, if there is room
-			printf("x: %3d, y: %3d\n", x, y);
-		}
-	}*/
-	float wx, wy;
+  /*if (state == GLUT_DOWN) {
+    if (button == GLUT_LEFT_BUTTON) {
+    // Add a point, if there is room
+    printf("x: %3d, y: %3d\n", x, y);
+    }
+    }*/
+  float wx, wy;
 
-    /* We are only interested in left clicks */
-    	if (button != GLUT_LEFT_BUTTON || state != GLUT_DOWN)
-       		return;
-
-    /* Translate back to our coordinate system */
-    	wx = (2.0 * x) / (float)(W - 1) - 1.0;
-    	wy = (2.0 * (H - 1 - y)) / (float)(H - 1) - 1.0;
-
-
-    /* See if we have room for any more control points */
-    	if (ncpts == 30)
-        	return;
-
-    /* Save the point */
-    	cpts[ncpts][0] = wx;
-    	cpts[ncpts][1] = wy;
-    	cpts[ncpts][2] = 0.0;
-    	ncpts++;
-
-    /* Draw the point */
-    	glColor3f(1.0, 1.0, 1.0);
-    	glPointSize(5.0);
-    	glBegin(GL_POINTS);
-    	glVertex3f(wx, wy, 0.0);
-    	glEnd();
-
-    	glFlush();
-
-	display();
-	printf("exiting mymousebutton\n");
+  printf("x: %d y: %d\n", x, y);
+  
+  /* We are only interested in left clicks */
+  if (button != GLUT_LEFT_BUTTON || state != GLUT_DOWN)
+    return;
+  
+  /* Translate back to our coordinate system */
+  wx = (2.0 * x) / (float)(W - 1) - 1.0;
+  wy = (2.0 * (H - 1 - y)) / (float)(H - 1) - 1.0;
+  
+  
+  /* See if we have room for any more control points */
+  if (ncpts == 30)
+    return;
+  
+  /* Save the point */
+  cpts[ncpts][0] = wx;
+  cpts[ncpts][1] = wy;
+  cpts[ncpts][2] = 0.0;
+  ncpts++;
+  
+  /* Draw the point */
+  glColor3f(1.0, 1.0, 1.0);
+  glPointSize(5.0);
+  glBegin(GL_POINTS);
+  glVertex3f(wx, wy, 0.0);
+  glEnd();
+  
+  glFlush();
+  
+  display();
+  printf("exiting mymousebutton\n");
 }
 
 void endSubdiv(int status) {
