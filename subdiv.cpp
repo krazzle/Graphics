@@ -117,31 +117,25 @@ void phil(void) {
   GLfloat trad = degreesToRads * 120;
   
   // rotation matrix for 120 degrees
-  GLfloat** m1 = new GLfloat*[4];
-  int a;
-  for ( a = 0; a < 4; a += 1)
-    m1[a] = new GLfloat[4];
   GLfloat m11[4] = { cos(trad), 0, sin(trad), 0};
   GLfloat m12[4] = { 0, 1, 0, 0};
   GLfloat m13[4] = { -1*sin(trad), 0, cos(trad), 0};
   GLfloat m14[4] = { 0, 0, 0, 1};
-  m1 = { m11, m12, m13, m14};
+  GLfloat *m1[4] = { m11, m12, m13, m14};
   
   // rotation matrix for -120 degrees
-  GLfloat** m2 = new GLfloat*[4];
-  for ( a = 0; a < 4; a += 1)
-    m2[a] = new GLfloat[4];
   GLfloat m21[4] = { cos(-trad), 0, sin(-trad), 0};
   GLfloat m22[4] = { 0, 1, 0, 0};
   GLfloat m23[4] = { -sin(-trad), 0, cos(-trad), 0};
   GLfloat m24[4] = { 0, 0, 0, 1};
-  m2 = { m21, m22, m23, m24};
+  GLfloat *m2[4] = { m21, m22, m23, m24};
   
   // vector for an arbritray point in cpts
-  GLfloat** v = new GLfloat*[4];
-  for ( a = 0; a < 4; a += 1) 
-    v[a] = new GLfloat[1];
-  v[0][3] = 1.0;
+  GLfloat v1[1] = {0};
+  GLfloat v2[1] = {0};
+  GLfloat v3[1] = {0};
+  GLfloat v4[1] = {1};
+  GLfloat *v[4] = { v1, v2, v3, v4};
   
   int i, j;
   for ( i = 0; i < ncpts; i += 1) { 
@@ -171,8 +165,7 @@ void phil(void) {
     cpts[i][2][2] = v[0][2];
   }
   
-
-		   		   
+  display();
 }
 
 void displayPointsAndLines(){

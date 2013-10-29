@@ -9,7 +9,7 @@
 
 #include "common.h"
 //#include "drawplant.h"
-#include "readppm.h"
+//#include "readppm.h"
 
 #include "helper.h"
 
