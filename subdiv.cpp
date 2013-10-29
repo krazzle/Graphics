@@ -19,6 +19,8 @@
 #include "drawing.h"
 #include "data.h"
 
+#include "helper.cpp"
+
 /* GLOBAL VARAIBLES */
 /* (storage is actually allocated here) */
 int W=400;		/* window width */
@@ -45,6 +47,7 @@ void myKeyHandler(unsigned char ch, int x, int y);
 void myMouseButton(int button, int state, int x, int y);
 void endSubdiv(int status);
 void displayPointsAndLines();
+void phil(void);
 
 int main (int argc, char** argv) {
   glutInit(&argc,argv);
@@ -111,46 +114,63 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 void phil(void) {
   
   GLfloat degreesToRads = (1*3.141592654)/180;
-  GLfloat rX = x*degreesToRads;
-  GLfloat rY = y*degreesToRads;
-  GLfloat rZ = z*degreesToRads;
-
-  Glfloat trad = degreeToRads * 120;
+  GLfloat trad = degreesToRads * 120;
   
+  // rotation matrix for 120 degrees
   GLfloat** m1 = new GLfloat*[4];
   int a;
   for ( a = 0; a < 4; a += 1)
     m1[a] = new GLfloat[4];
-  m1[0] = { cos(trad), 0, sin(trad), 0};
-  m1[1] = { 0, 1, 0, 0};
-  m1[2] = { -1*sin(trad), 0, cos(trad), 0};
-  m1[3] = { 0, 0, 0, 1}
-
+  GLfloat m11[4] = { cos(trad), 0, sin(trad), 0};
+  GLfloat m12[4] = { 0, 1, 0, 0};
+  GLfloat m13[4] = { -1*sin(trad), 0, cos(trad), 0};
+  GLfloat m14[4] = { 0, 0, 0, 1};
+  m1 = { m11, m12, m13, m14};
+  
+  // rotation matrix for -120 degrees
   GLfloat** m2 = new GLfloat*[4];
   for ( a = 0; a < 4; a += 1)
     m2[a] = new GLfloat[4];
-  m2[0] = { cos(-trad), 0, sin(-trad), 0};
-  m2[1] = { 0, 1, 0, 0};
-  m2[2] = { -sin(-trad), 0, cos(-trad), 0};
-  m2[3] = { 0, 0, 0, 1}
-
-  GLfloat** v = newGLfloat*[4];
+  GLfloat m21[4] = { cos(-trad), 0, sin(-trad), 0};
+  GLfloat m22[4] = { 0, 1, 0, 0};
+  GLfloat m23[4] = { -sin(-trad), 0, cos(-trad), 0};
+  GLfloat m24[4] = { 0, 0, 0, 1};
+  m2 = { m21, m22, m23, m24};
+  
+  // vector for an arbritray point in cpts
+  GLfloat** v = new GLfloat*[4];
   for ( a = 0; a < 4; a += 1) 
     v[a] = new GLfloat[1];
-  v[3] = 1;
+  v[0][3] = 1.0;
+  
   int i, j;
-  for ( i = 0; i < nctps; i += 1) { 
+  for ( i = 0; i < ncpts; i += 1) { 
+    // get point
+    v[0][0] = cpts[i][0][0];
+    v[0][1] = cpts[i][0][1];
+    v[0][2] = cpts[i][0][2];
 
-      v[0] = cpts[i][1][0];
-      v[1] = cpts[i][1][1];
-      v[2] = cpts[i][1][2];
-      GLfloat** result = multiply(4, 4, m1, 4, 1, v);
-      
-      
+    // rotate by m1, which is 120 degrees
+    GLfloat** result = multiply(4, 4, m1, 4, 1, v);
+    // put it back in there after rotated
+    cpts[i][1][0] = v[0][0];
+    cpts[i][1][1] = v[0][1];
+    cpts[i][1][2] = v[0][2];
 
-
+    // get point
+    v[0][0] = cpts[i][0][0];
+    v[0][1] = cpts[i][0][1];
+    v[0][2] = cpts[i][0][2];
+    
+    // rotate by m2, which is -120 degrees
+    result = multiply(4, 4, m2, 4, 1, v);
+    
+    // put it back in there after rotated
+    cpts[i][2][0] = v[0][0];
+    cpts[i][2][1] = v[0][1];
+    cpts[i][2][2] = v[0][2];
   }
-
+  
 
 		   		   
 }

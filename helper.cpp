@@ -8,7 +8,7 @@
 #include <iostream>
 
 #include "common.h"
-#include "drawplant.h"
+//#include "drawplant.h"
 #include "readppm.h"
 
 #include "helper.h"
