@@ -110,20 +110,49 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 
 void phil(void) {
   
-  GLfloat ** m = new GLfloat*[4];
+  GLfloat degreesToRads = (1*3.141592654)/180;
+  GLfloat rX = x*degreesToRads;
+  GLfloat rY = y*degreesToRads;
+  GLfloat rZ = z*degreesToRads;
+
+  Glfloat trad = degreeToRads * 120;
+  
+  GLfloat** m1 = new GLfloat*[4];
   int a;
   for ( a = 0; a < 4; a += 1)
-    m[a] = new GLfloat[4];
-  m[0][0] = cos(
+    m1[a] = new GLfloat[4];
+  m1[0] = { cos(trad), 0, sin(trad), 0};
+  m1[1] = { 0, 1, 0, 0};
+  m1[2] = { -1*sin(trad), 0, cos(trad), 0};
+  m1[3] = { 0, 0, 0, 1}
 
+  GLfloat** m2 = new GLfloat*[4];
+  for ( a = 0; a < 4; a += 1)
+    m2[a] = new GLfloat[4];
+  m2[0] = { cos(-trad), 0, sin(-trad), 0};
+  m2[1] = { 0, 1, 0, 0};
+  m2[2] = { -sin(-trad), 0, cos(-trad), 0};
+  m2[3] = { 0, 0, 0, 1}
 
-  int i;
+  GLfloat** v = newGLfloat*[4];
+  for ( a = 0; a < 4; a += 1) 
+    v[a] = new GLfloat[1];
+  v[3] = 1;
+  int i, j;
   for ( i = 0; i < nctps; i += 1) { 
-    
-    
-    
-    
+
+      v[0] = cpts[i][1][0];
+      v[1] = cpts[i][1][1];
+      v[2] = cpts[i][1][2];
+      GLfloat** result = multiply(4, 4, m1, 4, 1, v);
+      
+      
+
+
   }
+
+
+		   		   
 }
 
 void displayPointsAndLines(){
