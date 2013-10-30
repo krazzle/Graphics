@@ -99,7 +99,10 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 			endSubdiv(0);
 			break;
 	case 'w': 
-	  phil();
+	  if( ncpts >= 5) 
+	    phil();
+	  else
+	    printf("include at least five points\n");
 	  break;
 		default:
 			/* Unrecognized keypress */
@@ -113,6 +116,8 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 
 void phil(void) {
   
+  printf("in phil\n");
+
   GLfloat degreesToRads = (1*3.141592654)/180;
   GLfloat trad = degreesToRads * 120;
   
@@ -136,16 +141,21 @@ void phil(void) {
   GLfloat v3[1] = {0};
   GLfloat v4[1] = {1};
   GLfloat *v[4] = { v1, v2, v3, v4};
-  
+
   int i, j;
   for ( i = 0; i < ncpts; i += 1) { 
+    
+    printf("ncpts: %d\n", i);
+
     // get point
     v[0][0] = cpts[i][0][0];
-    v[0][1] = cpts[i][0][1];
-    v[0][2] = cpts[i][0][2];
+    v[1][0] = cpts[i][0][1];
+    v[2][0] = cpts[i][0][2];
 
     // rotate by m1, which is 120 degrees
+    printf("first multiplay start\n");
     GLfloat** result = multiply(4, 4, m1, 4, 1, v);
+    printf("first multiply end\n");
     // put it back in there after rotated
     cpts[i][1][0] = v[0][0];
     cpts[i][1][1] = v[0][1];
@@ -153,19 +163,31 @@ void phil(void) {
 
     // get point
     v[0][0] = cpts[i][0][0];
-    v[0][1] = cpts[i][0][1];
-    v[0][2] = cpts[i][0][2];
+    v[1][0] = cpts[i][0][1];
+    v[2][0] = cpts[i][0][2];
+    v[3][0] = 1;
+    
+    int f,g,h;
+    for ( f = 0; f < 4; f += 1) {
+      for ( g = 0; g < 1; g += 1) {
+	printf("%d %d %d\n", f, g, v[f][g]);
+      }
+    }
     
     // rotate by m2, which is -120 degrees
+    printf("second multiply start\n");
     result = multiply(4, 4, m2, 4, 1, v);
-    
+    printf("second multiply end\n");
     // put it back in there after rotated
     cpts[i][2][0] = v[0][0];
     cpts[i][2][1] = v[0][1];
     cpts[i][2][2] = v[0][2];
   }
   
+  printf("about to display\n");
   display();
+  printf("out of display\n");
+  printf("out of phil\n");
 }
 
 void displayPointsAndLines(){

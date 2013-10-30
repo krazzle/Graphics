@@ -16,6 +16,8 @@
 using namespace std;
 
 GLfloat**  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2Columns, GLfloat **m2) { 
+
+  printf("aaaaa\n");
   
   //GLfloat **result = (GLfloat**)malloc(m1Columns*m2Rows*sizeof(GLfloat));
   GLfloat ** result = new GLfloat*[m1Rows];
@@ -40,6 +42,8 @@ GLfloat**  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2
       result[i][x] = val;
     }
   }
+
+  printf("bbbbb\n");
   return result;
 }
 
