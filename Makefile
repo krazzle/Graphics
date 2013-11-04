@@ -1,7 +1,7 @@
 ###########################################################
 # Project 1 Makefile
 
-CC = gcc
+CC = g++
 CFLAGS = -Wall -ggdb
 INCLUDE = -I/lusr/X11/include -I/lusr/include
 LIBDIR = -L/lusr/X11/lib -L/lusr/lib
