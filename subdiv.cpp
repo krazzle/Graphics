@@ -337,7 +337,7 @@ void displayRotatedPointsAndLines(){
 
 	if ( drawStyleState == 1 && faceOrPoints == 0) {
 	  for(i = 0; i < 3; i++){
-	    glBegin(GL_LINE_STRIP);
+	    glBegin(GL_LINE_LOOP);
 	    for(j = 0; j < totalPoints*offset;j+=offset){
 	        glVertex3fv(cpts[j][i]);
 	    }
@@ -345,7 +345,7 @@ void displayRotatedPointsAndLines(){
 	  }
 
           for (i = 0; i < totalPoints*offset; i+=offset) {
-	    glBegin(GL_LINE_STRIP);
+	    glBegin(GL_LINE_LOOP);
 	    for (j = 0; j < 3; j++){
 	        glVertex3fv(cpts[i][j]);
 	    }
