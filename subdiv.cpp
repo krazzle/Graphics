@@ -18,8 +18,13 @@
 #include "common.h"
 #include "drawing.h"
 #include "data.h"
-
+//#include "mouse.h" 
 #include "helper.cpp"
+
+
+#define MOUSE_ROTATE_YX                0
+#define MOUSE_ROTATE_YZ                1
+#define MOUSE_ZOOM                        2
 
 /* GLOBAL VARAIBLES */
 /* (storage is actually allocated here) */
@@ -37,6 +42,10 @@ GLfloat fbottom = -40.0;
 GLfloat ftop    =  40.0;
 GLfloat zNear   =  40.0;
 GLfloat zFar    = -40.0;
+GLfloat zoomFactor = 1.0;
+int mouse_mode = 0;
+int m_last_x = 0;
+int m_last_y = 0;
 
 GLfloat cpts[960][3*32][3];
 int ncpts = 0;
@@ -51,6 +60,7 @@ void init(void);
 void display(void);
 void myKeyHandler(unsigned char ch, int x, int y);
 void myMouseButton(int button, int state, int x, int y);
+void myMouseMotion(int x, int y);
 void endSubdiv(int status);
 void displayPointsAndLines();
 void displayRotatedPointsAndLines();
@@ -67,6 +77,7 @@ int main (int argc, char** argv) {
   glutDisplayFunc(display);
   glutKeyboardFunc(myKeyHandler);
   glutMouseFunc(myMouseButton);
+  glutMotionFunc(myMouseMotion);
   glutMainLoop();
   return 0;
 }
@@ -357,46 +368,48 @@ void displayRotatedPointsAndLines(){
 	//glEnd();
 }
 
+void myMouseButton(int button, int state, int x, int y) {
+        if (state == GLUT_DOWN) {
+                if(threeDmode == 0){
+                        if (button == GLUT_RIGHT_BUTTON) {
+                                ncpts += -1;
+                                totalPoints = ncpts;
+                        } else {
+                                if((x < ((W/2) + 5)) && (x > ((W/2) - 5)))
+                                x = W/2;
 
-void myMouseButton(int button, int state, int x, int y) { 
-	float wx, wy;
+                                GLfloat wx = (2.0 * x) / (float)(W - 1) - 1.0;
+                                GLfloat wy = (2.0 * (H - 1 - y)) / (float)(H - 1) - 1.0;
 
-    /* We are only interested in left clicks */
+                                wx*= fright;
+                                wy*= ftop;
+                                if (ncpts == 30)
+                                        return;
+                                cpts[ncpts*offset][0][0] = wx;
+                                cpts[ncpts*offset][0][1] = wy;
+                                cpts[ncpts*offset][0][2] = 0.0;
+                                ncpts++;
+                                totalPoints = ncpts;
+                        }
+                        glFlush();
+                        display();
+                }
+                else{
+                        m_last_x = x;
+                        m_last_y = y;
 
-	//    	if (button != GLUT_LEFT_BUTTON || state != GLUT_DOWN)
-	//		return;
-	if (state != GLUT_DOWN)
-	  return;
-	
-	if (button == GLUT_RIGHT_BUTTON) {
-	  ncpts += -1; 
-	  totalPoints = ncpts;
-	}
-	else {
-
-		if((x < ((W/2) + 5)) && (x > ((W/2) - 5)))
-			x = W/2;
-
-    		wx = (2.0 * x) / (float)(W - 1) - 1.0;
-    		wy = (2.0 * (H - 1 - y)) / (float)(H - 1) - 1.0;
-	
-		wx*= fright;
-		wy*= ftop;
-    		if (ncpts == 30)
-        		return;
-    		cpts[ncpts*offset][0][0] = wx;
-    		cpts[ncpts*offset][0][1] = wy;
-    		cpts[ncpts*offset][0][2] = 0.0;
-    		ncpts++;
-		totalPoints = ncpts;
-	}
-
-    /* Draw the point */
-
-    	glFlush();
-
-	display();
+                        if (button == GLUT_LEFT_BUTTON) {
+                                mouse_mode = MOUSE_ROTATE_YX;
+                        } else if (button == GLUT_MIDDLE_BUTTON) {
+                                mouse_mode = MOUSE_ROTATE_YZ;
+                        } else if (button == GLUT_RIGHT_BUTTON) {
+                                mouse_mode = MOUSE_ZOOM;
+                        }
+                }
+        }
 }
+
+
 
 void endSubdiv(int status) {
   printf("\nQuitting subdivision program.\n\n");
@@ -407,3 +420,58 @@ void endSubdiv(int status) {
 
 
 /* end of subdiv.cpp */
+
+
+void myMouseMotion(int x, int y) {
+        double d_x, d_y;        /* The change in x and y since the last callback */
+
+        d_x = x - m_last_x;
+        d_y = y - m_last_y;
+
+        m_last_x = x;
+        m_last_y = y;
+
+        if (mouse_mode == MOUSE_ROTATE_YX) {
+                /* scaling factors */
+                d_x /= 2.0;
+                d_y /= 2.0;
+
+                glRotatef(d_x, 0.0, 1.0, 0.0);        /* y-axis rotation */
+                glRotatef(-d_y, 1.0, 0.0, 0.0);        /* x-axis rotation */
+
+        } else if (mouse_mode == MOUSE_ROTATE_YZ) {
+                /* scaling factors */
+                d_x /= 2.0;
+                d_y /= 2.0;
+
+                glRotatef(d_x, 0.0, 1.0, 0.0);        /* y-axis rotation */
+                glRotatef(-d_y, 0.0, 0.0, 1.0);        /* z-axis rotation */
+
+        } else if (mouse_mode == MOUSE_ZOOM) {
+                d_y /= 100.0;
+
+                zoomFactor += d_y;
+
+                if (zoomFactor <= 0.0) {
+                        /* The zoom factor should be positive */
+                        zoomFactor = 0.001;
+                }
+
+                glMatrixMode(GL_PROJECTION);
+                glLoadIdentity();
+
+                /*
+                 * glFrustum must receive positive values for the near and far
+                 * clip planes ( arguments 5 and 6 ).
+                 */
+                glFrustum(fleft*zoomFactor, fright*zoomFactor,
+                        fbottom*zoomFactor, ftop*zoomFactor,
+                        -zNear, -zFar);
+        }
+
+        /* Redraw the screen */
+        glutPostRedisplay();
+}
+
+
+
