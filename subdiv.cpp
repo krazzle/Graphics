@@ -160,22 +160,26 @@ void VerticalSubdivide(){
 	numOfVerticalSubs++;
 	int old_offset = offset;
 	offset/=2;
+	totalPoints = (2*totalPoints -1);
 	int i;
 	for(i = 0;i < totalPoints*offset; i+=offset){
 		//if((i +old_offset) >= ncpts*32)
-		//	continue;	
+		//	continue;
+		//printf("i: %d offset: %d old_offset: %d\n", i, offset, old_offset);	
 		if((i == 0) | ((i + offset)>= totalPoints*offset))
-			next;
- 		if(old_offset%offset == 0){
+			continue;
+ 		if(i%old_offset == 0){
+		//	printf("replacing new point %d\n", i);
 			//updating old points
-			GLfloat p_1[2] = {cpts[i-old_offset][0][0], cpts[i-old_offset[0][1]};
-			GLfloat p0[2] = {cpts[i][0][0], cpts[i][0][1]};
-			GLfloat p1[2] = {cpts[i+old_offset][0][0], cpts[i+old_offset][0][1]};
-			cpts[i][0][0] = (p_1[0] + (6*p0[0]) + p1[0])/8;
-			cpts[i][0][1] = (p_1[1] + (6*p0[1]) + p1[1])/8;
+			GLfloat p0[2] = {cpts[i - old_offset][0][0], cpts[i - old_offset][0][1]};
+			GLfloat p1[2] = {cpts[i][0][0], cpts[i][0][1]};
+			GLfloat p2[2] = {cpts[i+old_offset][0][0], cpts[i+old_offset][0][1]};
+			cpts[i][0][0] = (p0[0] + (6*p1[0]) + p2[0])/8;
+			cpts[i][0][1] = (p0[1] + (6*p1[1]) + p2[1])/8;
 		}
 		else{
 			//adding new points
+		//	printf("adding new point %d\n", i);
 			GLfloat p0[2] = {cpts[i - offset][0][0], cpts[i-offset][0][1]};
 			GLfloat p1[2] = {cpts[i + offset][0][0], cpts[i + offset][0][1]};
 			cpts[i][0][0] = ((4*p0[0]) + (4*p1[0]))/8;
@@ -183,7 +187,7 @@ void VerticalSubdivide(){
 		}
 	}
 	phil();
-	totalPoints = (2*totalPoints -1);
+	//totalPoints = (2*totalPoints -1);
 }
 
 
