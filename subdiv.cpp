@@ -38,7 +38,7 @@ GLfloat ftop    =  40.0;
 GLfloat zNear   =  40.0;
 GLfloat zFar    = -40.0;
 
-GLfloat cpts[960][3][3];
+GLfloat cpts[960][3*32][3];
 int ncpts = 0;
 int totalPoints = ncpts;
 int threeDmode = 0;
@@ -148,6 +148,12 @@ void myKeyHandler(unsigned char ch, int x, int y) {
   return;
 }
 
+void HorizontalSubdivide(){
+
+
+
+}
+
 void VerticalSubdivide(){
 	if(numOfVerticalSubs == 5)
 		return;
@@ -155,19 +161,29 @@ void VerticalSubdivide(){
 	int old_offset = offset;
 	offset/=2;
 	int i;
-	for(i = 0;i < ncpts*32; i+=old_offset){
-		if((i +old_offset) >= ncpts*32)
-			continue;
-	
-		
- 
-		cpts[i+offset][0][0] = (cpts[i][0][0] + cpts[i+old_offset][0][0])/2;
-		cpts[i+offset][0][1] = (cpts[i][0][1] + cpts[i+old_offset][0][1])/2;
-		cpts[i+offset][0][2] = (cpts[i][0][2] + cpts[i+old_offset][0][2])/2;
+	for(i = 0;i < totalPoints*offset; i+=offset){
+		//if((i +old_offset) >= ncpts*32)
+		//	continue;	
+		if((i == 0) | ((i + offset)>= totalPoints*offset))
+			next;
+ 		if(old_offset%offset == 0){
+			//updating old points
+			GLfloat p_1[2] = {cpts[i-old_offset][0][0], cpts[i-old_offset[0][1]};
+			GLfloat p0[2] = {cpts[i][0][0], cpts[i][0][1]};
+			GLfloat p1[2] = {cpts[i+old_offset][0][0], cpts[i+old_offset][0][1]};
+			cpts[i][0][0] = (p_1[0] + (6*p0[0]) + p1[0])/8;
+			cpts[i][0][1] = (p_1[1] + (6*p0[1]) + p1[1])/8;
+		}
+		else{
+			//adding new points
+			GLfloat p0[2] = {cpts[i - offset][0][0], cpts[i-offset][0][1]};
+			GLfloat p1[2] = {cpts[i + offset][0][0], cpts[i + offset][0][1]};
+			cpts[i][0][0] = ((4*p0[0]) + (4*p1[0]))/8;
+			cpts[i][0][1] = ((4*p0[1]) + (4*p1[1]))/8;	
+		}
 	}
 	phil();
 	totalPoints = (2*totalPoints -1);
-	//printf("total points changed to %d\n", totalPoints);
 }
 
 
