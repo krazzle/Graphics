@@ -47,13 +47,14 @@ int mouse_mode = 0;
 int m_last_x = 0;
 int m_last_y = 0;
 
-GLfloat cpts[960][3*32][3];
+GLfloat cpts[30*32][3][3];
 int ncpts = 0;
 int totalPoints = ncpts;
 int threeDmode = 0;
 int numOfVerticalSubs = 1;
-int numOfHorizontalSubs = 0;
+int numOfHorizontalSubs = 1;
 int offset = 32;
+int Hoffset = 32;
 
 /* local function declarations */
 void init(void);
@@ -64,7 +65,7 @@ void myMouseMotion(int x, int y);
 void endSubdiv(int status);
 void displayPointsAndLines();
 void displayRotatedPointsAndLines();
-void phil(void);
+void phil(GLfloat theta, int horiz_loc);
 void VerticalSubdivide();
 
 int main (int argc, char** argv) {
@@ -128,7 +129,8 @@ void myKeyHandler(unsigned char ch, int x, int y) {
   case 'w': 
     if ( ncpts >= 5) {
       threeDmode = 1;
-      phil();
+      phil(120, 1);
+      phil(-120, 2);
     } else
       printf("include at least five points\n");
     break;
@@ -160,9 +162,10 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 }
 
 void HorizontalSubdivide(){
-
-
-
+	//current number of horizontal subdivisions = 3
+	//afterward we want 6. right? 
+	//then 12
+	//then	
 }
 
 void VerticalSubdivide(){
@@ -197,17 +200,16 @@ void VerticalSubdivide(){
 			cpts[i][0][1] = ((4*p0[1]) + (4*p1[1]))/8;	
 		}
 	}
-	phil();
+	phil(120, 1);
+	phil(-120, 2);
 	//totalPoints = (2*totalPoints -1);
 }
 
 
-void phil(void) {
-  
- // printf("in phil\n");
+void phil(GLfloat theta, int horiz_loc ) {
 
   GLfloat degreesToRads = (1*3.141592654)/180;
-  GLfloat trad = degreesToRads * 120;
+  GLfloat trad = degreesToRads * theta;
   
   // rotation matrix for 120 degrees
   GLfloat m11[4] = { cos(trad), 0, sin(trad), 0};
@@ -217,13 +219,6 @@ void phil(void) {
   GLfloat *m1[4] = { m11, m12, m13, m14};
   
   // rotation matrix for -120 degrees
-  GLfloat m21[4] = { cos(-trad), 0, sin(-trad), 0};
-  GLfloat m22[4] = { 0, 1, 0, 0};
-  GLfloat m23[4] = { -sin(-trad), 0, cos(-trad), 0};
-  GLfloat m24[4] = { 0, 0, 0, 1};
-  GLfloat *m2[4] = { m21, m22, m23, m24};
-  
-  // vector for an arbritray point in cpts
   GLfloat v1[1] = {0};
   GLfloat v2[1] = {0};
   GLfloat v3[1] = {0};
@@ -232,9 +227,6 @@ void phil(void) {
 
   int i, j;
   for ( i = 0; i < ncpts*32; i += offset) { 
-   
-    //printf("ncpts: %d\n", i);
-
     // get point
     v[0][0] = cpts[i][0][0];
     v[1][0] = cpts[i][0][1];
@@ -242,36 +234,14 @@ void phil(void) {
     v[3][0] = 1;
 
     // rotate by m1, which is 120 degrees
-   // printf("first multiplay start\n");
     GLfloat** result = multiply(4, 4, m1, 4, 1, v);
-   // printf("first multiply end\n");
+  
     // put it back in there after rotated
-    cpts[i][1][0] = result[0][0];
-    cpts[i][1][1] = result[1][0];
-    cpts[i][1][2] = result[2][0];
-
-    // get point
-    v[0][0] = cpts[i][0][0];
-    v[1][0] = cpts[i][0][1];
-    v[2][0] = cpts[i][0][2];
-    v[3][0] = 1;
-    
-    
-    // rotate by m2, which is -120 degrees
-    //printf("second multiply start\n");
-    result = multiply(4, 4, m2, 4, 1, v);
-    //printf("second multiply end\n");
-    // put it back in there after rotated
-    cpts[i][2][0] = result[0][0];
-    cpts[i][2][1] = result[1][0];
-    cpts[i][2][2] = result[2][0];
+    cpts[i][horiz_loc][0] = result[0][0];
+    cpts[i][horiz_loc][1] = result[1][0];
+    cpts[i][horiz_loc][2] = result[2][0];
   }
-  
-  
-  //printf("about to display\n");
   display();
-  //printf("out of display\n");
-  //printf("out of phil\n");
 }
 
 void displayPointsAndLines(){
@@ -337,7 +307,7 @@ void displayRotatedPointsAndLines(){
 
 	if ( drawStyleState == 1 && faceOrPoints == 0) {
 	  for(i = 0; i < 3; i++){
-	    glBegin(GL_LINE_LOOP);
+	    glBegin(GL_LINE_STRIP);
 	    for(j = 0; j < totalPoints*offset;j+=offset){
 	        glVertex3fv(cpts[j][i]);
 	    }
@@ -423,6 +393,9 @@ void endSubdiv(int status) {
 
 
 void myMouseMotion(int x, int y) {
+	if(threeDmode == 0)
+		return;
+
         double d_x, d_y;        /* The change in x and y since the last callback */
 
         d_x = x - m_last_x;
