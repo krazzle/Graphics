@@ -343,7 +343,9 @@ void displayRotatedPointsAndLines(){
 	params[2] = .5;
 	glLightModelfv( GL_LIGHT_MODEL_AMBIENT, params);	
 	// material!
-	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 50);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 128);
+	// wut
+	glEnable(GL_NORMALIZE);
 
 
 	if ( drawStyleState == 0 && faceOrPoints == 0) {
