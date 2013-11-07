@@ -107,12 +107,7 @@ void init() {
 void display() {
   glEnable(GL_DEPTH_TEST);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  GLfloat lightpos[] = {0, 10, 0, 0};
-  glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
-  
+   
   /*
    * See drawing.c for the definition of these routines.
    *
@@ -334,6 +329,18 @@ void displayRotatedPointsAndLines(){
 	glColor3f(1.0,0.0,0.0);
 	glPointSize(5);
 	int i,j;	
+
+	
+	GLfloat params[3];
+	params[0] = .5;
+	params[1] = .5;
+	params[2] = 0;
+	glLightModelfv( GL_LIGHT_MODEL_AMBIENT, params);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	GLfloat lightpos[] = {0, 0, 10, 0};
+	glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
+	
 
 	if ( drawStyleState == 0 && faceOrPoints == 0) {
 	  	for( i = 0; i < totalPoints*offset; i+=offset){
