@@ -331,12 +331,20 @@ void displayRotatedPointsAndLines(){
 	int i,j;	
 
 	// lighting!
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	// position!
-	GLfloat lightpos[] = {0, 0, 10, 0};
-	glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
-	// colors!
+	GLfloat pos[] = {0, 0, -10};
+	glLightfv(GL_LIGHT0, GL_POSITION, pos);
+	// colors (get rid of one)
+	GLfloat whiteDiffuseLight[] = {1.0, 1.0, 1.0};
+	GLfloat blueAmbientLight[] = {0, 0, 1.0};
+	GLfloat whiteSpecularLight[] = {1.0, 1.0, 1.0};
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteDiffuseLight);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, blueAmbientLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, whiteSpecularLight);
+	// colors (get rid of one)
 	GLfloat params[3];
 	params[0] = .5;
 	params[1] = 0;
@@ -348,6 +356,9 @@ void displayRotatedPointsAndLines(){
 	glEnable(GL_NORMALIZE);
 
 
+
+
+
 	if ( drawStyleState == 0 && faceOrPoints == 0) {
 	  	for( i = 0; i < totalPoints*offset; i+=offset){
 			for(j = 0; j < hCount*hOffset; j += hOffset){
@@ -357,7 +368,7 @@ void displayRotatedPointsAndLines(){
 					glBegin(GL_POLYGON);
 					GLfloat normal[3];
 					getNormal((GLfloat*)normal, (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i][j+hOffset]), (GLfloat*)(cpts[i+offset][j+hOffset]));
-					glNormal3d(normal[0], normal[1], normal[2]);
+					glNormal3f(normal[0], normal[1], normal[2]);
 					glVertex3fv(cpts[i][j]);
 					glVertex3fv(cpts[i][j+hOffset]);
 					glVertex3fv(cpts[i+offset][j+hOffset]);
@@ -367,7 +378,7 @@ void displayRotatedPointsAndLines(){
 					glBegin(GL_POLYGON);
 					GLfloat normal[3];
 					getNormal((GLfloat*)normal, (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i+offset][j]), (GLfloat*)(cpts[i+offset][0]));
-					glNormal3d(normal[0], normal[1], normal[2]);
+					glNormal3f(normal[0], normal[1], normal[2]);
 					glVertex3fv(cpts[i][j]);
 					glVertex3fv(cpts[i+offset][j]);
 					glVertex3fv(cpts[i+offset][0]);
@@ -427,7 +438,7 @@ void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c) {
   
   v2[0] = a[0] - c[0];
   v2[1] = a[1] - c[1];
-  v2[2] = a[2] - a[3];
+  v2[2] = a[2] - c[2];
 
   GLfloat normal[3];
   crossProduct( (GLfloat*)normal, (GLfloat*)v1, (GLfloat*)v2);
