@@ -69,13 +69,13 @@ void displayRotatedPointsAndLines();
 void phil(GLfloat theta, int horiz_loc);
 void VerticalSubdivide();
 void HorizontalSubdivide();
-<<<<<<< HEAD
+
 void resetAll();
-=======
+
 void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c);
 void crossProduct(GLfloat* result ,GLfloat* a, GLfloat*b);
 
->>>>>>> 5ba8b1bcd2ac42a1763648978e5fe6694360f174
+
 int main (int argc, char** argv) {
   glutInit(&argc,argv);
   glutInitWindowSize(W, H);
@@ -141,7 +141,7 @@ void myKeyHandler(unsigned char ch, int x, int y) {
     if ( ncpts >= 5) {
       threeDmode = 1;
       phil(120, 64);
-      phil(-120, 64);
+      phil(-120, 128);
     } else
       printf("include at least five points\n");
     break;
@@ -370,7 +370,7 @@ void displayRotatedPointsAndLines(){
 	  	for(i = 0; i < hCount*hOffset; i+=hOffset){
 	    		glBegin(GL_LINE_STRIP);
 	   	 	for(j = 0; j < totalPoints*offset;j+=offset){ 
-//				printf(" cpts[%d][%d]: (%f,%f,%f)", j, i, cpts[j][i][0], cpts[j][i][1], cpts[j][i][2]);
+//				printf(" cpts[%d][%d]: (%f,%f,%f)\n", j, i, cpts[j][i][0], cpts[j][i][1], cpts[j][i][2]);
 	        		glVertex3fv(cpts[j][i]);
 	    		}
 	    		glEnd();
