@@ -167,7 +167,10 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 }
 
 void HorizontalSubdivide(){
-
+  if(numOfHorizontalSubs == 6)
+     return;
+   numOfHorizontalSubs++;
+  
   int oldHOffset = hOffset;
   hOffset /= 2;
   hCount *= 2;
@@ -176,17 +179,18 @@ void HorizontalSubdivide(){
   
   int i;
   for ( i = hOffset; i < hCount*hOffset; i += oldHOffset) {
+    printf("filling in location %d with degree %f\n", i, theta);
     phil(theta, i);
     theta += thetaOffset*2;
   }
   
   
   
-  
+ printf("new hCount = %d new hOffset = %d\n", hCount, hOffset); 
 }
 
 void VerticalSubdivide(){
-	if(numOfVerticalSubs == 5)
+	if(numOfVerticalSubs == 6)
 		return;
 	numOfVerticalSubs++;
 	int old_offset = offset;
@@ -323,22 +327,24 @@ void displayRotatedPointsAndLines(){
 	  }
 	}
 
+	printf("hCount: %d hOffset: %d\n");
 	if ( drawStyleState == 1 && faceOrPoints == 0) {
-	  for(i = 0; i < hCount; i++){
+	  for(i = 0; i < hCount; i+=hOffset){
 	    glBegin(GL_LINE_STRIP);
 	    for(j = 0; j < totalPoints*offset;j+=offset){
+		printf("i: %d j: %d cpts[%d][%d] = (%f,%f,%f)\n", i, j, j, i, cpts[j][i][0], cpts[j][i][1], cpts[j][i][2]); 
 	        glVertex3fv(cpts[j][i]);
 	    }
 	    glEnd();
 	  }
 
-          for (i = 0; i < totalPoints*offset; i+=offset) {
+         /* for (i = 0; i < totalPoints*offset; i+=offset) {
 	    glBegin(GL_LINE_LOOP);
-	    for (j = 0; j < 3; j++){
+	    for (j = 0; j < hCount; j+=hOffset){
 	        glVertex3fv(cpts[i][j]);
 	    }
 	    glEnd();
-	  }
+	  }*/
 	}
 
 	if ( drawStyleState == 0 && faceOrPoints == 1 
@@ -347,7 +353,7 @@ void displayRotatedPointsAndLines(){
 	  //glBegin(GL_POINTS);
 	  for (i = 0; i < ncpts*32; i+=offset) {
 	    glBegin(GL_POINTS);
-	    for (j = 0; j < 3; j++) {	
+	    for (j = 0; j < hCount; j+=hOffset) {	
 	      glVertex3fv(cpts[i][j]);
 	    }
 	    glEnd();
