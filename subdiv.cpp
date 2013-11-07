@@ -107,12 +107,7 @@ void init() {
 void display() {
   glEnable(GL_DEPTH_TEST);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  GLfloat lightpos[] = {0, 10, 0, 0};
-  glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
-  
+   
   /*
    * See drawing.c for the definition of these routines.
    *
@@ -335,6 +330,18 @@ void displayRotatedPointsAndLines(){
 	glPointSize(5);
 	int i,j;	
 
+	
+	GLfloat params[3];
+	params[0] = .5;
+	params[1] = .5;
+	params[2] = 0;
+	glLightModelfv( GL_LIGHT_MODEL_AMBIENT, params);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	GLfloat lightpos[] = {0, 0, 10, 0};
+	glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
+	
+
 	if ( drawStyleState == 0 && faceOrPoints == 0) {
 	  	for( i = 0; i < totalPoints*offset; i+=offset){
 			for(j = 0; j < hCount*hOffset; j += hOffset){
@@ -344,7 +351,7 @@ void displayRotatedPointsAndLines(){
 					glBegin(GL_POLYGON);
 					GLfloat normal[3];
 					getNormal((GLfloat*)normal, (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i][j+hOffset]), (GLfloat*)(cpts[i+offset][j+hOffset]));
-					glNormal3d(normal[0], normal[1], normal[2]);
+					glNormal3f(normal[0], normal[1], normal[2]);
 					glVertex3fv(cpts[i][j]);
 					glVertex3fv(cpts[i][j+hOffset]);
 					glVertex3fv(cpts[i+offset][j+hOffset]);
@@ -354,7 +361,7 @@ void displayRotatedPointsAndLines(){
 					glBegin(GL_POLYGON);
 					GLfloat normal[3];
 					getNormal((GLfloat*)normal, (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i+offset][j]), (GLfloat*)(cpts[i+offset][0]));
-					glNormal3d(normal[0], normal[1], normal[2]);
+					glNormal3f(normal[0], normal[1], normal[2]);
 					glVertex3fv(cpts[i][j]);
 					glVertex3fv(cpts[i+offset][j]);
 					glVertex3fv(cpts[i+offset][0]);
