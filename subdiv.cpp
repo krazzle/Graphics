@@ -330,17 +330,21 @@ void displayRotatedPointsAndLines(){
 	glPointSize(5);
 	int i,j;	
 
-	
-	GLfloat params[3];
-	params[0] = .5;
-	params[1] = .5;
-	params[2] = 0;
-	glLightModelfv( GL_LIGHT_MODEL_AMBIENT, params);
+	// lighting!
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+	// position!
 	GLfloat lightpos[] = {0, 0, 10, 0};
 	glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
-	
+	// colors!
+	GLfloat params[3];
+	params[0] = .5;
+	params[1] = 0;
+	params[2] = .5;
+	glLightModelfv( GL_LIGHT_MODEL_AMBIENT, params);	
+	// material!
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 50);
+
 
 	if ( drawStyleState == 0 && faceOrPoints == 0) {
 	  	for( i = 0; i < totalPoints*offset; i+=offset){
