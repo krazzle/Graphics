@@ -47,14 +47,14 @@ int mouse_mode = 0;
 int m_last_x = 0;
 int m_last_y = 0;
 
-GLfloat cpts[30*32][3*32][3];
+GLfloat cpts[30*64][3*64][3];
 int ncpts = 0;
 int totalPoints = ncpts;
 int threeDmode = 0;
-int numOfVerticalSubs = 1;
-int numOfHorizontalSubs = 1;
-int offset = 32;
-int hOffset = 32;
+int numOfVerticalSubs = 0;
+int numOfHorizontalSubs = 0;
+int offset = 64;
+int hOffset = 64;
 int hCount = 3;
 
 /* local function declarations */
@@ -69,6 +69,7 @@ void displayRotatedPointsAndLines();
 void phil(GLfloat theta, int horiz_loc);
 void VerticalSubdivide();
 void HorizontalSubdivide();
+void resetAll();
 int main (int argc, char** argv) {
   glutInit(&argc,argv);
   glutInitWindowSize(W, H);
@@ -90,7 +91,7 @@ void init() {
 	glLoadIdentity();
 	glOrtho(fleft, fright, fbottom, ftop, -zNear, -zFar);
 	hCount = 3;
-	hOffset = 32;	
+	hOffset = 64;	
 //	int i, j;
 //	for(i = 0; i < 960; i++)
 //		for(j = 0; j < 3; j++) 
@@ -131,7 +132,7 @@ void myKeyHandler(unsigned char ch, int x, int y) {
   case 'w': 
     if ( ncpts >= 5) {
       threeDmode = 1;
-      phil(120, 32);
+      phil(120, 64);
       phil(-120, 64);
     } else
       printf("include at least five points\n");
@@ -158,6 +159,9 @@ void myKeyHandler(unsigned char ch, int x, int y) {
     HorizontalSubdivide();
     display();
     break;
+  case 'z':
+    threeDmode = 0;
+    resetAll();
   default:
     /* Unrecognized keypress */
     return;
@@ -165,6 +169,22 @@ void myKeyHandler(unsigned char ch, int x, int y) {
   
   glutPostRedisplay(); 
   return;
+}
+
+void resetAll(){
+	//ncpts = 0;
+	totalPoints = ncpts;
+	threeDmode = 0;
+	numOfVerticalSubs = 1;
+	numOfHorizontalSubs = 1;
+	offset = 64;
+	hOffset = 64;
+	hCount = 3;
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(fleft, fright, fbottom, ftop, -zNear, -zFar);
+	display();
 }
 
 void HorizontalSubdivide(){
@@ -184,10 +204,6 @@ void HorizontalSubdivide(){
     phil(theta, i);
     theta += thetaOffset*2;
   }
-  
-  
-  
- //printf("new hCount = %d new hOffset = %d\n", hCount, hOffset); 
 }
 
 void VerticalSubdivide(){
@@ -255,7 +271,7 @@ void phil(GLfloat theta, int horiz_loc ) {
   GLfloat *v[4] = { v1, v2, v3, v4};
 
   int i, j;
-  for ( i = 0; i < ncpts*32; i += offset) { 
+  for ( i = 0; i < ncpts*64; i += offset) { 
     // get point
     v[0][0] = cpts[i][0][0];
     v[1][0] = cpts[i][0][1];
@@ -284,7 +300,7 @@ void displayPointsAndLines(){
 	glPointSize(5);
 	int i;
 	glBegin(GL_LINE_STRIP);
-        for (i = 0; i < ncpts*32; i+=offset) {
+        for (i = 0; i < ncpts*64; i+=64) {
 	//  printf("%f %f\n", cpts[i][0], cpts[i][1]);
 	  glVertex3fv(cpts[i][0]);
 	}
@@ -292,7 +308,7 @@ void displayPointsAndLines(){
 
 	glColor3f(0.0,0.0,1.0);
 	glBegin(GL_POINTS);
-    	for (i = 0; i < ncpts*32; i+=offset)
+    	for (i = 0; i < ncpts*64; i+=64)
         	glVertex3fv(cpts[i][0]);
     	glEnd();
 }
@@ -315,9 +331,6 @@ void displayRotatedPointsAndLines(){
 				if((i + offset) >= totalPoints*offset)
 					continue;
 				if((j+hOffset) <  hCount*hOffset){
-//					printf("printing polygon from (%d,%d) -> (%d,%d) -> (%d,%d) -> (%d,%d)\n", i, j, i, j+hOffset, i+1, j+hOffset, i+1, j);
-					//attaching the last to the first
-//printf("drawing polygon from (%f,%f,%f) -> (%f,%f,%f) -> (%f,%f,%f) -> (%f,%f,%f)\n", cpts[i][j][0], cpts[i][j][1], cpts[i][j][2], cpts[i][j+hOffset][0], cpts[i][j+hOffset][1], cpts[i][j+hOffset][2], cpts[i+1][j+hOffset][0], cpts[i+1][j+hOffset][1], cpts[i+1][j+hOffset][2], cpts[i+1][j][0], cpts[i+1][j][1], cpts[i+1][j][2]);
 					glBegin(GL_POLYGON);
 					glVertex3fv(cpts[i][j]);
 					glVertex3fv(cpts[i][j+hOffset]);
@@ -325,8 +338,6 @@ void displayRotatedPointsAndLines(){
 					glVertex3fv(cpts[i+offset][j]);
 					glEnd();
 				} else {
-//					printf("printing polygon from (%d,%d) -> (%d,%d) -> (%d,%d) -> (%d,%d)\n", i, j, i+1, j, i+1, 0, i, 0);
-
 					glBegin(GL_POLYGON);
 					glVertex3fv(cpts[i][j]);
 					glVertex3fv(cpts[i+offset][j]);
@@ -349,13 +360,10 @@ void displayRotatedPointsAndLines(){
 	        		glVertex3fv(cpts[j][i]);
 	    		}
 	    		glEnd();
-	  	}
-//		printf("\ndrawing line from: ");
-		
+	 	}		
         	for (i = 0; i < totalPoints*offset; i+=offset) {
 	    		glBegin(GL_LINE_LOOP);
 	    		for (j = 0; j < hCount*hOffset; j+=hOffset){
-//				printf(" cpts[%d][%d]: (%f,%f,%f)", j, i, cpts[j][i][0], cpts[j][i][1], cpts[j][i][2]);
 	        		glVertex3fv(cpts[i][j]);
 	    		}
 	    		glEnd();
@@ -368,7 +376,7 @@ void displayRotatedPointsAndLines(){
 	  glColor3f(0.0,0.0,1.0);
 	  glPointSize(1.0);
 	  //glBegin(GL_POINTS);
-	  for (i = 0; i < ncpts*32; i+=offset) {
+	  for (i = 0; i < totalPoints*offset; i+=offset) {
 	    glBegin(GL_POINTS);
 	    for (j = 0; j < hCount*hOffset; j+=hOffset) {	
 	      glVertex3fv(cpts[i][j]);
