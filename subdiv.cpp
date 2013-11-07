@@ -89,7 +89,8 @@ void init() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(fleft, fright, fbottom, ftop, -zNear, -zFar);
-	
+	hCount = 3;
+	hOffset = 32;	
 //	int i, j;
 //	for(i = 0; i < 960; i++)
 //		for(j = 0; j < 3; j++) 
@@ -327,24 +328,24 @@ void displayRotatedPointsAndLines(){
 	  }
 	}
 
-	printf("hCount: %d hOffset: %d\n");
+//	printf("hCount: %d hOffset: %d\n", hCount, hOffset);
 	if ( drawStyleState == 1 && faceOrPoints == 0) {
-	  for(i = 0; i < hCount; i+=hOffset){
-	    glBegin(GL_LINE_STRIP);
-	    for(j = 0; j < totalPoints*offset;j+=offset){
-		printf("i: %d j: %d cpts[%d][%d] = (%f,%f,%f)\n", i, j, j, i, cpts[j][i][0], cpts[j][i][1], cpts[j][i][2]); 
-	        glVertex3fv(cpts[j][i]);
-	    }
-	    glEnd();
-	  }
+	  	for(i = 0; i < hCount*hOffset; i+=hOffset){
+	    		glBegin(GL_LINE_STRIP);
+	   	 	for(j = 0; j < totalPoints*offset;j+=offset){
+		//		printf("i: %d j: %d cpts[%d][%d] = (%f,%f,%f)\n", i, j, j, i, cpts[j][i][0], cpts[j][i][1], cpts[j][i][2]); 
+	        		glVertex3fv(cpts[j][i]);
+	    		}
+	    		glEnd();
+	  	}
 
-         /* for (i = 0; i < totalPoints*offset; i+=offset) {
-	    glBegin(GL_LINE_LOOP);
-	    for (j = 0; j < hCount; j+=hOffset){
-	        glVertex3fv(cpts[i][j]);
-	    }
-	    glEnd();
-	  }*/
+        	for (i = 0; i < totalPoints*offset; i+=offset) {
+	    		glBegin(GL_LINE_LOOP);
+	    		for (j = 0; j < hCount*hOffset; j+=hOffset){
+	        		glVertex3fv(cpts[i][j]);
+	    		}
+	    		glEnd();
+	  	}
 	}
 
 	if ( drawStyleState == 0 && faceOrPoints == 1 
