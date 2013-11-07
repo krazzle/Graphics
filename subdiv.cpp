@@ -318,6 +318,21 @@ void displayPointsAndLines(){
     	glEnd();
 }
 
+void computeNormals(){
+	for(j = 0; j < hCount*hOffset; j += hOffset){
+		if((i + offset) >= totalPoints*offset)
+			continue;
+		if((j+hOffset) <  hCount*hOffset){
+			GLfloat normal[3];
+			getNormal((GLfloat*)normal, (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i][j+hOffset]), (GLfloat*)(cpts[i+offset][j+hOffset]));
+			glNormal3f(normal[0], normal[1], normal[2]);
+		} else {
+			GLfloat normal[3];
+			getNormal((GLfloat*)normal, (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i+offset][j]), (GLfloat*)(cpts[i+offset][0]));
+			glNormal3f(normal[0], normal[1], normal[2]);
+		}
+	}
+}
 
 void displayRotatedPointsAndLines(){
 	glColor3f(1.0,1.0,1.0);

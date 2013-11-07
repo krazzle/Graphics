@@ -17,18 +17,14 @@ using namespace std;
 
 GLfloat**  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2Columns, GLfloat **m2) { 
 
-  //printf("aaaaa\n");
-  
-  //GLfloat **result = (GLfloat**)malloc(m1Columns*m2Rows*sizeof(GLfloat));
-  GLfloat ** result = new GLfloat*[m1Rows];
-  int s;
-  for ( s = 0; s < m1Rows; s += 1) 
-    result[s] = new GLfloat[m2Columns];
-  // check if valid multiplication
+  GLfloat **result = (GLfloat **)malloc(m1Rows*sizeof(GLfloat*));
+  int i;
+  for(i = 0; i < m1Rows; i++)
+	result[i] = (GLfloat *)malloc(m1Columns*sizeof(GLfloat));
   assert(m1Columns == m2Rows);
   
 // dem loopz
-  int i, x, y;
+  int x, y;
   for( i = 0; i < m1Rows; i += 1) 
   {
     int size = m1Columns;
@@ -37,13 +33,13 @@ GLfloat**  multiply( int m1Rows, int m1Columns, GLfloat **m1, int m2Rows, int m2
       for( y = 0; y < size; y += 1) {
 	GLfloat num1 = m1[i][y];
 	GLfloat num2 = m2[y][x];
-	val += num1*num2;
+	val += num1*num2;	
       }
       result[i][x] = val;
     }
   }
 
- // printf("bbbbb\n");
+ 
   return result;
 }
 
