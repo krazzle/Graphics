@@ -24,7 +24,7 @@
 
 #define MOUSE_ROTATE_YX                0
 #define MOUSE_ROTATE_YZ                1
-#define MOUSE_ZOOM                        2
+#define MOUSE_ZOOM                     2
 
 /* GLOBAL VARAIBLES */
 /* (storage is actually allocated here) */
@@ -175,19 +175,19 @@ void HorizontalSubdivide(){
   int oldHOffset = hOffset;
   hOffset /= 2;
   hCount *= 2;
-  GLfloat thetaOffset = 360/hCount;
+  GLfloat thetaOffset = 360/(GLfloat)hCount;
   GLfloat theta = thetaOffset;
   
   int i;
   for ( i = hOffset; i < hCount*hOffset; i += oldHOffset) {
-    printf("filling in location %d with degree %f\n", i, theta);
+    //printf("filling location %d with angle %f\n", i, theta);
     phil(theta, i);
     theta += thetaOffset*2;
   }
   
   
   
- printf("new hCount = %d new hOffset = %d\n", hCount, hOffset); 
+ //printf("new hCount = %d new hOffset = %d\n", hCount, hOffset); 
 }
 
 void VerticalSubdivide(){
@@ -223,8 +223,14 @@ void VerticalSubdivide(){
 		}
 
 	}
-	phil(120, 32);
-	phil(-120, 64);
+	
+//	printf("for new added points, adding %d elements in radial direction\n", hCount);
+	GLfloat thetaOffset = 360/(GLfloat)hCount;	
+	GLfloat theta = thetaOffset;
+	for(i = hOffset; i < hCount*hOffset; i+=hOffset){
+		phil(theta, i);
+		theta += thetaOffset;
+	}
 	//totalPoints = (2*totalPoints -1);
 }
 
@@ -304,57 +310,67 @@ void displayRotatedPointsAndLines(){
 	int i,j;	
 
 	if ( drawStyleState == 0 && faceOrPoints == 0) {
-	  for( i = 0; i < ncpts*32; i+=offset){
-	    if((cpts[i][0][0] == -99) || cpts[i+offset][0][0] == -99)
-	      continue;
-	    glBegin(GL_POLYGON);
-	    glVertex3fv(cpts[i][0]);
-	    glVertex3fv(cpts[i][1]);
-	    glVertex3fv(cpts[i+offset][1]);
-	    glVertex3fv(cpts[i+offset][0]);
-	    glEnd();
-	    glBegin(GL_POLYGON);
-	    glVertex3fv(cpts[i][0]);
-	    glVertex3fv(cpts[i][2]);
-	    glVertex3fv(cpts[i+offset][2]);
-	    glVertex3fv(cpts[i+offset][0]);
-	    glEnd();
-	    glBegin(GL_POLYGON);
-	    glVertex3fv(cpts[i][1]);
-	    glVertex3fv(cpts[i][2]);
-	    glVertex3fv(cpts[i+offset][2]);
-	    glVertex3fv(cpts[i+offset][1]);
-	    glEnd();
-	  }
+	  	for( i = 0; i < totalPoints*offset; i+=offset){
+			for(j = 0; j < hCount*hOffset; j += hOffset){
+				if((i + offset) >= totalPoints*offset)
+					continue;
+				if((j+hOffset) <  hCount*hOffset){
+//					printf("printing polygon from (%d,%d) -> (%d,%d) -> (%d,%d) -> (%d,%d)\n", i, j, i, j+hOffset, i+1, j+hOffset, i+1, j);
+					//attaching the last to the first
+//printf("drawing polygon from (%f,%f,%f) -> (%f,%f,%f) -> (%f,%f,%f) -> (%f,%f,%f)\n", cpts[i][j][0], cpts[i][j][1], cpts[i][j][2], cpts[i][j+hOffset][0], cpts[i][j+hOffset][1], cpts[i][j+hOffset][2], cpts[i+1][j+hOffset][0], cpts[i+1][j+hOffset][1], cpts[i+1][j+hOffset][2], cpts[i+1][j][0], cpts[i+1][j][1], cpts[i+1][j][2]);
+					glBegin(GL_POLYGON);
+					glVertex3fv(cpts[i][j]);
+					glVertex3fv(cpts[i][j+hOffset]);
+					glVertex3fv(cpts[i+offset][j+hOffset]);
+					glVertex3fv(cpts[i+offset][j]);
+					glEnd();
+				} else {
+//					printf("printing polygon from (%d,%d) -> (%d,%d) -> (%d,%d) -> (%d,%d)\n", i, j, i+1, j, i+1, 0, i, 0);
+
+					glBegin(GL_POLYGON);
+					glVertex3fv(cpts[i][j]);
+					glVertex3fv(cpts[i+offset][j]);
+					glVertex3fv(cpts[i+offset][0]);
+					glVertex3fv(cpts[i][0]);
+					glEnd();
+				}
+	  		}
+		}
 	}
 
-//	printf("hCount: %d hOffset: %d\n", hCount, hOffset);
+//	printf("hCount: %d totalPoints: %d\n", hCount, totalPoints);
+
 	if ( drawStyleState == 1 && faceOrPoints == 0) {
+//		printf("drawing line from: ");
 	  	for(i = 0; i < hCount*hOffset; i+=hOffset){
 	    		glBegin(GL_LINE_STRIP);
-	   	 	for(j = 0; j < totalPoints*offset;j+=offset){
-		//		printf("i: %d j: %d cpts[%d][%d] = (%f,%f,%f)\n", i, j, j, i, cpts[j][i][0], cpts[j][i][1], cpts[j][i][2]); 
+	   	 	for(j = 0; j < totalPoints*offset;j+=offset){ 
+//				printf(" cpts[%d][%d]: (%f,%f,%f)", j, i, cpts[j][i][0], cpts[j][i][1], cpts[j][i][2]);
 	        		glVertex3fv(cpts[j][i]);
 	    		}
 	    		glEnd();
 	  	}
-
+//		printf("\ndrawing line from: ");
+		
         	for (i = 0; i < totalPoints*offset; i+=offset) {
 	    		glBegin(GL_LINE_LOOP);
 	    		for (j = 0; j < hCount*hOffset; j+=hOffset){
+//				printf(" cpts[%d][%d]: (%f,%f,%f)", j, i, cpts[j][i][0], cpts[j][i][1], cpts[j][i][2]);
 	        		glVertex3fv(cpts[i][j]);
 	    		}
 	    		glEnd();
 	  	}
+//		printf("\n");
 	}
 
 	if ( drawStyleState == 0 && faceOrPoints == 1 
 	     || (drawStyleState == 1 && faceOrPoints == 1)) {
 	  glColor3f(0.0,0.0,1.0);
+	  glPointSize(1.0);
 	  //glBegin(GL_POINTS);
 	  for (i = 0; i < ncpts*32; i+=offset) {
 	    glBegin(GL_POINTS);
-	    for (j = 0; j < hCount; j+=hOffset) {	
+	    for (j = 0; j < hCount*hOffset; j+=hOffset) {	
 	      glVertex3fv(cpts[i][j]);
 	    }
 	    glEnd();
