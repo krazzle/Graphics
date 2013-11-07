@@ -69,7 +69,13 @@ void displayRotatedPointsAndLines();
 void phil(GLfloat theta, int horiz_loc);
 void VerticalSubdivide();
 void HorizontalSubdivide();
+<<<<<<< HEAD
 void resetAll();
+=======
+void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c);
+void crossProduct(GLfloat* result ,GLfloat* a, GLfloat*b);
+
+>>>>>>> 5ba8b1bcd2ac42a1763648978e5fe6694360f174
 int main (int argc, char** argv) {
   glutInit(&argc,argv);
   glutInitWindowSize(W, H);
@@ -102,7 +108,9 @@ void display() {
   glEnable(GL_DEPTH_TEST);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
-  
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+
   /*
    * See drawing.c for the definition of these routines.
    *
@@ -332,6 +340,9 @@ void displayRotatedPointsAndLines(){
 					continue;
 				if((j+hOffset) <  hCount*hOffset){
 					glBegin(GL_POLYGON);
+					GLfloat normal[3];
+					getNormal((GLfloat*)normal, (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i][j+hOffset]), (GLfloat*)(cpts[i+offset][j+hOffset]));
+					glNormal3d(normal[0], normal[1], normal[2]);
 					glVertex3fv(cpts[i][j]);
 					glVertex3fv(cpts[i][j+hOffset]);
 					glVertex3fv(cpts[i+offset][j+hOffset]);
@@ -339,6 +350,9 @@ void displayRotatedPointsAndLines(){
 					glEnd();
 				} else {
 					glBegin(GL_POLYGON);
+					GLfloat normal[3];
+					getNormal((GLfloat*)normal, (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i+offset][j]), (GLfloat*)(cpts[i+offset][0]));
+					glNormal3d(normal[0], normal[1], normal[2]);
 					glVertex3fv(cpts[i][j]);
 					glVertex3fv(cpts[i+offset][j]);
 					glVertex3fv(cpts[i+offset][0]);
@@ -385,6 +399,38 @@ void displayRotatedPointsAndLines(){
 	  }
 	}
 	//glEnd();
+}
+
+void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c) {
+  
+  GLfloat v1[3];
+  GLfloat v2[3];
+  
+  v1[0] = a[0] - b[0];
+  v1[1] = a[1] - b[1];
+  v1[2] = a[2] - b[2];
+  
+  v2[0] = a[0] - c[0];
+  v2[1] = a[1] - c[1];
+  v2[2] = a[2] - a[3];
+
+  GLfloat normal[3];
+  crossProduct( (GLfloat*)normal, (GLfloat*)v1, (GLfloat*)v2);
+  
+  GLfloat length = sqrt( normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2] );
+  
+  unitNormal[0] = normal[0] / length;
+  unitNormal[1] = normal[1] / length;
+  unitNormal[2] = normal[2] / length;
+  
+}
+
+void crossProduct(GLfloat* result ,GLfloat* a, GLfloat*b) {
+
+  result[0] = ((a[1]*b[2]) - (a[2]*b[1]));
+  result[1] = ((a[2]*b[0]) - (a[0]*b[2]));
+  result[2] = ((a[0]*b[1]) - (a[1]*b[0]));
+
 }
 
 void myMouseButton(int button, int state, int x, int y) {
