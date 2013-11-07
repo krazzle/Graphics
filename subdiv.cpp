@@ -47,14 +47,15 @@ int mouse_mode = 0;
 int m_last_x = 0;
 int m_last_y = 0;
 
-GLfloat cpts[30*32][3][3];
+GLfloat cpts[30*32][3*32][3];
 int ncpts = 0;
 int totalPoints = ncpts;
 int threeDmode = 0;
 int numOfVerticalSubs = 1;
 int numOfHorizontalSubs = 1;
 int offset = 32;
-int Hoffset = 32;
+int hOffset = 32;
+int hCount = 3;
 
 /* local function declarations */
 void init(void);
@@ -67,7 +68,7 @@ void displayPointsAndLines();
 void displayRotatedPointsAndLines();
 void phil(GLfloat theta, int horiz_loc);
 void VerticalSubdivide();
-
+void HorizontalSubdivide();
 int main (int argc, char** argv) {
   glutInit(&argc,argv);
   glutInitWindowSize(W, H);
@@ -129,8 +130,8 @@ void myKeyHandler(unsigned char ch, int x, int y) {
   case 'w': 
     if ( ncpts >= 5) {
       threeDmode = 1;
-      phil(120, 1);
-      phil(-120, 2);
+      phil(120, 32);
+      phil(-120, 64);
     } else
       printf("include at least five points\n");
     break;
@@ -152,6 +153,10 @@ void myKeyHandler(unsigned char ch, int x, int y) {
     VerticalSubdivide();
     display();
     break;
+  case 'b':
+    HorizontalSubdivide();
+    display();
+    break;
   default:
     /* Unrecognized keypress */
     return;
@@ -162,10 +167,22 @@ void myKeyHandler(unsigned char ch, int x, int y) {
 }
 
 void HorizontalSubdivide(){
-	//current number of horizontal subdivisions = 3
-	//afterward we want 6. right? 
-	//then 12
-	//then	
+
+  int oldHOffset = hOffset;
+  hOffset /= 2;
+  hCount *= 2;
+  GLfloat thetaOffset = 360/hCount;
+  GLfloat theta = thetaOffset;
+  
+  int i;
+  for ( i = hOffset; i < hCount*hOffset; i += oldHOffset) {
+    phil(theta, i);
+    theta += thetaOffset*2;
+  }
+  
+  
+  
+  
 }
 
 void VerticalSubdivide(){
@@ -199,9 +216,10 @@ void VerticalSubdivide(){
 			cpts[i][0][0] = ((4*p0[0]) + (4*p1[0]))/8;
 			cpts[i][0][1] = ((4*p0[1]) + (4*p1[1]))/8;	
 		}
+
 	}
-	phil(120, 1);
-	phil(-120, 2);
+	phil(120, 32);
+	phil(-120, 64);
 	//totalPoints = (2*totalPoints -1);
 }
 
@@ -306,7 +324,7 @@ void displayRotatedPointsAndLines(){
 	}
 
 	if ( drawStyleState == 1 && faceOrPoints == 0) {
-	  for(i = 0; i < 3; i++){
+	  for(i = 0; i < hCount; i++){
 	    glBegin(GL_LINE_STRIP);
 	    for(j = 0; j < totalPoints*offset;j+=offset){
 	        glVertex3fv(cpts[j][i]);
