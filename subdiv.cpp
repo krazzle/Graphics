@@ -330,17 +330,26 @@ void displayRotatedPointsAndLines(){
 	glPointSize(5);
 	int i,j;	
 
-	
-	GLfloat params[3];
-	params[0] = .5;
-	params[1] = .5;
-	params[2] = 0;
-	glLightModelfv( GL_LIGHT_MODEL_AMBIENT, params);
+	// lighting!
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-	GLfloat lightpos[] = {0, 0, 10, 0};
-	glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
-	
+	// position!
+	GLfloat whiteDiffuseLight[] = {1.0, 1.0, 1.0};
+	GLfloat blueAmbientLight[] = {0, 0, 1.0};
+	GLfloat whiteSpecularLight[] = {1.0, 1.0, 1.0};
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteDiffuseLight);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, blueAmbientLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, whiteSpecularLight);
+	// colors!
+	//GLfloat params[3];
+	//params[0] = .5;
+	//params[1] = 0;
+	//params[2] = .5;
+	//glLightModelfv( GL_LIGHT_MODEL_AMBIENT, params);	
+	// material!
+	//glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 50);
+
 
 	if ( drawStyleState == 0 && faceOrPoints == 0) {
 	  	for( i = 0; i < totalPoints*offset; i+=offset){
@@ -421,7 +430,7 @@ void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c) {
   
   v2[0] = a[0] - c[0];
   v2[1] = a[1] - c[1];
-  v2[2] = a[2] - a[3];
+  v2[2] = a[2] - c[2];
 
   GLfloat normal[3];
   crossProduct( (GLfloat*)normal, (GLfloat*)v1, (GLfloat*)v2);
