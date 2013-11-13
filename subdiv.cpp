@@ -80,6 +80,8 @@ void VerticalSubdivide();
 void HorizontalSubdivide();
 void calculateNormals();
 void resetAll();
+void drawTriangles(GLfloat * point1, GLfloat* point2, GLfloat *point3);
+void drawTriangle(GLfloat* normal, GLfloat *p1, GLfloat *p2, GLfloat* p3);
 
 void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c);
 void crossProduct(GLfloat* result ,GLfloat* a, GLfloat*b);
@@ -367,6 +369,17 @@ void calculateNormals(){
 
 }
 
+void drawTriangle(GLfloat*p1, GLfloat *p2, GLfloat *p3){
+	GLfloat norm[3];
+	getNormal((GLfloat*)norm, p1, p2, p3);
+	glBegin(GL_POLYGON);
+	glNormal3f(norm[0], norm[1], norm[2]);
+	glVertex3fv(p1);
+	glVertex3fv(p2);
+	glVertex3fv(p3);
+	glEnd();
+}
+
 void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3){
 	GLfloat mid1_2[3];
 	GLfloat mid2_3[3];
@@ -384,44 +397,16 @@ void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3){
 	mid3_1[1] = (point3[1]+point1[1])/2;
 	mid3_1[2] = (point3[2]+point1[2])/2;
 	
-	GLfloat normal[3];
+//	GLfloat normal[3];
 	
 	//triangle 1
-	getNormal((GLfloat*)normal, (GLfloat *)mid1_2, point1, (GLfloat*)mid3_1);
-	glBegin(GL_POLYGON);
-	glNormal3f(normal[0], normal[1], normal[2]);
-	glVertex3fv(mid1_2);
-	glVertex3fv(point1);
-	glVertex3fv(mid3_1);
-	glEnd();
-	
+	drawTriangle((GLfloat*)mid3_1, point1, (GLfloat*)mid1_2);	
 	//triangle 2
-	getNormal((GLfloat*)normal, point2, (GLfloat*)mid2_3, (GLfloat*)mid1_2);
-	glBegin(GL_POLYGON);
-	glNormal3f(normal[0], normal[1], normal[2]);
-	glVertex3fv(point2);
-	glVertex3fv(mid2_3);
-	glVertex3fv(mid1_2);
-	glEnd();
-	
+	drawTriangle(point2, (GLfloat*)mid2_3, (GLfloat*)mid1_2);
 	//triangle 3
-	getNormal((GLfloat*)normal, (GLfloat*)mid1_2, (GLfloat*)mid2_3, (GLfloat*)mid3_1);
-	glBegin(GL_POLYGON);
-	glNormal3f(normal[0], normal[1], normal[2]);
-	glVertex3fv(mid1_2);
-	glVertex3fv(mid2_3);
-	glVertex3fv(mid3_1);
-	glEnd();
-	
+	drawTriangle((GLfloat*)mid1_2, (GLfloat*)mid2_3, (GLfloat*)mid3_1);
 	//triangle 4
-	getNormal((GLfloat*)normal, (GLfloat*)mid2_3, point3, (GLfloat*)mid3_1);
-	glBegin(GL_POLYGON);
-	glNormal3f(normal[0], normal[1], normal[2]);
-	glVertex3fv(mid2_3);
-	glVertex3fv(point3);
-	glVertex3fv(mid3_1);
-	glEnd();
-	
+	drawTriangle((GLfloat*)mid2_3, point3, (GLfloat*)mid3_1);
 }
 
 void displayRotatedPointsAndLines(){
@@ -434,6 +419,7 @@ void displayRotatedPointsAndLines(){
     glColor3f(1.0,0.0,0.0);
     glPointSize(5);
     int i,j;        
+
 
     if ( drawStyleState == 0 && faceOrPoints == 0) {
 
