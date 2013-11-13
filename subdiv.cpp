@@ -81,7 +81,7 @@ void HorizontalSubdivide();
 void calculateNormals();
 void resetAll();
 void drawTriangles(GLfloat * point1, GLfloat* point2, GLfloat *point3);
-void drawTriangle(GLfloat* normal, GLfloat *p1, GLfloat *p2, GLfloat* p3);
+void drawTriangle(GLfloat *p1, GLfloat *p2, GLfloat* p3);
 
 void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c);
 void crossProduct(GLfloat* result ,GLfloat* a, GLfloat*b);
@@ -397,16 +397,40 @@ void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3){
 	mid3_1[1] = (point3[1]+point1[1])/2;
 	mid3_1[2] = (point3[2]+point1[2])/2;
 	
-//	GLfloat normal[3];
+	GLfloat normal[3];
 	
 	//triangle 1
-	drawTriangle((GLfloat*)mid3_1, point1, (GLfloat*)mid1_2);	
+	getNormal((GLfloat*)normal,(GLfloat*)mid3_1, point1, (GLfloat*)mid1_2);	
+	glBegin(GL_POLYGON);
+        glNormal3f(normal[0], normal[1], normal[2]);
+        glVertex3fv(mid3_1);
+        glVertex3fv(point1);
+        glVertex3fv(mid1_2);
+        glEnd();
 	//triangle 2
-	drawTriangle(point2, (GLfloat*)mid2_3, (GLfloat*)mid1_2);
+	getNormal((GLfloat*)normal,point2, (GLfloat*)mid2_3, (GLfloat*)mid1_2);
+        glBegin(GL_POLYGON);
+        glNormal3f(normal[0], normal[1], normal[2]);
+        glVertex3fv(point2);
+        glVertex3fv(mid2_3);
+        glVertex3fv(mid1_2);
+        glEnd();
 	//triangle 3
-	drawTriangle((GLfloat*)mid1_2, (GLfloat*)mid2_3, (GLfloat*)mid3_1);
+	getNormal((GLfloat*)normal,(GLfloat*)mid1_2, (GLfloat*)mid2_3, (GLfloat*)mid3_1);
+	glBegin(GL_POLYGON);
+        glNormal3f(normal[0], normal[1], normal[2]);
+        glVertex3fv(mid1_2);
+        glVertex3fv(mid2_3);
+        glVertex3fv(mid3_1);
+        glEnd();
 	//triangle 4
-	drawTriangle((GLfloat*)mid2_3, point3, (GLfloat*)mid3_1);
+	getNormal((GLfloat*)normal, (GLfloat*)mid2_3, point3, (GLfloat*)mid3_1);
+        glBegin(GL_POLYGON);
+        glNormal3f(normal[0], normal[1], normal[2]);
+        glVertex3fv(mid2_3);
+        glVertex3fv(point3);
+        glVertex3fv(mid3_1);
+        glEnd();
 }
 
 void displayRotatedPointsAndLines(){
