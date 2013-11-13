@@ -54,6 +54,7 @@ int shading_style = GOURAD;
 
 GLfloat cpts[30*64][3*64][3];
 GLfloat normals[30*64][3*64][3];
+GLfloat original_cpts[30][3];
 int ncpts = 0;
 int totalPoints = ncpts;
 int threeDmode = 0;
@@ -82,6 +83,7 @@ void calculateNormals();
 void resetAll();
 void drawTriangles(GLfloat * point1, GLfloat* point2, GLfloat *point3);
 void drawTriangle(GLfloat *p1, GLfloat *p2, GLfloat* p3);
+void saveCpts();
 
 void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c);
 void crossProduct(GLfloat* result ,GLfloat* a, GLfloat*b);
@@ -148,6 +150,7 @@ void myKeyHandler(unsigned char ch, int x, int y) {
         case 'w': 
             //  if ( ncpts >= 5) {
             threeDmode = 1;
+	    saveCpts();
             phil(120, 64);
             phil(-120, 128);
             calculateNormals();
@@ -195,6 +198,17 @@ void myKeyHandler(unsigned char ch, int x, int y) {
     return;
 }
 
+void saveCpts(){
+	int loc = 0;
+	int i;
+	for( i = 0; i < ncpts*offset; i+=offset){
+		original_cpts[loc][0] = cpts[i][0][0];
+		original_cpts[loc][1] = cpts[i][0][1];
+		original_cpts[loc][2] = cpts[i][0][2];
+		loc++;
+	}
+}
+
 void resetAll(){
     //ncpts = 0;
     totalPoints = ncpts;
@@ -208,6 +222,16 @@ void resetAll(){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(fleft, fright, fbottom, ftop, -zNear, -zFar);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHT0);
+    int loc = 0;
+    int i;
+    for( i = 0; i < ncpts*offset;i+=offset){
+	cpts[i][0][0] = original_cpts[loc][0];
+	cpts[i][0][1] = original_cpts[loc][1];
+	cpts[i][0][2] = original_cpts[loc][2];
+	loc++;
+    }
     display();
 }
 
@@ -352,40 +376,40 @@ void calculateNormals(){
         }
     }
 
+
+//   printf("ppoooooopppp\n");
     for(i = 0; i < totalPoints*offset; i += offset) {
       for(j = 0; j < hCount*hOffset; j += hOffset) {
 
-	GLfloat* p0 = temp_normals[i][j];
-	GLfloat* p1 = temp_normals[i-offset][j];
-	GLfloat* p2 = temp_normals[i-offset][j-hOffset];
-	GLfloat* p3 = temp_normals[i][+hOffset];
+	if(i == 0 && j == 0){
+		normals[i][j][0] = temp_normals[i][j][0];
+		normals[i][j][1] = temp_normals[i][j][1];
+		normals[i][j][2] = temp_normals[i][j][2];
+	} else if (i == 0 && j != 0){
+		normals[i][j][0] = (temp_normals[i][j][0] + temp_normals[i][j-hOffset][0])/2;
+		normals[i][j][1] = (temp_normals[i][j][1] + temp_normals[i][j-hOffset][1])/2;
+		normals[i][j][2] = (temp_normals[i][j][2] + temp_normals[i][j-hOffset][2])/2;
+	} else if (i != 0 && j == 0){
+		normals[i][j][0] = (temp_normals[i][j][0] + temp_normals[i-offset][j][0])/2;
+		normals[i][j][1] = (temp_normals[i][j][1] + temp_normals[i-offset][j][1])/2;
+		normals[i][j][2] = (temp_normals[i][j][2] + temp_normals[i-offset][j][2])/2;
+	} else {
+		GLfloat* p0 = temp_normals[i][j];
+		GLfloat* p1 = temp_normals[i-offset][j];
+		GLfloat* p2 = temp_normals[i-offset][j-hOffset];
+		GLfloat* p3 = temp_normals[i][+hOffset];
 
-	GLfloat avg[3];
-	avg[0] = ( p0[0] + p1[0] + p2[0] + p3[0] ) / 4;
-	avg[1] = ( p0[1] + p1[1] + p2[1] + p3[1] ) / 4;
-	avg[2] = ( p0[2] + p1[2] + p2[2] + p3[2] ) / 4;
-	
-	normals[i][j][0] = avg[0];
-	normals[i][j][1] = avg[1];
-	normals[i][j][2] = avg[2];
+		GLfloat avg[3];
+		avg[0] = ( p0[0] + p1[0] + p2[0] + p3[0] ) / 4;
+		avg[1] = ( p0[1] + p1[1] + p2[1] + p3[1] ) / 4;
+		avg[2] = ( p0[2] + p1[2] + p2[2] + p3[2] ) / 4;
+		
+		normals[i][j][0] = avg[0];
+		normals[i][j][1] = avg[1];
+		normals[i][j][2] = avg[2];
+	}
       }
     }
-
- 
-/*    for( i = 0; i < totalPoints*offset; i+= offset){
-	for(j = 0; j<hCount*hOffset;j+=hOffset){
-	    if(i == top & j == top ){
-		normals[i][j] = temp_normals[i][j];
-	    } else if(i == top & j != top){
-		normals[i][j][0] = (temp_normals[i][j][0]+temp_normals[i][j+hOffset][0])/2;
-		normals[i][j][1] = (temp_normals[i][j][1]+temp_normals[i][j+hOffset][1])/2;
-		normals[i][j][2] = (temp_normals[i][j][2]+temp_normals[i][j+hOffset][2])/2;	
-	    } else if(j == top & i != top){
-		normals
-	    }
-	}
-    }	
-  */  
 
 }
 
@@ -401,6 +425,7 @@ void drawTriangle(GLfloat*p1, GLfloat *p2, GLfloat *p3){
 }
 
 void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3){
+//	printf("drawing trialgessss (%f,%f,%f) -> (%f,%f,%f) -> (%f,%f,%f)\n", point1[0], point1[1],point1[2],point2[0],point2[1], point2[2],point3[0],point3[1],point3[2]);
 	GLfloat mid1_2[3];
 	GLfloat mid2_3[3];
 	GLfloat mid3_1[3];
@@ -419,38 +444,10 @@ void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3){
 	
 	GLfloat normal[3];
 	
-	//triangle 1
-	getNormal((GLfloat*)normal,(GLfloat*)mid3_1, point1, (GLfloat*)mid1_2);	
-	glBegin(GL_POLYGON);
-        glNormal3f(normal[0], normal[1], normal[2]);
-        glVertex3fv(mid3_1);
-        glVertex3fv(point1);
-        glVertex3fv(mid1_2);
-        glEnd();
-	//triangle 2
-	getNormal((GLfloat*)normal,point2, (GLfloat*)mid2_3, (GLfloat*)mid1_2);
-        glBegin(GL_POLYGON);
-        glNormal3f(normal[0], normal[1], normal[2]);
-        glVertex3fv(point2);
-        glVertex3fv(mid2_3);
-        glVertex3fv(mid1_2);
-        glEnd();
-	//triangle 3
-	getNormal((GLfloat*)normal,(GLfloat*)mid1_2, (GLfloat*)mid2_3, (GLfloat*)mid3_1);
-	glBegin(GL_POLYGON);
-        glNormal3f(normal[0], normal[1], normal[2]);
-        glVertex3fv(mid1_2);
-        glVertex3fv(mid2_3);
-        glVertex3fv(mid3_1);
-        glEnd();
-	//triangle 4
-	getNormal((GLfloat*)normal, (GLfloat*)mid2_3, point3, (GLfloat*)mid3_1);
-        glBegin(GL_POLYGON);
-        glNormal3f(normal[0], normal[1], normal[2]);
-        glVertex3fv(mid2_3);
-        glVertex3fv(point3);
-        glVertex3fv(mid3_1);
-        glEnd();
+	drawTriangle((GLfloat*)mid3_1, point1, (GLfloat*)mid1_2);
+	drawTriangle(point2, (GLfloat*)mid2_3, (GLfloat*)mid1_2);
+	drawTriangle((GLfloat*)mid1_2,(GLfloat*)mid2_3,(GLfloat*)mid3_1);
+	drawTriangle((GLfloat*)mid2_3, point3, (GLfloat*)mid3_1);
 }
 
 void displayRotatedPointsAndLines(){
@@ -476,10 +473,12 @@ void displayRotatedPointsAndLines(){
         glLightfv(GL_LIGHT0, GL_POSITION, pos);
         // colors (get rid of one)
         GLfloat whiteDiffuseLight[] = {1.0, 1.0, 1.0};
-        GLfloat blueAmbientLight[] = {0, 0, 1.0};
+   //     GLfloat blueAmbientLight[] = {1.0, 1.0, 0};
+//	GLfloat redAmbientLight[]= {0,1.0,1.0};
+	GLfloat purpleAmbientLight[] = {1.0,0,1.0};
         GLfloat whiteSpecularLight[] = {0, 0, 1.0};
         glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteDiffuseLight);
-        glLightfv(GL_LIGHT0, GL_AMBIENT, blueAmbientLight);
+        glLightfv(GL_LIGHT0, GL_AMBIENT, purpleAmbientLight);
         glLightfv(GL_LIGHT0, GL_SPECULAR, whiteSpecularLight);
         // colors (get rid of one)
         GLfloat params[3];
@@ -495,20 +494,14 @@ void displayRotatedPointsAndLines(){
 
         for( i = 0; i < totalPoints*offset; i+=offset){
             for(j = 0; j < hCount*hOffset; j += hOffset){
-                //if((i + offset) >= totalPoints*offset)
-                //      continue;
                 if((j+hOffset) <  hCount*hOffset){
-                    //printf("drawing polygon starting at i = %d j = %d\n", i,j);
                     if(shading_style == GOURAD){
  		    	glBegin(GL_POLYGON);
-                    //   GLfloat normal[3];
-                    //  getNormal((GLfloat*)normal, (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i][j+hOffset]), (GLfloat*)(cpts[i+offset][j+hOffset]));
-                    //  glNormal3f(normal[0], normal[1], normal[2]);
                     	glNormal3fv(normals[i][j]);
                     	glVertex3fv(cpts[i][j]);
-                    glNormal3fv(normals[i][j+hOffset]);
+                    	glNormal3fv(normals[i][j+hOffset]);
                     	glVertex3fv(cpts[i][j+hOffset]);
-                    glNormal3fv(normals[i+offset][j+hOffset]);
+                    	glNormal3fv(normals[i+offset][j+hOffset]);
                     	glVertex3fv(cpts[i+offset][j+hOffset]);
 			glNormal3fv(normals[i+offset][j]);
                     	glVertex3fv(cpts[i+offset][j]);
@@ -518,15 +511,8 @@ void displayRotatedPointsAndLines(){
 			drawTriangles(cpts[i+offset][j+hOffset], cpts[i+offset][j], cpts[i][j]);
                     }
 		} else {
-                    //printf("here as last\n");
-                    //printf("drawing finishing! i = %d j = %d; hCount(%d)*hOffset(%d) = %d; j+hOffset = %d\n", i,j, hCount, hOffset, hCount*hOffset,j+hOffset);
-                    //  printf("drawing polygon starting at i = %d j = %d\n", i,j);
 		    if(shading_style == GOURAD){
                     	glBegin(GL_POLYGON);
-                    // GLfloat normal[3];
-                    // getNormal((GLfloat*)normal, (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i][0]), (GLfloat*)(cpts[i+offset][0]));
-                    // glNormal3f(normal[0], normal[1], normal[2]);
-                    //printf("making final polygon from P(%d,%d) -> P(%d,%d) -> P(%d,%d) -> P(%d,%d)\n", i, j, i+offset, j, i+offset, 0, i, 0);
                     	glNormal3fv(normals[i][j]);
                     	glVertex3fv(cpts[i][j]);
 			glNormal3fv(normals[i][0]);
@@ -537,7 +523,7 @@ void displayRotatedPointsAndLines(){
                     	glVertex3fv(cpts[i+offset][j]);
                     	glEnd();
 		    } else {
-			drawTriangles(cpts[i][j], cpts[i][j+hOffset], cpts[i+offset][0]);
+			drawTriangles(cpts[i][j], cpts[i][0], cpts[i+offset][0]);
 			drawTriangles(cpts[i+offset][0], cpts[i+offset][j], cpts[i][j]);
 
 		    }
@@ -546,16 +532,13 @@ void displayRotatedPointsAndLines(){
         }
     }
 
-    //        printf("hCount: %d totalPoints: %d\n", hCount, totalPoints);
 
     if ( drawStyleState == 1 && faceOrPoints == 0) {
-        //                printf("drawing line from: ")i;
         glDisable(GL_LIGHTING);
         glDisable(GL_LIGHT0);
         for(i = 0; i < hCount*hOffset; i+=hOffset){
             glBegin(GL_LINE_STRIP);
             for(j = 0; j < totalPoints*offset;j+=offset){ 
-                //                                printf(" cpts[%d][%d]: (%f,%f,%f)\n", j, i, cpts[j][i][0], cpts[j][i][1], cpts[j][i][2]);
                 glVertex3fv(cpts[j][i]);
             }
             glEnd();
@@ -567,14 +550,12 @@ void displayRotatedPointsAndLines(){
             }
             glEnd();
         }
-        //                printf("\n");
     }
 
     if ( drawStyleState == 0 && faceOrPoints == 1 
             || (drawStyleState == 1 && faceOrPoints == 1)) {
         glColor3f(0.0,0.0,1.0);
         glPointSize(1.0);
-        //glBegin(GL_POINTS);
         for (i = 0; i < totalPoints*offset; i+=offset) {
             glBegin(GL_POINTS);
             for (j = 0; j < hCount*hOffset; j+=hOffset) {        
@@ -583,7 +564,6 @@ void displayRotatedPointsAndLines(){
             glEnd();
         }
     }
-    //glEnd();
 }
 
 
