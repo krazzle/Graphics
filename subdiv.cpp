@@ -81,7 +81,7 @@ void HorizontalSubdivide();
 void calculateNormals();
 void resetAll();
 void drawTriangles(GLfloat * point1, GLfloat* point2, GLfloat *point3);
-void drawTriangle(GLfloat* normal, GLfloat *p1, GLfloat *p2, GLfloat* p3);
+void drawTriangle(GLfloat *p1, GLfloat *p2, GLfloat* p3);
 
 void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c);
 void crossProduct(GLfloat* result ,GLfloat* a, GLfloat*b);
@@ -232,7 +232,7 @@ void HorizontalSubdivide(){
 }
 
 void VerticalSubdivide(){
-    if(numOfVerticalSubs == 6)
+  if(numOfVerticalSubs == 6)
         return;
     numOfVerticalSubs++;
     int old_offset = offset;
@@ -341,17 +341,37 @@ void displayPointsAndLines(){
 
 void calculateNormals(){
     int i,j;
-  //  GLfloat temp_normals[30*64][3*64][3];
+    GLfloat temp_normals[30*64][3*64][3];
     for( i = 0; i < totalPoints*offset; i+=offset){
         for(j = 0; j < hCount*hOffset; j += hOffset){
             if((j+hOffset) <  hCount*hOffset){
-                getNormal((GLfloat*)normals[i][j], (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i][j+hOffset]), (GLfloat*)(cpts[i+offset][j+hOffset]));    
+                getNormal((GLfloat*)temp_normals[i][j], (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i][j+hOffset]), (GLfloat*)(cpts[i+offset][j+hOffset]));    
 	    } else {
-                getNormal((GLfloat*)normals[i][j], (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i][0]), (GLfloat*)(cpts[i+offset][0])); 
+                getNormal((GLfloat*)temp_normals[i][j], (GLfloat*)(cpts[i][j]), (GLfloat*)(cpts[i][0]), (GLfloat*)(cpts[i+offset][0])); 
             }
         }
     }
 
+    for(i = 0; i < totalPoints*offset; i += offset) {
+      for(j = 0; j < hCount*hOffset; j += hOffset) {
+
+	GLfloat* p0 = temp_normals[i][j];
+	GLfloat* p1 = temp_normals[i-offset][j];
+	GLfloat* p2 = temp_normals[i-offset][j-hOffset];
+	GLfloat* p3 = temp_normals[i][+hOffset];
+
+	GLfloat avg[3];
+	avg[0] = ( p0[0] + p1[0] + p2[0] + p3[0] ) / 4;
+	avg[1] = ( p0[1] + p1[1] + p2[1] + p3[1] ) / 4;
+	avg[2] = ( p0[2] + p1[2] + p2[2] + p3[2] ) / 4;
+	
+	normals[i][j][0] = avg[0];
+	normals[i][j][1] = avg[1];
+	normals[i][j][2] = avg[2];
+      }
+    }
+
+ 
 /*    for( i = 0; i < totalPoints*offset; i+= offset){
 	for(j = 0; j<hCount*hOffset;j+=hOffset){
 	    if(i == top & j == top ){
@@ -397,16 +417,40 @@ void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3){
 	mid3_1[1] = (point3[1]+point1[1])/2;
 	mid3_1[2] = (point3[2]+point1[2])/2;
 	
-//	GLfloat normal[3];
+	GLfloat normal[3];
 	
 	//triangle 1
-	drawTriangle((GLfloat*)mid3_1, point1, (GLfloat*)mid1_2);	
+	getNormal((GLfloat*)normal,(GLfloat*)mid3_1, point1, (GLfloat*)mid1_2);	
+	glBegin(GL_POLYGON);
+        glNormal3f(normal[0], normal[1], normal[2]);
+        glVertex3fv(mid3_1);
+        glVertex3fv(point1);
+        glVertex3fv(mid1_2);
+        glEnd();
 	//triangle 2
-	drawTriangle(point2, (GLfloat*)mid2_3, (GLfloat*)mid1_2);
+	getNormal((GLfloat*)normal,point2, (GLfloat*)mid2_3, (GLfloat*)mid1_2);
+        glBegin(GL_POLYGON);
+        glNormal3f(normal[0], normal[1], normal[2]);
+        glVertex3fv(point2);
+        glVertex3fv(mid2_3);
+        glVertex3fv(mid1_2);
+        glEnd();
 	//triangle 3
-	drawTriangle((GLfloat*)mid1_2, (GLfloat*)mid2_3, (GLfloat*)mid3_1);
+	getNormal((GLfloat*)normal,(GLfloat*)mid1_2, (GLfloat*)mid2_3, (GLfloat*)mid3_1);
+	glBegin(GL_POLYGON);
+        glNormal3f(normal[0], normal[1], normal[2]);
+        glVertex3fv(mid1_2);
+        glVertex3fv(mid2_3);
+        glVertex3fv(mid3_1);
+        glEnd();
 	//triangle 4
-	drawTriangle((GLfloat*)mid2_3, point3, (GLfloat*)mid3_1);
+	getNormal((GLfloat*)normal, (GLfloat*)mid2_3, point3, (GLfloat*)mid3_1);
+        glBegin(GL_POLYGON);
+        glNormal3f(normal[0], normal[1], normal[2]);
+        glVertex3fv(mid2_3);
+        glVertex3fv(point3);
+        glVertex3fv(mid3_1);
+        glEnd();
 }
 
 void displayRotatedPointsAndLines(){
@@ -462,11 +506,11 @@ void displayRotatedPointsAndLines(){
                     //  glNormal3f(normal[0], normal[1], normal[2]);
                     	glNormal3fv(normals[i][j]);
                     	glVertex3fv(cpts[i][j]);
-                   // glNormal3fv(normals[i][j+hOffset]);
+                    glNormal3fv(normals[i][j+hOffset]);
                     	glVertex3fv(cpts[i][j+hOffset]);
-                   // glVertex3fv(normals[i+offset][j+hOffset]);
+                    glNormal3fv(normals[i+offset][j+hOffset]);
                     	glVertex3fv(cpts[i+offset][j+hOffset]);
-                   // glVertex3fv(normals[i+offset][j]);
+			glNormal3fv(normals[i+offset][j]);
                     	glVertex3fv(cpts[i+offset][j]);
                     	glEnd();
 		    } else {
@@ -485,11 +529,11 @@ void displayRotatedPointsAndLines(){
                     //printf("making final polygon from P(%d,%d) -> P(%d,%d) -> P(%d,%d) -> P(%d,%d)\n", i, j, i+offset, j, i+offset, 0, i, 0);
                     	glNormal3fv(normals[i][j]);
                     	glVertex3fv(cpts[i][j]);
-                   // glVertex3fv(normals[i][0]);
+			glNormal3fv(normals[i][0]);
                     	glVertex3fv(cpts[i][0]);
-                   // glVertex3fv(normals[i+offset][0]);
+			glNormal3fv(normals[i+offset][0]);
                     	glVertex3fv(cpts[i+offset][0]);
-                   // glVertex3fv(normals[i+offset][j]);
+			glNormal3fv(normals[i+offset][j]);
                     	glVertex3fv(cpts[i+offset][j]);
                     	glEnd();
 		    } else {
@@ -541,6 +585,9 @@ void displayRotatedPointsAndLines(){
     }
     //glEnd();
 }
+
+
+
 
 void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c) {
 
