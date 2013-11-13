@@ -371,12 +371,15 @@ void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3){
 	GLfloat mid1_2[3];
 	GLfloat mid2_3[3];
 	GLfloat mid3_1[3];
+
 	mid1_2[0] = (point1[0]+point2[0])/2;
 	mid1_2[1] = (point1[1]+point2[1])/2;
 	mid1_2[2] = (point1[2]+point2[2])/2;
+
 	mid2_3[0] = (point2[0]+point3[0])/2;
 	mid2_3[1] = (point2[1]+point3[1])/2;
 	mid2_3[2] = (point2[2]+point3[2])/2;
+
 	mid3_1[0] = (point3[0]+point1[0])/2;
 	mid3_1[1] = (point3[1]+point1[1])/2;
 	mid3_1[2] = (point3[2]+point1[2])/2;
@@ -384,39 +387,39 @@ void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3){
 	GLfloat normal[3];
 	
 	//triangle 1
-	getNormal((GLfloat*)normal, (GLfloat *)mid3_1, (GLfloat*)mid1_2, point1);
+	getNormal((GLfloat*)normal, (GLfloat *)mid1_2, point1, (GLfloat*)mid3_1);
 	glBegin(GL_POLYGON);
 	glNormal3f(normal[0], normal[1], normal[2]);
-	glVertex3fv(mid3_1);
 	glVertex3fv(mid1_2);
 	glVertex3fv(point1);
+	glVertex3fv(mid3_1);
 	glEnd();
 	
 	//triangle 2
-	getNormal((GLfloat*)normal, point3, (GLfloat*)mid2_3, (GLfloat*)mid3_1);
+	getNormal((GLfloat*)normal, point2, (GLfloat*)mid2_3, (GLfloat*)mid1_2);
 	glBegin(GL_POLYGON);
 	glNormal3f(normal[0], normal[1], normal[2]);
 	glVertex3fv(point2);
 	glVertex3fv(mid2_3);
-	glVertex3fv(mid3_1);
+	glVertex3fv(mid1_2);
 	glEnd();
 	
 	//triangle 3
-	getNormal((GLfloat*)normal, (GLfloat*)mid3_1, (GLfloat*)mid2_3, (GLfloat*)mid1_2);
+	getNormal((GLfloat*)normal, (GLfloat*)mid1_2, (GLfloat*)mid2_3, (GLfloat*)mid3_1);
 	glBegin(GL_POLYGON);
 	glNormal3f(normal[0], normal[1], normal[2]);
-	glVertex3fv(mid3_1);
-	glVertex3fv(mid2_3);
 	glVertex3fv(mid1_2);
+	glVertex3fv(mid2_3);
+	glVertex3fv(mid3_1);
 	glEnd();
 	
 	//triangle 4
-	getNormal((GLfloat*)normal, (GLfloat*)mid2_3, point2, (GLfloat*)mid1_2);
+	getNormal((GLfloat*)normal, (GLfloat*)mid2_3, point3, (GLfloat*)mid3_1);
 	glBegin(GL_POLYGON);
 	glNormal3f(normal[0], normal[1], normal[2]);
 	glVertex3fv(mid2_3);
-	glVertex3fv(point2);
-	glVertex3fv(mid1_2);
+	glVertex3fv(point3);
+	glVertex3fv(mid3_1);
 	glEnd();
 	
 }
@@ -481,8 +484,8 @@ void displayRotatedPointsAndLines(){
                     	glVertex3fv(cpts[i+offset][j]);
                     	glEnd();
 		    } else {
-			drawTriangles(cpts[i][j], cpts[i+offset][j], cpts[i][j+hOffset]);
-			drawTriangles(cpts[i+offset][j], cpts[i+offset][j+hOffset], cpts[i][j+hOffset]);
+			drawTriangles(cpts[i][j], cpts[i][j+hOffset], cpts[i+offset][j+hOffset]);
+			drawTriangles(cpts[i+offset][j+hOffset], cpts[i+offset][j], cpts[i][j]);
                     }
 		} else {
                     //printf("here as last\n");
@@ -504,8 +507,8 @@ void displayRotatedPointsAndLines(){
                     	glVertex3fv(cpts[i+offset][j]);
                     	glEnd();
 		    } else {
-			drawTriangles(cpts[i][j], cpts[i+offset][j], cpts[i][0]);
-			drawTriangles(cpts[i+offset][j], cpts[i+offset][0], cpts[i][0]);
+			drawTriangles(cpts[i][j], cpts[i][j+hOffset], cpts[i+offset][0]);
+			drawTriangles(cpts[i+offset][0], cpts[i+offset][j], cpts[i][j]);
 
 		    }
                 }
