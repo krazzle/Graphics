@@ -1,7 +1,7 @@
 /******************************************************************/
 /*         Main raytracer file                                    */
 /*                                                                */
-/* Group Members: <FILL IN>                                       */
+/* Group Members: Alyssa Sallean Andoni Mendoza                   */
 /******************************************************************/
 
 #ifdef _WIN32
@@ -77,7 +77,7 @@ void display() {
 
 void initScene () {
   s1 = makeSphere(0.0,0.0,-2.0,0.25);
-  s1->m = makeMaterial(1.0,0.1,0.15,0.3);
+  s1->m = makeMaterial(1.0,0.1,1.0,.1);
 }
 
 void initCamera (int w, int h) {
