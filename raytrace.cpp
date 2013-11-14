@@ -77,7 +77,7 @@ void display() {
 
 void initScene () {
   s1 = makeSphere(0.0,0.0,-2.0,0.25);
-  s1->m = makeMaterial(1.0,0.1,1.0,.1);
+  s1->m = makeMaterial(1.0,0.1,1.0,.5);
 }
 
 void initCamera (int w, int h) {
