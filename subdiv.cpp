@@ -65,7 +65,7 @@ int hOffset = 64;
 int hCount = 3;
 
 GLfloat pos[] = {0, 0, -10};
-
+GLfloat temp_normals[30*64][3*64][3];
 
 /* local function declarations */
 void init(void);
@@ -81,13 +81,14 @@ void VerticalSubdivide();
 void HorizontalSubdivide();
 void calculateNormals();
 void resetAll();
-void drawTriangles(GLfloat * point1, GLfloat* point2, GLfloat *point3);
-void drawTriangle(GLfloat *p1, GLfloat *p2, GLfloat* p3);
+void drawTriangle(GLfloat*p1, GLfloat *p2, GLfloat *p3, GLfloat* norm);
+void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3, GLfloat* point1Normal, GLfloat* point2Normal, GLfloat* point3Normal);
 void saveCpts();
 
 void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c);
 void crossProduct(GLfloat* result ,GLfloat* a, GLfloat*b);
 
+void getNormalPhong(GLfloat* norm, GLfloat* n1, GLfloat* n2, GLfloat* n3);
 
 int main (int argc, char** argv) {
     glutInit(&argc,argv);
@@ -365,7 +366,7 @@ void displayPointsAndLines(){
 
 void calculateNormals(){
     int i,j;
-    GLfloat temp_normals[30*64][3*64][3];
+
     for( i = 0; i < totalPoints*offset; i+=offset){
         for(j = 0; j < hCount*hOffset; j += hOffset){
             if((j+hOffset) <  hCount*hOffset){
@@ -413,18 +414,18 @@ void calculateNormals(){
 
 }
 
-void drawTriangle(GLfloat*p1, GLfloat *p2, GLfloat *p3){
-	GLfloat norm[3];
-	getNormal((GLfloat*)norm, p1, p2, p3);
-	glBegin(GL_POLYGON);
-	glNormal3f(norm[0], norm[1], norm[2]);
-	glVertex3fv(p1);
-	glVertex3fv(p2);
-	glVertex3fv(p3);
-	glEnd();
+void drawTriangle(GLfloat*p1, GLfloat *p2, GLfloat *p3, GLfloat* norm){
+
+  glBegin(GL_POLYGON);
+  glNormal3f(norm[0], norm[1], norm[2]);
+  glVertex3fv(p1);
+  glVertex3fv(p2);
+  glVertex3fv(p3);
+  glEnd();
+
 }
 
-void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3){
+void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3, GLfloat* point1Normal, GLfloat* point2Normal, GLfloat* point3Normal){
 //	printf("drawing trialgessss (%f,%f,%f) -> (%f,%f,%f) -> (%f,%f,%f)\n", point1[0], point1[1],point1[2],point2[0],point2[1], point2[2],point3[0],point3[1],point3[2]);
 	GLfloat mid1_2[3];
 	GLfloat mid2_3[3];
@@ -442,12 +443,52 @@ void drawTriangles(GLfloat *point1, GLfloat *point2, GLfloat* point3){
 	mid3_1[1] = (point3[1]+point1[1])/2;
 	mid3_1[2] = (point3[2]+point1[2])/2;
 	
-	GLfloat normal[3];
+	GLfloat norm1_3[3];
+	GLfloat norm1_2[3];
+	GLfloat norm2_3[3];
+       
+	norm1_3[0] = ( point1Normal[0] + point3Normal[0] ) / 2;
+	norm1_3[1] = ( point1Normal[1] + point3Normal[1] ) / 2;
+	norm1_3[2] = ( point1Normal[2] + point3Normal[2] ) / 2;
 	
-	drawTriangle((GLfloat*)mid3_1, point1, (GLfloat*)mid1_2);
-	drawTriangle(point2, (GLfloat*)mid2_3, (GLfloat*)mid1_2);
-	drawTriangle((GLfloat*)mid1_2,(GLfloat*)mid2_3,(GLfloat*)mid3_1);
-	drawTriangle((GLfloat*)mid2_3, point3, (GLfloat*)mid3_1);
+	norm1_2[0] = ( point1Normal[0] + point2Normal[0] ) / 2;
+	norm1_2[1] = ( point1Normal[1] + point2Normal[1] ) / 2;
+	norm1_2[2] = ( point2Normal[2] + point2Normal[2] ) / 2;
+
+	norm2_3[0] = ( point2Normal[0] + point3Normal[0] ) / 2;
+	norm2_3[1] = ( point2Normal[1] + point3Normal[1] ) / 2;
+	norm2_3[2] = ( point2Normal[2] + point3Normal[2] ) / 2;
+
+	GLfloat tri1Normal[3];
+	GLfloat tri2Normal[3];
+	GLfloat tri3Normal[3];
+	GLfloat tri4Normal[3];
+
+	getNormalPhong( (GLfloat*)tri1Normal, point3Normal, (GLfloat*)norm1_3, (GLfloat*)norm2_3);
+	getNormalPhong( (GLfloat*)tri2Normal, (GLfloat*)norm1_3, point1Normal, (GLfloat*)norm1_2);
+	getNormalPhong( (GLfloat*)tri3Normal, (GLfloat*)norm2_3, (GLfloat*)norm1_2, point2Normal);
+	getNormalPhong( (GLfloat*)tri4Normal, (GLfloat*)norm1_3, (GLfloat*)norm1_2, (GLfloat*)norm2_3);
+
+
+	drawTriangle( point3, (GLfloat*)mid3_1, (GLfloat*)mid2_3, (GLfloat*)tri1Normal);
+	drawTriangle( (GLfloat*)mid3_1, point1, (GLfloat*)mid1_2, (GLfloat*)tri2Normal);
+	drawTriangle( (GLfloat*)mid2_3, (GLfloat*)mid1_2, point2, (GLfloat*)tri3Normal);
+	drawTriangle( (GLfloat*)mid3_1, (GLfloat*)mid1_2, (GLfloat*)mid2_3, (GLfloat*)tri4Normal);
+	       
+	/*
+	drawTriangle((GLfloat*)mid3_1, point1, (GLfloat*)mid1_2, (GLfloat*)tri1Normal);
+	drawTriangle(point2, (GLfloat*)mid2_3, (GLfloat*)mid1_2, (GLfloat*)tri2Normal);
+	drawTriangle((GLfloat*)mid1_2,(GLfloat*)mid2_3,(GLfloat*)mid3_1, (GLfloat*)tri3Normal);
+	drawTriangle((GLfloat*)mid2_3, point3, (GLfloat*)mid3_1, (GLfloat*)tri4Normal);
+	*/
+}
+
+void getNormalPhong(GLfloat* norm, GLfloat* n1, GLfloat* n2, GLfloat* n3) {
+  
+  norm[0] = ( n1[0] + n2[0] + n3[0] ) / 3;
+  norm[1] = ( n1[1] + n2[1] + n3[1] ) / 3;
+  norm[2] = ( n1[2] + n2[2] + n3[2] ) / 3;
+  
 }
 
 void displayRotatedPointsAndLines(){
@@ -507,8 +548,12 @@ void displayRotatedPointsAndLines(){
                     	glVertex3fv(cpts[i+offset][j]);
                     	glEnd();
 		    } else {
-			drawTriangles(cpts[i][j], cpts[i][j+hOffset], cpts[i+offset][j+hOffset]);
-			drawTriangles(cpts[i+offset][j+hOffset], cpts[i+offset][j], cpts[i][j]);
+		      //drawTriangles(cpts[i][j], cpts[i][j+hOffset], cpts[i+offset][j+hOffset]);
+		      //drawTriangles(cpts[i+offset][j+hOffset], cpts[i+offset][j], cpts[i][j]);
+		      drawTriangles(cpts[i][j], cpts[i][j+hOffset], cpts[i+offset][j+hOffset], 
+				    temp_normals[i][j], temp_normals[i][j+hOffset], temp_normals[i+offset][j+hOffset]);
+		      drawTriangles(cpts[i+offset][j+hOffset], cpts[i+offset][j], cpts[i][j],
+				    temp_normals[i+offset][j+hOffset], temp_normals[i+offset][j], temp_normals[i][j]);
                     }
 		} else {
 		    if(shading_style == GOURAD){
@@ -523,9 +568,13 @@ void displayRotatedPointsAndLines(){
                     	glVertex3fv(cpts[i+offset][j]);
                     	glEnd();
 		    } else {
-			drawTriangles(cpts[i][j], cpts[i][0], cpts[i+offset][0]);
-			drawTriangles(cpts[i+offset][0], cpts[i+offset][j], cpts[i][j]);
-
+		      //drawTriangles(cpts[i][j], cpts[i][0], cpts[i+offset][0]);
+		      //drawTriangles(cpts[i+offset][0], cpts[i+offset][j], cpts[i][j]);
+		      drawTriangles(cpts[i][j], cpts[i][0], cpts[i+offset][0],
+				    temp_normals[i][j], temp_normals[i][0], temp_normals[i+offset][0]);
+		      drawTriangles(cpts[i+offset][0], cpts[i+offset][j], cpts[i][j],
+				    temp_normals[i+offset][0], temp_normals[i+offset][j], temp_normals[i][j]);
+		      
 		    }
                 }
             }
