@@ -84,6 +84,7 @@ void resetAll();
 void drawTriangles(GLfloat * point1, GLfloat* point2, GLfloat *point3);
 void drawTriangle(GLfloat *p1, GLfloat *p2, GLfloat* p3);
 void saveCpts();
+void printCpts();
 
 void getNormal(GLfloat* unitNormal, GLfloat* a, GLfloat* b, GLfloat* c);
 void crossProduct(GLfloat* result ,GLfloat* a, GLfloat*b);
@@ -154,7 +155,8 @@ void myKeyHandler(unsigned char ch, int x, int y) {
             phil(120, 64);
             phil(-120, 128);
             calculateNormals();
-            // } else
+	  //  printCpts();   
+         // } else
             //   printf("include at least five points\n");
             break;
         case 'e':
@@ -179,12 +181,16 @@ void myKeyHandler(unsigned char ch, int x, int y) {
             display();
             break;
         case 'a':
-            VerticalSubdivide();
-            display();
+	    if(threeDmode){
+            	VerticalSubdivide();
+            	display();
+	    }
             break;
         case 'b':
-            HorizontalSubdivide();
-            display();
+	    if(threeDmode){
+            	HorizontalSubdivide();
+            	display();
+	    }
             break;
         case 'z':
             threeDmode = 0;
@@ -206,6 +212,15 @@ void saveCpts(){
 		original_cpts[loc][1] = cpts[i][0][1];
 		original_cpts[loc][2] = cpts[i][0][2];
 		loc++;
+	}
+}
+
+void printCpts(){
+	int i, j;
+	for(i = 0; i < totalPoints*offset; i+=offset){
+		for(j = 0; j < hCount*hOffset;j+=hOffset){
+			printf(" [%d][%d] -> (%f,%f,%f)\n", i, j, cpts[i][j][0], cpts[i][j][1], cpts[i][j][2]);
+		}
 	}
 }
 
@@ -336,7 +351,7 @@ void phil(GLfloat theta, int horiz_loc ) {
         cpts[i][horiz_loc][1] = result[1][0];
         cpts[i][horiz_loc][2] = result[2][0];
     }
-    display();
+ //   display();
 }
 
 void displayPointsAndLines(){
@@ -463,7 +478,7 @@ void displayRotatedPointsAndLines(){
 
 
     if ( drawStyleState == 0 && faceOrPoints == 0) {
-
+	//printCpts();
         // lighting!
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LIGHTING);
@@ -492,10 +507,12 @@ void displayRotatedPointsAndLines(){
         // wut
         glEnable(GL_NORMALIZE);
 
-        for( i = 0; i < totalPoints*offset; i+=offset){
+        for( i = 0; i < totalPoints*offset - offset; i+=offset){
             for(j = 0; j < hCount*hOffset; j += hOffset){
-                if((j+hOffset) <  hCount*hOffset){
+	//	printf("totalPoints*offset: %d i->%d j->%d\n",totalPoints*offset, i, j);
+		if((j+hOffset) <  hCount*hOffset){
                     if(shading_style == GOURAD){
+	//		printf("drawing (%f,%f,%f) -> (%f,%f,%f) -> (%f,%f,%f) -> (%f,%f,%f)\n", cpts[i][j][0], cpts[i][j][1], cpts[i][j][2], cpts[i][j+hOffset][0], cpts[i][j+hOffset][1], cpts[i][j+hOffset][2], cpts[i+offset][j+hOffset][0], cpts[i+offset][j+hOffset][1], cpts[i+offset][j+hOffset][2], cpts[i+offset][j][0], cpts[i+offset][j][1], cpts[i+offset][j][2]);
  		    	glBegin(GL_POLYGON);
                     	glNormal3fv(normals[i][j]);
                     	glVertex3fv(cpts[i][j]);
@@ -512,6 +529,7 @@ void displayRotatedPointsAndLines(){
                     }
 		} else {
 		    if(shading_style == GOURAD){
+	//		 printf("drawing (%f,%f,%f) -> (%f,%f,%f) -> (%f,%f,%f) -> (%f,%f,%f)\n", cpts[i][j][0], cpts[i][j][1], cpts[i][j][2], cpts[i][0][0], cpts[i][0][1], cpts[i][0][2], cpts[i+offset][0][0], cpts[i+offset][0][1], cpts[i+offset][0][2], cpts[i+offset][j][0], cpts[i+offset][j][1], cpts[i+offset][j][2]);
                     	glBegin(GL_POLYGON);
                     	glNormal3fv(normals[i][j]);
                     	glVertex3fv(cpts[i][j]);
@@ -528,7 +546,7 @@ void displayRotatedPointsAndLines(){
 
 		    }
                 }
-            }
+           }
         }
     }
 
