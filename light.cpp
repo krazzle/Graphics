@@ -70,3 +70,6 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
 
 }
 
+
+
+
