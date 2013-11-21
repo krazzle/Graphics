@@ -71,5 +71,36 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
 }
 
 
+GLfloat diffuseReflection(GLfloat diffuseCoef, vector normalVector, vector lightVector, GLfloat incomingDiffuseIntensity) {
+
+  GLfloat max = 0;
+  if ( 0 < dotProduct(normalVector, lightVector) )
+    max = dotProduct(normalVector, lightVector);
+  
+  return diffuseCoef *
+    max *
+    incomingDiffuseIntensity;
+  
+}
+
+GLfloat specularReflection( GLfloat specularCoef, vector* reflectionVector, vector* viewVector, GLfloat incomingSpecularIntensity) {
+
+  return specularCoef *
+    dotProduct( reflectionVector, viewVector) *
+    incomingSpecularIntensity;
+
+}
+
+
+GLfloat dotProduct(vector* v1, vector* v2) {
+  
+  return ( v1->x * v2->x ) + 
+    ( v1->y * v2->y ) + 
+    ( v1->z * v2->z ); 
+  
+}
+
+
+
 
 
