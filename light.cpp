@@ -28,12 +28,35 @@ material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb) {
   return(m);
 }
 
+light* makeLight(GLfloat x, GLfloat y ,GLfloat z, GLfloat vx, GLfloat vy, GLfloat vz, GLfloat r, GLfloat g, GLfloat b){
+  light *l;
+  l = (light*) malloc(sizeof(light));
+
+  //location
+  l->r->start->x = x;
+  l->r->start->y = y;
+  l->r->start->z = z;
+  l->r->start->w = 1.0;
+   
+  //direction
+  l->r->dir->x = vx;
+  l->r->dir->y = vy;
+  l->r->dir->z = vz;
+  l->r->dir->w = 0.0;
+
+  l->r = r;
+  l->g = g;
+  l->b = b;
+
+  return(l);
+}
+
 /* LIGHTING CALCULATIONS */
 
 /* shade */
 /* color of point p with normal vector n and material m returned in c */
 /* in is the direction of the incoming ray and d is the recusive depth */
-void shade(point* p, vector* n, material* m, vector* in, color* c, int d) {
+void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light* l) {
 
   /* so far, just finds ambient component of color */
   c->r = m->amb * m->r;

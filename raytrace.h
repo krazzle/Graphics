@@ -35,9 +35,20 @@ typedef struct material {
   GLfloat r;
   GLfloat g;
   GLfloat b; 
-  /* ambient reflectivity */
+
   GLfloat amb;
+  GLfloat dif;
+  GLfloat spec;
+  GLfloat s;
+
 } material;
+
+typedef struct light {
+  ray* r;
+  GLfloat r;
+  GLfloat g;
+  GLfloat b;
+}
 
 typedef struct color {
   GLfloat r;
@@ -66,7 +77,8 @@ int raySphereIntersect(ray*,sphere*,double*);
 void findSphereNormal(sphere*,point*,vector*);
 
 /* functions in light.cpp */
-material* makeMaterial(GLfloat, GLfloat, GLfloat, GLfloat);
+material* makeMaterial(GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat);
+light* makeLight(GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat);
 void shade(point*,vector*,material*,vector*,color*,int);
 
 /* global variables */
