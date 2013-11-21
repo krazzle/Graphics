@@ -17,7 +17,8 @@
 
 GLfloat dotProduct(vector* v1, vector* v2);
 void ambientReflection(color *c , GLfloat ambientCoef, material* m);
-
+void specularReflection(vector* outgoingSpecularIntensity, GLfloat specularCoef, vector* reflectionVector, vector* viewVector, vector* incomingSpecularIntensity);
+void diffuseReflection(vector* outgoingDiffuseIntensity, GLfloat diffuseCoef, vector* normalVector, vector* lightVector, vector* incomingDiffuseIntensity);
 
 material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb, GLfloat dif, GLfloat spec, GLfloat s) {
   material* m;
@@ -80,31 +81,48 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
 }
 
 
+
 void ambientReflection(color *c , GLfloat ambientCoef, material* m){
   c->r = ambientCoef*m->r;
   c->g = ambientCoef*m->g;
   c->b = ambientCoef*m->b;
 }
 
-
-GLfloat diffuseReflection(GLfloat diffuseCoef, vector normalVector, vector lightVector, GLfloat incomingDiffuseIntensity) {
-
+void diffuseReflection(vector* outgoingDiffuseIntensity, GLfloat diffuseCoef, vector* normalVector, vector* lightVector, vector* incomingDiffuseIntensity) {
   GLfloat max = 0;
   if ( 0 < dotProduct(normalVector, lightVector) )
     max = dotProduct(normalVector, lightVector);
   
-  return diffuseCoef *
-    max *
-    incomingDiffuseIntensity;
+  outgoingDiffuseIntensity->x = diffuseCoef *
+    max * 
+    incomingDiffuseIntensity->x;
+  
+  outgoingDiffuseIntensity->y = diffuseCoef *
+    max * 
+    incomingDiffuseIntensity->y;
+  
+  outgoingDiffuseIntensity->z = diffuseCoef *
+    max * 
+    incomingDiffuseIntensity->z;
   
 }
 
-GLfloat specularReflection( GLfloat specularCoef, vector* reflectionVector, vector* viewVector, GLfloat incomingSpecularIntensity) {
+void specularReflection(vector* outgoingSpecularIntensity, GLfloat specularCoef, vector* reflectionVector, vector* viewVector, vector* incomingSpecularIntensity) {
+  
+  GLfloat pizza = dotProduct( reflectionVector, viewVector);
+  
+  outgoingSpecularIntensity->x = specularCoef *
+    pizza *
+    incomingSpecularIntensity->x;
 
-  return specularCoef *
-    dotProduct( reflectionVector, viewVector) *
-    incomingSpecularIntensity;
-
+  outgoingSpecularIntensity->y = specularCoef *
+    pizza *
+    incomingSpecularIntensity->y;
+  
+  outgoingSpecularIntensity->z = specularCoef *
+    pizza *
+    incomingSpecularIntensity->z;
+  
 }
 
 
