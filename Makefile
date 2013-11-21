@@ -24,8 +24,8 @@ endif
 # Uncomment the following line if you are using Mesa
 #LIBS = -lglut -lMesaGLU -lMesaGL -lm
 
-subdiv: subdiv.cpp drawing.cpp data.cpp drawing.h data.h
-	${CC} ${CFLAGS} ${INCLUDE} -o subdiv ${LIBDIR} subdiv.cpp drawing.cpp data.cpp ${LIBS}
+raytrace: raytrace.cpp geometry.cpp light.cpp lowlevel.cpp raytrace.h lowlevel.h
+	${CC} ${CFLAGS} ${INCLUDE} -o raytrace ${LIBDIR} raytrace.cpp geometry.cpp light.cpp lowlevel.cpp ${LIBS} 
 
 clean:
-	rm -f subdiv *.o core
+	rm -f raytrace *.o core
