@@ -64,7 +64,7 @@ typedef struct sphere {
 } sphere;
 
 /* functions in raytrace.cpp */
-void traceRay(ray*, color*, int);
+void traceRay(ray*, color*, int, vector*);
 
 /* functions in geometry.cpp */
 sphere* makeSphere(GLfloat, GLfloat, GLfloat, GLfloat);
@@ -79,7 +79,7 @@ void findSphereNormal(sphere*,point*,vector*);
 /* functions in light.cpp */
 material* makeMaterial(GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat);
 light* makeLight(GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat);
-void shade(point*,vector*,material*,vector*,color*,int, light*);
+void shade(point*,vector*,material*,vector*,color*,int, light*, vector*);
 
 /* global variables */
 extern int width;

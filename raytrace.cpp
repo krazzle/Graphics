@@ -21,7 +21,7 @@ void initScene(void);
 void initCamera (int, int);
 void display(void);
 void init(int, int);
-void traceRay(ray*,color*);
+void traceRay(ray*,color*,int,vector*);
 void drawScene(void);
 void firstHit(ray*,point*,vector*,material**);
 
@@ -125,7 +125,7 @@ void drawScene () {
       calculateDirection(viewpoint,&worldPix,&direction);
 
       /* trace the ray! */
-      traceRay(&r,&c,0);
+      traceRay(&r,&c,0,(vector*)&direction);
       /* write the pixel! */
       drawPixel(i,j,c.r,c.g,c.b);
     }
@@ -135,7 +135,7 @@ void drawScene () {
 
 /* returns the color seen by ray r in parameter c */
 /* d is the recursive depth */
-void traceRay(ray* r, color* c, int d) {
+void traceRay(ray* r, color* c, int d, vector* direction) {
   point p;  /* first intersection point */
   vector n;
   material* m;
@@ -144,7 +144,7 @@ void traceRay(ray* r, color* c, int d) {
   firstHit(r,&p,&n,&m);
 
   if (p.w != 0.0) {
-    shade(&p,&n,m,r->dir,c,d,l1);  /* do the lighting calculations */
+    shade(&p,&n,m,r->dir,c,d,l1, direction);  /* do the lighting calculations */
   } else {             /* nothing was hit */
     c->r = 0.0;
     c->g = 0.0;

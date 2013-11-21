@@ -19,6 +19,7 @@ void specularReflection(color* SpecularIntensity, vector* reflectionVector, vect
 GLfloat dotProduct(vector* v1, vector* v2);
 void ambientReflection(color *c , material* m);
 void diffuseReflection(color* DiffuseIntensity,vector* normalVector, light* lightVector, material* m);
+vector* getReflection(vector* normal, vector* light);
 
 material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb, GLfloat dif, GLfloat spec, GLfloat s) {
 
@@ -68,15 +69,18 @@ light* makeLight(GLfloat x, GLfloat y ,GLfloat z, GLfloat vx, GLfloat vy, GLfloa
 /* shade */
 /* color of point p with normal vector n and material m returned in c */
 /* in is the direction of the incoming ray and d is the recusive depth */
-void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light* l) {
+void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light* l, vector* direction) {
 
 
   color *Ia = (color*)malloc(sizeof(color));
   color *Id = (color*)malloc(sizeof(color));
   color *Is = (color*)malloc(sizeof(color));  
 
+  vector* reflectionVec = getReflection(n, l->r->dir);  
+
   ambientReflection(Ia, m);
   diffuseReflection(Id, n, l, m);
+  specularReflection(Is, reflectionVec ,direction, m);
  // specularReflection(Is, 
 
   c->r = Id->r;
@@ -108,13 +112,13 @@ void diffuseReflection(color* DiffuseIntensity, vector* normalVector, light* lig
   
 }
 
-void specularReflection(color* SpecularIntensity,light* reflectionVector, vector* viewVector, material* m) {
+void specularReflection(color* SpecularIntensity,vector* reflectionVector, vector* viewVector, material* m) {
   
-//  GLfloat pizza = dotProduct( reflectionVector, viewVector);
+  GLfloat pizza = dotProduct(reflectionVector, viewVector);
   
-//  SpecularIntensity->r =  * pow(pizza, m->s) * m->r;
-//  SpecularIntensity->g = specularCoef * pow(pizza, m->s) * m->g;
- // SpecularIntensity->z = specularCoef * pow(pizza, m->s) * m->b;
+  SpecularIntensity->r = m->spec * pow(pizza, m->s) * m->r;
+  SpecularIntensity->g = m->spec * pow(pizza, m->s) * m->g;
+  SpecularIntensity->b = m->spec * pow(pizza, m->s) * m->b;
 }
 
 GLfloat pow(GLfloat a, GLfloat b){
@@ -133,7 +137,12 @@ GLfloat dotProduct(vector* v1, vector* v2) {
   return val;
 }
 
-
-
-
-
+vector* getReflection(vector* normal, vector* light){
+	GLfloat dot = dotProduct(normal, light);
+        vector* reflection = (vector*)malloc(sizeof(vector));
+        reflection->x = 2*dot*normal->x - light->x;
+        reflection->y = 2*dot*normal->y - light->y;
+	reflection->z = 2*dot*normal->z - light->z;
+  	reflection->w = 0;
+	return reflection;
+}
