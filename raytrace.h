@@ -45,10 +45,10 @@ typedef struct material {
 
 typedef struct light {
   ray* r;
-  GLfloat r;
-  GLfloat g;
-  GLfloat b;
-}
+  GLfloat red;
+  GLfloat green;
+  GLfloat blue;
+} light;
 
 typedef struct color {
   GLfloat r;
@@ -79,7 +79,7 @@ void findSphereNormal(sphere*,point*,vector*);
 /* functions in light.cpp */
 material* makeMaterial(GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat);
 light* makeLight(GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat);
-void shade(point*,vector*,material*,vector*,color*,int);
+void shade(point*,vector*,material*,vector*,color*,int, light*);
 
 /* global variables */
 extern int width;

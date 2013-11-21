@@ -16,9 +16,12 @@
 #include "raytrace.h"
 
 void specularReflection(vector* outgoingSpecularIntensity, GLfloat specularCoef, vector* reflectionVector, vector* viewVector, vector* incomingSpecularIntensity);
-void diffuseReflection(vector* outgoingDiffuseIntensity, GLfloat diffuseCoef, vector* normalVector, vector* lightVector, vector* incomingDiffuseIntensity)
+GLfloat dotProduct(vector* v1, vector* v2);
+void ambientReflection(color *c , GLfloat ambientCoef, material* m);
+void diffuseReflection(vector* outgoingDiffuseIntensity, GLfloat diffuseCoef, vector* normalVector, vector* lightVector, vector* incomingDiffuseIntensity);
 
-material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb) {
+material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb, GLfloat dif, GLfloat spec, GLfloat s) {
+
   material* m;
   
   /* allocate memory */
@@ -28,6 +31,9 @@ material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb) {
   m->g = g;
   m->b = b;
   m->amb = amb;
+  m->dif = dif;
+  m->spec = spec;
+  m->s = s;
   return(m);
 }
 
@@ -47,9 +53,9 @@ light* makeLight(GLfloat x, GLfloat y ,GLfloat z, GLfloat vx, GLfloat vy, GLfloa
   l->r->dir->z = vz;
   l->r->dir->w = 0.0;
 
-  l->r = r;
-  l->g = g;
-  l->b = b;
+  l->red = r;
+  l->green = g;
+  l->blue = b;
 
   return(l);
 }
@@ -61,11 +67,13 @@ light* makeLight(GLfloat x, GLfloat y ,GLfloat z, GLfloat vx, GLfloat vy, GLfloa
 /* in is the direction of the incoming ray and d is the recusive depth */
 void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light* l) {
 
-  /* so far, just finds ambient component of color */
-  c->r = m->amb * m->r;
-  c->g = m->amb * m->g;
-  c->b = m->amb * m->b;
-  
+
+  color *Ia = (color*)malloc(sizeof(color));
+  color *Id = (color*)malloc(sizeof(color));
+  color *Is = (color*)malloc(sizeof(color));  
+
+  ambientReflection(Ia, m->amb, m);
+
   /* clamp color values to 1.0 */
   if (c->r > 1.0) c->r = 1.0;
   if (c->g > 1.0) c->g = 1.0;
@@ -74,8 +82,15 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
 }
 
 
+
+void ambientReflection(color *c , GLfloat ambientCoef, material* m){
+  c->r = ambientCoef*m->r;
+  c->g = ambientCoef*m->g;
+  c->b = ambientCoef*m->b;
+}
+
 void diffuseReflection(vector* outgoingDiffuseIntensity, GLfloat diffuseCoef, vector* normalVector, vector* lightVector, vector* incomingDiffuseIntensity) {
-  
+
   GLfloat max = 0;
   if ( 0 < dotProduct(normalVector, lightVector) )
     max = dotProduct(normalVector, lightVector);
