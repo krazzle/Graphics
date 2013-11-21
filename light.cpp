@@ -15,10 +15,10 @@
 #include "common.h"
 #include "raytrace.h"
 
-void specularReflection(vector* outgoingSpecularIntensity, GLfloat specularCoef, vector* reflectionVector, vector* viewVector, vector* incomingSpecularIntensity);
+void specularReflection(color* SpecularIntensity, vector* reflectionVector, vector* viewVector, material* m);
 GLfloat dotProduct(vector* v1, vector* v2);
-void ambientReflection(color *c , GLfloat ambientCoef, material* m);
-void diffuseReflection(vector* outgoingDiffuseIntensity, GLfloat diffuseCoef, vector* normalVector, vector* lightVector, vector* incomingDiffuseIntensity);
+void ambientReflection(color *c , material* m);
+void diffuseReflection(color* DiffuseIntensity,vector* normalVector, light* lightVector, material* m);
 
 material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb, GLfloat dif, GLfloat spec, GLfloat s) {
 
@@ -72,7 +72,13 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
   color *Id = (color*)malloc(sizeof(color));
   color *Is = (color*)malloc(sizeof(color));  
 
-  ambientReflection(Ia, m->amb, m);
+  ambientReflection(Ia, m);
+  diffuseReflection(Id, n, l, m);
+ // specularReflection(Is, 
+
+  c->r = Ia->r;
+  c->g = Ia->g;
+  c->b = Ia->b;
 
   /* clamp color values to 1.0 */
   if (c->r > 1.0) c->r = 1.0;
@@ -81,50 +87,39 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
 
 }
 
-
-
-void ambientReflection(color *c , GLfloat ambientCoef, material* m){
-  c->r = ambientCoef*m->r;
-  c->g = ambientCoef*m->g;
-  c->b = ambientCoef*m->b;
+void ambientReflection(color *c , material* m){
+  c->r = m->amb*m->r;
+  c->g = m->amb*m->g;
+  c->b = m->amb*m->b;
 }
 
-void diffuseReflection(vector* outgoingDiffuseIntensity, GLfloat diffuseCoef, vector* normalVector, vector* lightVector, vector* incomingDiffuseIntensity) {
+void diffuseReflection(color* DiffuseIntensity, vector* normalVector, light* lightVector, material* m) {
 
   GLfloat max = 0;
-  if ( 0 < dotProduct(normalVector, lightVector) )
-    max = dotProduct(normalVector, lightVector);
+  if ( 0 < dotProduct(normalVector, (vector*)lightVector->r->dir) )
+    max = dotProduct(normalVector, (vector*)lightVector->r->dir);
   
-  outgoingDiffuseIntensity->x = diffuseCoef *
-    max * 
-    incomingDiffuseIntensity->x;
-  
-  outgoingDiffuseIntensity->y = diffuseCoef *
-    max * 
-    incomingDiffuseIntensity->y;
-  
-  outgoingDiffuseIntensity->z = diffuseCoef *
-    max * 
-    incomingDiffuseIntensity->z;
+  DiffuseIntensity->r = m->dif * max * m->r;
+  DiffuseIntensity->g = m->dif * max * m->g;
+  DiffuseIntensity->b = m->dif * max * m->b;
   
 }
 
-void specularReflection(vector* outgoingSpecularIntensity, GLfloat specularCoef, vector* reflectionVector, vector* viewVector, vector* incomingSpecularIntensity) {
+void specularReflection(color* SpecularIntensity,light* reflectionVector, vector* viewVector, material* m) {
   
-  GLfloat pizza = dotProduct( reflectionVector, viewVector);
+//  GLfloat pizza = dotProduct( reflectionVector, viewVector);
   
-  outgoingSpecularIntensity->x = specularCoef *
-    pizza *
-    incomingSpecularIntensity->x;
+//  SpecularIntensity->r =  * pow(pizza, m->s) * m->r;
+//  SpecularIntensity->g = specularCoef * pow(pizza, m->s) * m->g;
+ // SpecularIntensity->z = specularCoef * pow(pizza, m->s) * m->b;
+}
 
-  outgoingSpecularIntensity->y = specularCoef *
-    pizza *
-    incomingSpecularIntensity->y;
-  
-  outgoingSpecularIntensity->z = specularCoef *
-    pizza *
-    incomingSpecularIntensity->z;
-  
+GLfloat pow(GLfloat a, GLfloat b){
+	GLfloat val = a;
+	int i;
+	for(i = b; i > 0; i--)
+		val*=a;
+	return val;
 }
 
 
