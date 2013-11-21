@@ -54,7 +54,8 @@ int main (int argc, char** argv) {
 }
 
 void init(int w, int h) {
-
+  printf("INIT\n");
+  
   /* OpenGL setup */
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -79,7 +80,7 @@ void display() {
 void initScene () {
   s1 = makeSphere(0.0,0.0,-2.0,0.25);
   s1->m = makeMaterial(1.0,0.1,1.0,.5,.5,.5,.5);
-  l1 = makeLight(0,0,10, 0,0,-1,1.0,0,0);
+  l1 = makeLight(0,0,10, 0,0,1,1.0,0,0);
 }
 
 void initCamera (int w, int h) {
@@ -113,7 +114,6 @@ void drawScene () {
     flushCanvas();
 
     for (j=0; j<height; j++) {
-
       /* find position of pixel in world coordinates */
       /* y position = (pixel height/middle) scaled to world coords */ 
       worldPix.y = (j-(height/2))*imageWidth/width;
@@ -130,6 +130,7 @@ void drawScene () {
       drawPixel(i,j,c.r,c.g,c.b);
     }
   }
+  printf("done drawing\n");
 }
 
 /* returns the color seen by ray r in parameter c */

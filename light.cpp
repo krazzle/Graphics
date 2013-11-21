@@ -40,6 +40,9 @@ material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb, GLfloat dif
 light* makeLight(GLfloat x, GLfloat y ,GLfloat z, GLfloat vx, GLfloat vy, GLfloat vz, GLfloat r, GLfloat g, GLfloat b){
   light *l;
   l = (light*) malloc(sizeof(light));
+  l->r = (ray*) malloc(sizeof(ray));
+  l->r->start = (point*)malloc(sizeof(point));
+  l->r->dir = (vector*)malloc(sizeof(vector));  
 
   //location
   l->r->start->x = x;
@@ -76,9 +79,9 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
   diffuseReflection(Id, n, l, m);
  // specularReflection(Is, 
 
-  c->r = Ia->r;
-  c->g = Ia->g;
-  c->b = Ia->b;
+  c->r = Id->r;
+  c->g = Id->g;
+  c->b = Id->b;
 
   /* clamp color values to 1.0 */
   if (c->r > 1.0) c->r = 1.0;
@@ -96,8 +99,8 @@ void ambientReflection(color *c , material* m){
 void diffuseReflection(color* DiffuseIntensity, vector* normalVector, light* lightVector, material* m) {
 
   GLfloat max = 0;
-  if ( 0 < dotProduct(normalVector, (vector*)lightVector->r->dir) )
-    max = dotProduct(normalVector, (vector*)lightVector->r->dir);
+  GLfloat dot_product = dotProduct(normalVector, lightVector->r->dir);
+  if ( dot_product > 0 ) max = dot_product;
   
   DiffuseIntensity->r = m->dif * max * m->r;
   DiffuseIntensity->g = m->dif * max * m->g;
@@ -124,11 +127,10 @@ GLfloat pow(GLfloat a, GLfloat b){
 
 
 GLfloat dotProduct(vector* v1, vector* v2) {
-  
-  return ( v1->x * v2->x ) + 
-    ( v1->y * v2->y ) + 
-    ( v1->z * v2->z ); 
-  
+  GLfloat val = (v1->x*v2->x) + (v1->y*v2->y) + (v1->z*v2->z);
+
+//  printf("dot product: (%f,%f,%f) . (%f,%f,%f) = %f\n", v1->x, v1->y, v1->z, v2->x, v2->y, v2->z, val);
+  return val;
 }
 
 
