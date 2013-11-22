@@ -20,6 +20,7 @@ GLfloat dotProduct(vector* v1, vector* v2);
 void ambientReflection(color *c , material* m);
 void diffuseReflection(color* DiffuseIntensity,vector* normalVector, light* lightVector, material* m);
 vector* getReflection(vector* normal, vector* light);
+GLfloat comp_pow(GLfloat a, GLfloat b);
 
 material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb, GLfloat dif, GLfloat spec, GLfloat s) {
 
@@ -69,7 +70,7 @@ light* makeLight(GLfloat x, GLfloat y ,GLfloat z, GLfloat vx, GLfloat vy, GLfloa
 /* shade */
 /* color of point p with normal vector n and material m returned in c */
 /* in is the direction of the incoming ray and d is the recusive depth */
-void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light* l, vector* direction) {
+void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light* l) {
 
 
   color *Ia = (color*)malloc(sizeof(color));
@@ -80,12 +81,12 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
 
   ambientReflection(Ia, m);
   diffuseReflection(Id, n, l, m);
-  specularReflection(Is, reflectionVec ,direction, m);
+  specularReflection(Is, reflectionVec ,in, m);
  // specularReflection(Is, 
 
-  c->r = Id->r;
-  c->g = Id->g;
-  c->b = Id->b;
+  c->r = Ia->r + Id->r + Is->r;
+  c->g = Ia->g + Id->g + Is->g;
+  c->b = Ia->b + Id->b + Is->b;
 
   /* clamp color values to 1.0 */
   if (c->r > 1.0) c->r = 1.0;
@@ -113,19 +114,26 @@ void diffuseReflection(color* DiffuseIntensity, vector* normalVector, light* lig
 }
 
 void specularReflection(color* SpecularIntensity,vector* reflectionVector, vector* viewVector, material* m) {
-  
-  GLfloat pizza = dotProduct(reflectionVector, viewVector);
-  
-  SpecularIntensity->r = m->spec * pow(pizza, m->s) * m->r;
-  SpecularIntensity->g = m->spec * pow(pizza, m->s) * m->g;
-  SpecularIntensity->b = m->spec * pow(pizza, m->s) * m->b;
+ // printf("reflection (%f,%f,%f) view (%f,%f,%f)\n", reflectionVector->x, reflectionVector->y, reflectionVector->z, viewVector->x, viewVector->y, viewVector->z);  
+  GLfloat pizza = dotProduct(viewVector, reflectionVector);
+  GLfloat max = 0;
+  if( pizza > 0) 
+  	max = pizza;
+
+  GLfloat powVal = comp_pow(max, m->s);
+
+  SpecularIntensity->r = m->spec * powVal * m->r;
+  SpecularIntensity->g = m->spec * powVal * m->g;
+  SpecularIntensity->b = m->spec * powVal * m->b;
 }
 
-GLfloat pow(GLfloat a, GLfloat b){
+GLfloat comp_pow(GLfloat a, GLfloat b){
 	GLfloat val = a;
 	int i;
 	for(i = b; i > 0; i--)
 		val*=a;
+
+//	printf("%f ^ %f = %f\n", a,b,val); 
 	return val;
 }
 
@@ -140,9 +148,9 @@ GLfloat dotProduct(vector* v1, vector* v2) {
 vector* getReflection(vector* normal, vector* light){
 	GLfloat dot = dotProduct(normal, light);
         vector* reflection = (vector*)malloc(sizeof(vector));
-        reflection->x = 2*dot*normal->x - light->x;
-        reflection->y = 2*dot*normal->y - light->y;
-	reflection->z = 2*dot*normal->z - light->z;
+        reflection->x = -((2*dot*normal->x) - light->x);
+        reflection->y = -((2*dot*normal->y) - light->y);
+	reflection->z = -((2*dot*normal->z) - light->z);
   	reflection->w = 0;
 	return reflection;
 }
