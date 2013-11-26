@@ -124,7 +124,7 @@ void drawScene () {
   for (i=0; i<width; i++) {
     /* Refresh the display */
     /* Comment this line out after debugging */
-    flushCanvas();
+    //flushCanvas();
 
     for (j=0; j<height; j++) {
       /* find position of pixel in world coordinates */
