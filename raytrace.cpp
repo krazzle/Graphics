@@ -67,7 +67,7 @@ void init(int w, int h) {
   /* OpenGL setup */
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
+  glOrtho(0, 1.0, 0, 1.0, -1.0, 1.0);
   glClearColor(0.0, 0.0, 0.0, 0.0);  
 
   /* low-level graphics setup */
@@ -91,12 +91,15 @@ void initScene () {
   sceneItems = (item**) malloc(sizeof(item*)*10);  
 
   numItems = 0;
-  s1 = makeSphere(.15,0.0,-2.0,0.2);
-  s2 = makeSphere(-.15, 0.0, -4.0, 0.2);
-  s1->m = makeMaterial(1.0, 0.1, 1.0, .4, 0, .6, 9);
-  s2->m = makeMaterial(1.0, 0.1, 0.0, .4, 0, .6, 9);
+  s1 = makeSphere(.15,.15,-2.0,0.15);
+  s2 = makeSphere(-.15, .15, -4.0, 0.15);
+  s1->m = makeMaterial(1.0, 0.1, 1.0, .4, .6, 0, 9);
+  s2->m = makeMaterial(1.0, 0.1, 0.0, .4, .6, 0, 9);
+  p1 = makePlane(0,1,0,1);
+  p1->m = makeMaterial(0.0,1.0,1.0, 0,1,0 ,2);
   addItem((uint32_t)&s2, 0);
   addItem((uint32_t)&s1, 0);
+  addItem((uint32_t)&p1, 1);
   l1 = makeLight(2,2,2, .5,.5,.5,1.0,0,0);
 //  l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
   lights[0] = l1;
@@ -113,7 +116,7 @@ void addItem(uint32_t ptr, int type){
 }
 
 void initCamera (int w, int h) {
-  viewpoint = makePoint(0.0,0.0,0.0);
+  viewpoint = makePoint(0.0,0,0);
   pnear = 1.0;
   fovx = PI/6;
 }
@@ -206,6 +209,7 @@ void firstHit(ray* r, point* p, vector* n, material* *m) {
 			}
 			break;}
 		case 1:{
+ 	//		printf("drawing plane\n");
 			//possibly wrong casting...
 			plane* pl = *((plane**)cur_item->ptr);
 			hit[i] = planeIntersect(r, pl, &t);
