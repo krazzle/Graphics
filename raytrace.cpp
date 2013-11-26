@@ -29,7 +29,11 @@ void firstHit(ray*,point*,vector*,material**);
 
 /* the scene: so far, just one sphere */
 sphere* s1;
+sphere* s2;
 light* l1;
+light* l2;
+
+light** lights;
 
 /* the viewing parameters: */
 point* viewpoint;
@@ -78,9 +82,18 @@ void display() {
 }
 
 void initScene () {
-  s1 = makeSphere(0.0,0.0,-2.0,0.25);
-  s1->m = makeMaterial(1.0,0.1,1.0,.1,.7,.2,2);
+  
+  lights = (light**) malloc(sizeof(light*));
+  
+
+  s1 = makeSphere(.25,0.0,-2.0,0.2);
+  s2 = makeSphere(-.25, 0.0, -2.0, 0.2);
+  s1->m = makeMaterial(1.0, 0.1, 1.0, .2, .5, .3, 5);
+  s2->m = makeMaterial(1.0, 0.1, 0.0, .2, .5, .3, 5);
   l1 = makeLight(10,10,10, .5,.5,.5,1.0,0,0);
+  l2 = makeLight(-10,10,10,.5,.5,.5,1.0,0,0);
+  lights[0] = l1;
+  lights[2] = l2;
 }
 
 void initCamera (int w, int h) {
@@ -144,7 +157,7 @@ void traceRay(ray* r, color* c, int d)  {
   firstHit(r,&p,&n,&m);
 
   if (p.w != 0.0) {
-    shade(&p,&n,m,r->dir,c,d,l1);  /* do the lighting calculations */
+    shade(&p,&n,m,r->dir,c,d,(light**)lights);  /* do the lighting calculations */
   } else {             /* nothing was hit */
     c->r = 0.0;
     c->g = 0.0;
@@ -159,6 +172,7 @@ void traceRay(ray* r, color* c, int d)  {
 void firstHit(ray* r, point* p, vector* n, material* *m) {
   double t = 0;     /* parameter value at first hit */
   int hit = FALSE;
+  int hit1 = FALSE;
   
   hit = raySphereIntersect(r,s1,&t);
   if (hit) {
@@ -166,9 +180,18 @@ void firstHit(ray* r, point* p, vector* n, material* *m) {
     findPointOnRay(r,t,p);
     findSphereNormal(s1,p,n);
   } else {
-    /* indicates no hit */
-    p->w = 0.0;
+  //  p->w = 0.0;
   }
+    
+  hit1 = raySphereIntersect(r, s2, &t);
+  if(hit1){
+	*m = s2->m;
+  	findPointOnRay(r, t, p);
+ 	findSphereNormal(s2, p, n);
+  }
+  
+  if(!hit && !hit1)
+	p->w = 0.0;
 
 }
 

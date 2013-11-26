@@ -15,7 +15,8 @@
 #include "common.h"
 #include "raytrace.h"
 
-void specularReflection(color* SpecularIntensity, vector* reflectionVector, vector* viewVector, material* m);
+void normalize(vector* v);
+void specularReflection(color* SpecularIntensity,vector* normal,  vector* light, vector* viewVector, material* m);
 GLfloat dotProduct(vector* v1, vector* v2);
 void ambientReflection(color *c , material* m);
 void diffuseReflection(color* DiffuseIntensity,vector* normalVector, light* lightVector, material* m);
@@ -70,24 +71,39 @@ light* makeLight(GLfloat x, GLfloat y ,GLfloat z, GLfloat vx, GLfloat vy, GLfloa
 /* shade */
 /* color of point p with normal vector n and material m returned in c */
 /* in is the direction of the incoming ray and d is the recusive depth */
-void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light* l) {
+void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light** lights) {
 
+  normalize(n);
+  normalize(in);
 
   color *Ia = (color*)malloc(sizeof(color));
   color *Id = (color*)malloc(sizeof(color));
   color *Is = (color*)malloc(sizeof(color));  
 
-  vector* reflectionVec = getReflection(n, l->r->dir);  
+  //vector* reflectionVec = getReflection(n, l->r->dir);  
+  int i; 
+  for(i = 0; i < 2; i++){
+  //      printf("getting light...\n");
+	light* l = lights[i];
+//	printf("light before normalizing (%f,%f,%f) \n", l->r->dir->x, l->r->dir->y, l->r->dir->z); 	
 
-  ambientReflection(Ia, m);
-  diffuseReflection(Id, n, l, m);
-  specularReflection(Is, reflectionVec ,in, m);
+//	normalize(l->r->dir);
+   //     printf("light after normalizing (%f,%f,%f) \n", l->r->dir->x, l->r->dir->y, l->r->dir->z);
+
+
+    //    printf("alright now we're calculating\n");
+     //   printf("ambient\n");
+  	ambientReflection(Ia, m);
+ // 	printf("diffuse\n");
+  	diffuseReflection(Id, n, l, m);
+//	printf("specular\n");
+  	specularReflection(Is, n, l->r->dir ,in, m);
  // specularReflection(Is, 
-
-  c->r = Ia->r + Id->r + Is->r;
-  c->g = Ia->g + Id->g + Is->g;
-  c->b = Ia->b + Id->b + Is->b;
-
+//	printf("assigning colors...\n");
+  	c->r += (Ia->r + Id->r + Is->r)/2;
+  	c->g += (Ia->g + Id->g + Is->g)/2;
+  	c->b += (Ia->b + Id->b + Is->b)/2;
+  }
   /* clamp color values to 1.0 */
   if (c->r > 1.0) c->r = 1.0;
   if (c->g > 1.0) c->g = 1.0;
@@ -113,15 +129,20 @@ void diffuseReflection(color* DiffuseIntensity, vector* normalVector, light* lig
   
 }
 
-void specularReflection(color* SpecularIntensity,vector* reflectionVector, vector* viewVector, material* m) {
- // printf("reflection (%f,%f,%f) view (%f,%f,%f)\n", reflectionVector->x, reflectionVector->y, reflectionVector->z, viewVector->x, viewVector->y, viewVector->z);  
-  GLfloat pizza = dotProduct(viewVector, reflectionVector);
+void specularReflection(color* SpecularIntensity,vector* normal, vector* light, vector* viewVector, material* m) {
+ // printf("reflection (%f,%f,%f) view (%f,%f,%f)i\n", reflectionVector->x, reflectionVector->y, reflectionVector->z, viewVector->x, viewVector->y, viewVector->z);  
+  //printf("getting reflection\n");
+  vector* reflectionVec = getReflection(normal, light);  
+
+ // printf("dot product\n");  
+  GLfloat pizza = dotProduct(viewVector, reflectionVec);
   GLfloat max = 0;
   if( pizza > 0) 
   	max = pizza;
 
+ // printf("computing power\n");
   GLfloat powVal = comp_pow(max, m->s);
-
+  
   SpecularIntensity->r = m->spec * powVal * m->r;
   SpecularIntensity->g = m->spec * powVal * m->g;
   SpecularIntensity->b = m->spec * powVal * m->b;
@@ -139,6 +160,7 @@ GLfloat comp_pow(GLfloat a, GLfloat b){
 
 
 GLfloat dotProduct(vector* v1, vector* v2) {
+  //printf(" (%f,%f,%f) . (%f,%f,%f) \n", v1->x, v1->y, v1->z, v2->x, v2->y, v2->z);
   GLfloat val = (v1->x*v2->x) + (v1->y*v2->y) + (v1->z*v2->z);
 
 //  printf("dot product: (%f,%f,%f) . (%f,%f,%f) = %f\n", v1->x, v1->y, v1->z, v2->x, v2->y, v2->z, val);
@@ -146,11 +168,25 @@ GLfloat dotProduct(vector* v1, vector* v2) {
 }
 
 vector* getReflection(vector* normal, vector* light){
+//	printf("dot product\n");
 	GLfloat dot = dotProduct(normal, light);
         vector* reflection = (vector*)malloc(sizeof(vector));
+    
+   // 	printf("about to compute reflection stuff\n");
         reflection->x = -((2*dot*normal->x) - light->x);
         reflection->y = -((2*dot*normal->y) - light->y);
 	reflection->z = -((2*dot*normal->z) - light->z);
   	reflection->w = 0;
+ //	printf("normalizing reflection\n");
+        normalize(reflection);
 	return reflection;
 }
+
+void normalize(vector* v) {
+  GLfloat length = sqrt(v->x*v->x + v->y*v->y + v->z*v->z);
+  v->x = v->x/length;
+  v->y = v->y/length;
+  v->z = v->z/length;
+}
+
+
