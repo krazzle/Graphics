@@ -15,6 +15,9 @@
 #include "common.h"
 #include "raytrace.h"
 
+extern item** sceneItems;
+extern int numItems;
+
 point* makePoint(GLfloat x, GLfloat y, GLfloat z) {
   point* p;
   /* allocate memory */
@@ -71,6 +74,7 @@ void findPointOnRay(ray* r,double t,point* p) {
 /* SPHERES */
 
 sphere* makeSphere(GLfloat x, GLfloat y, GLfloat z, GLfloat r) {
+  //printf("making sphere... its item number %d\n", numItems);
   sphere* s;
   /* allocate memory */
   s = (sphere*) malloc(sizeof(sphere));
@@ -79,7 +83,21 @@ sphere* makeSphere(GLfloat x, GLfloat y, GLfloat z, GLfloat r) {
   s->c = makePoint(x,y,z);   /* center */
   s->r = r;   /* radius */
   s->m = NULL;   /* material */
+
   return(s);
+}
+
+plane* makePlane(GLfloat A, GLfloat B, GLfloat C, GLfloat D){
+  plane* p;
+  p = (plane*) malloc(sizeof(plane));
+  
+  p->A = A;
+  p->B = B;
+  p->C = C;
+  p->D = D;
+  p->m = NULL;
+
+  return(p);
 }
 
 /* returns TRUE if ray r hits sphere s, with parameter value in t */
@@ -120,6 +138,15 @@ int raySphereIntersect(ray* r,sphere* s,double* t) {
   }
 }
 
+int planeIntersect(ray* r, plane* p, double* t){
+	GLfloat top = p->D + (p->A*r->start->x) + (p->B*r->start->y) + (p->C*r->start->z);
+	GLfloat bottom = (p->A*r->dir->x) + (p->B*r->dir->y) + (p->C*r->dir->z);
+	top = -top;
+	*t = top/bottom;
+	if( *t < 0) { return(FALSE); }
+	else return(TRUE);
+}
+
 /* normal vector of s at p is returned in n */
 /* note: dividing by radius normalizes */
 void findSphereNormal(sphere* s, point* p, vector* n) {
@@ -129,4 +156,11 @@ void findSphereNormal(sphere* s, point* p, vector* n) {
   n->w = 0.0;
 }
 
-
+void findPlaneNormal(plane* p, point* point, vector* n){
+  GLfloat val = sqrt((p->A*p->A) + (p->B*p->B) + (p->C*p->C)); 
+ 
+  n->x = p->A/val;
+  n->y = p->B/val;
+  n->z = p->C/val;
+  n->w = 0.0;
+}

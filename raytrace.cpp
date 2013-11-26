@@ -24,17 +24,21 @@ void init(int, int);
 void traceRay(ray*,color*,int);
 void drawScene(void);
 void firstHit(ray*,point*,vector*,material**);
+void addItem(uint32_t, int);
 
 /* local data */
+item** sceneItems;
+int numItems;
 
 /* the scene: so far, just one sphere */
 sphere* s1;
 sphere* s2;
 light* l1;
 light* l2;
+plane* p1;
 
 light** lights;
-
+int num_lights;
 /* the viewing parameters: */
 point* viewpoint;
 GLfloat pnear;  /* distance from viewpoint to image plane */
@@ -84,16 +88,28 @@ void display() {
 void initScene () {
   
   lights = (light**) malloc(sizeof(light*));
-  
+  sceneItems = (item**) malloc(sizeof(item*)*10);  
 
-  s1 = makeSphere(.25,0.0,-2.0,0.2);
-  s2 = makeSphere(-.25, 0.0, -2.0, 0.2);
-  s1->m = makeMaterial(1.0, 0.1, 1.0, .2, .5, .3, 5);
-  s2->m = makeMaterial(1.0, 0.1, 0.0, .2, .5, .3, 5);
-  l1 = makeLight(10,10,10, .5,.5,.5,1.0,0,0);
-  l2 = makeLight(-10,10,10,.5,.5,.5,1.0,0,0);
+  numItems = 0;
+  s1 = makeSphere(.15,0.0,-2.0,0.2);
+  s2 = makeSphere(-.15, 0.0, -4.0, 0.2);
+  s1->m = makeMaterial(1.0, 0.1, 1.0, .4, 0, .6, 9);
+  s2->m = makeMaterial(1.0, 0.1, 0.0, .4, 0, .6, 9);
+  addItem((uint32_t)&s2, 0);
+  addItem((uint32_t)&s1, 0);
+  l1 = makeLight(2,2,2, .5,.5,.5,1.0,0,0);
+//  l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
   lights[0] = l1;
-  lights[2] = l2;
+  num_lights = 1;
+//  lights[1] = l2;
+}
+
+void addItem(uint32_t ptr, int type){
+	item* i = (item*)malloc(sizeof(item));
+	i->ptr= ptr;
+ 	i->type = type;
+	sceneItems[numItems] = i;
+	numItems++;
 }
 
 void initCamera (int w, int h) {
@@ -171,27 +187,43 @@ void traceRay(ray* r, color* c, int d)  {
    material m. If no hit, returns an infinite point (p->w = 0.0) */
 void firstHit(ray* r, point* p, vector* n, material* *m) {
   double t = 0;     /* parameter value at first hit */
-  int hit = FALSE;
-  int hit1 = FALSE;
+  int* hit = (int*) malloc(sizeof(int)*numItems);   
   
-  hit = raySphereIntersect(r,s1,&t);
-  if (hit) {
-    *m = s1->m;
-    findPointOnRay(r,t,p);
-    findSphereNormal(s1,p,n);
-  } else {
-  //  p->w = 0.0;
+  int i; 
+  for(i = 0; i < numItems; i++){
+	item* cur_item = sceneItems[i];
+        switch(cur_item->type){
+		case 0: {
+ 			//printf("generating sphere\n");
+			//possibly wrong
+			//cur_item->ptr is the address of the sphere pointer
+   			sphere* s = *((sphere**)cur_item->ptr);
+			hit[i] = raySphereIntersect(r, s, &t);
+			if(hit[i]){
+				*m = s->m;
+				findPointOnRay(r,t,p);
+				findSphereNormal(s,p,n);
+			}
+			break;}
+		case 1:{
+			//possibly wrong casting...
+			plane* pl = *((plane**)cur_item->ptr);
+			hit[i] = planeIntersect(r, pl, &t);
+			if(hit[i]){
+				*m = pl->m;
+				findPointOnRay(r, t, p);
+				findPlaneNormal(pl, p, n);
+			}	
+			break;}
+		default: printf("type not found\n"); break;
+	}
   }
-    
-  hit1 = raySphereIntersect(r, s2, &t);
-  if(hit1){
-	*m = s2->m;
-  	findPointOnRay(r, t, p);
- 	findSphereNormal(s2, p, n);
-  }
-  
-  if(!hit && !hit1)
-	p->w = 0.0;
+   
+  int sum = 0;
+  for(i = 0; i < numItems; i++)
+	sum+= hit[i];
+
+  if(sum == 0) { p->w = 0.0;}
 
 }
 

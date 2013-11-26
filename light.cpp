@@ -15,6 +15,7 @@
 #include "common.h"
 #include "raytrace.h"
 
+extern int num_lights;
 void normalize(vector* v);
 void specularReflection(color* SpecularIntensity,vector* normal,  vector* light, vector* viewVector, material* m);
 GLfloat dotProduct(vector* v1, vector* v2);
@@ -75,35 +76,33 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
 
   normalize(n);
   normalize(in);
+//  printf("num_lights: %d\n", num_lights);
 
   color *Ia = (color*)malloc(sizeof(color));
   color *Id = (color*)malloc(sizeof(color));
   color *Is = (color*)malloc(sizeof(color));  
 
+  c->r = 0;
+  c->g = 0;
+  c->b = 0;
+
   //vector* reflectionVec = getReflection(n, l->r->dir);  
   int i; 
-  for(i = 0; i < 2; i++){
-  //      printf("getting light...\n");
+  for(i = 0; i < num_lights; i++){
 	light* l = lights[i];
-//	printf("light before normalizing (%f,%f,%f) \n", l->r->dir->x, l->r->dir->y, l->r->dir->z); 	
-
-//	normalize(l->r->dir);
-   //     printf("light after normalizing (%f,%f,%f) \n", l->r->dir->x, l->r->dir->y, l->r->dir->z);
-
-
-    //    printf("alright now we're calculating\n");
-     //   printf("ambient\n");
+      	normalize(l->r->dir);
   	ambientReflection(Ia, m);
- // 	printf("diffuse\n");
   	diffuseReflection(Id, n, l, m);
-//	printf("specular\n");
   	specularReflection(Is, n, l->r->dir ,in, m);
- // specularReflection(Is, 
-//	printf("assigning colors...\n");
-  	c->r += (Ia->r + Id->r + Is->r)/2;
-  	c->g += (Ia->g + Id->g + Is->g)/2;
-  	c->b += (Ia->b + Id->b + Is->b)/2;
+  	c->r += (Ia->r + Id->r + Is->r);
+  	c->g += (Ia->g + Id->g + Is->g);
+  	c->b += (Ia->b + Id->b + Is->b);
   }
+
+  c->r/=num_lights;
+  c->g/=num_lights;
+  c->b/=num_lights;
+ 
   /* clamp color values to 1.0 */
   if (c->r > 1.0) c->r = 1.0;
   if (c->g > 1.0) c->g = 1.0;
