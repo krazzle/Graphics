@@ -72,10 +72,8 @@ typedef struct sphere {
 } sphere;
 
 typedef struct plane {
-  GLfloat A;
-  GLfloat B;
-  GLfloat C;
-  GLfloat D;
+  vector* normal;
+  point* origin;
   material* m;
 } plane;
 
@@ -84,7 +82,7 @@ void traceRay(ray*, color*, int, vector*);
 
 /* functions in geometry.cpp */
 sphere* makeSphere(GLfloat, GLfloat, GLfloat, GLfloat);
-plane* makePlane(GLfloat, GLfloat, GLfloat, GLfloat);
+plane* makePlane(GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat);
 point* makePoint(GLfloat, GLfloat, GLfloat);
 point* copyPoint(point *);
 void freePoint(point *);

@@ -17,6 +17,7 @@
 
 extern item** sceneItems;
 extern int numItems;
+extern GLfloat dotProduct(vector*, vector*);
 
 point* makePoint(GLfloat x, GLfloat y, GLfloat z) {
   point* p;
@@ -87,14 +88,18 @@ sphere* makeSphere(GLfloat x, GLfloat y, GLfloat z, GLfloat r) {
   return(s);
 }
 
-plane* makePlane(GLfloat A, GLfloat B, GLfloat C, GLfloat D){
+plane* makePlane(GLfloat A, GLfloat B, GLfloat C, GLfloat x0, GLfloat y0, GLfloat z0){
   plane* p;
   p = (plane*) malloc(sizeof(plane));
-  
-  p->A = A;
-  p->B = B;
-  p->C = C;
-  p->D = D;
+  p->normal = (vector*) malloc(sizeof(vector));
+  p->origin = (point*) malloc(sizeof(point));
+
+  p->normal->x = A;
+  p->normal->y = B;
+  p->normal->z = C;
+  p->origin->x = x0;
+  p->origin->y = y0;
+  p->origin->z = z0;
   p->m = NULL;
 
   return(p);
@@ -139,12 +144,25 @@ int raySphereIntersect(ray* r,sphere* s,double* t) {
 }
 
 int planeIntersect(ray* r, plane* p, double* t){
-	GLfloat top = p->D + (p->A*r->start->x) + (p->B*r->start->y) + (p->C*r->start->z);
-	GLfloat bottom = (p->A*r->dir->x) + (p->B*r->dir->y) + (p->C*r->dir->z);
+
+	GLfloat d = p->origin->x*p->normal->x + p->origin->y*p->normal->y + p->origin->z*p->normal->z;
+
+//	printf("d: %f r->start (%f,%f,%f) r->dir(%f,%f,%f) p->normal (%f,%f,%f)\n",d, r->start->x, r->start->y, r->start->z, r->dir->x, r->dir->y,r->dir->z, p->normal->x, p->normal->y, p->normal->z);
+
+
+	GLfloat top = d + (p->normal->x*r->start->x) + (p->normal->y*r->start->y) + (p->normal->z*r->start->z);
+	GLfloat bottom = (p->normal->x*r->dir->x) + (p->normal->y*r->dir->y) + (p->normal->z*r->dir->z);
 	top = -top;
 	*t = top/bottom;
+	//printf("*t: %f\n", *t);
 	if( *t < 0) { return(FALSE); }
-	else return(TRUE);
+	else {return(TRUE);}
+
+	printf("r->start (%f,%f,%f) r->dir(%f,%f,%f) p->normal (%f,%f,%f)\n", r->start->x, r->start->y, r->start->z, r->dir->x, r->dir->y,r->dir->z, p->normal->x, p->normal->y, p->normal->z);
+
+/*	*t = -(dotProduct(r->start, p->normal) + d)/dotProduct(r->dir, p->normal);	
+	if(*t < 0) { return(FALSE);}
+	else return(TRUE);*/
 }
 
 /* normal vector of s at p is returned in n */
@@ -157,10 +175,10 @@ void findSphereNormal(sphere* s, point* p, vector* n) {
 }
 
 void findPlaneNormal(plane* p, point* point, vector* n){
-  GLfloat val = sqrt((p->A*p->A) + (p->B*p->B) + (p->C*p->C)); 
+  GLfloat val = sqrt((p->normal->x*p->normal->x) + (p->normal->y*p->normal->y) + (p->normal->z*p->normal->z)); 
  
-  n->x = p->A/val;
-  n->y = p->B/val;
-  n->z = p->C/val;
+  n->x = p->normal->x/val;
+  n->y = p->normal->y/val;
+  n->z = p->normal->z/val;
   n->w = 0.0;
 }

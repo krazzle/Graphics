@@ -29,13 +29,16 @@ void addItem(uint32_t, int);
 /* local data */
 item** sceneItems;
 int numItems;
+int curItem;
 
 /* the scene: so far, just one sphere */
 sphere* s1;
 sphere* s2;
+sphere* s3;
 light* l1;
 light* l2;
 plane* p1;
+
 
 light** lights;
 int num_lights;
@@ -91,20 +94,25 @@ void initScene () {
   sceneItems = (item**) malloc(sizeof(item*)*10);  
 
   numItems = 0;
-  s1 = makeSphere(.15,.15,-2.0,0.15);
-  s2 = makeSphere(-.15, .15, -4.0, 0.15);
-  s1->m = makeMaterial(1.0, 0.1, 1.0, .4, .6, 0, 9);
-  s2->m = makeMaterial(1.0, 0.1, 0.0, .4, .6, 0, 9);
-  p1 = makePlane(0,1,0,1);
+  s1 = makeSphere(.20, -.05,-2.0,0.15);
+  s2 = makeSphere(.15, .15, -1.5, 0.15);
+  s3 = makeSphere(-.15, 0, -2, .15);
+  s1->m = makeMaterial(1.0, 0.1, 1.0, .4, .3, .3, 4);
+  s2->m = makeMaterial(1.0, 0.1, 0.0, .4, .3, .3, 4);
+  s3->m = makeMaterial(0.0,1.0,.3, .4,.3,.3,4);
+  p1 = makePlane(0,0,0, 0,0,0);
   p1->m = makeMaterial(0.0,1.0,1.0, 0,1,0 ,2);
-  addItem((uint32_t)&s2, 0);
+//  addItem((uint32_t)&p1, 1);
   addItem((uint32_t)&s1, 0);
-  addItem((uint32_t)&p1, 1);
-  l1 = makeLight(2,2,2, .5,.5,.5,1.0,0,0);
-//  l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
+  addItem((uint32_t)&s3, 0);
+  addItem((uint32_t)&s2, 0);
+  
+  l1 = makeLight(0,2,2, 0,1,1, 1.0,0,0);
+  l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
   lights[0] = l1;
-  num_lights = 1;
-//  lights[1] = l2;
+  lights[1] = l2;
+  num_lights = 2;
+//`  lights[1] = l2;
 }
 
 void addItem(uint32_t ptr, int type){
@@ -191,7 +199,8 @@ void traceRay(ray* r, color* c, int d)  {
 void firstHit(ray* r, point* p, vector* n, material* *m) {
   double t = 0;     /* parameter value at first hit */
   int* hit = (int*) malloc(sizeof(int)*numItems);   
-  
+  curItem = 2;  
+
   int i; 
   for(i = 0; i < numItems; i++){
 	item* cur_item = sceneItems[i];
@@ -203,6 +212,7 @@ void firstHit(ray* r, point* p, vector* n, material* *m) {
    			sphere* s = *((sphere**)cur_item->ptr);
 			hit[i] = raySphereIntersect(r, s, &t);
 			if(hit[i]){
+				curItem = i;
 				*m = s->m;
 				findPointOnRay(r,t,p);
 				findSphereNormal(s,p,n);
@@ -214,6 +224,7 @@ void firstHit(ray* r, point* p, vector* n, material* *m) {
 			plane* pl = *((plane**)cur_item->ptr);
 			hit[i] = planeIntersect(r, pl, &t);
 			if(hit[i]){
+				curItem = i;
 				*m = pl->m;
 				findPointOnRay(r, t, p);
 				findPlaneNormal(pl, p, n);

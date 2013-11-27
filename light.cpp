@@ -16,6 +16,10 @@
 #include "raytrace.h"
 
 extern int num_lights;
+extern item** sceneItems;
+extern int numItems;
+extern int curItem;
+
 void normalize(vector* v);
 void specularReflection(color* SpecularIntensity,vector* normal,  vector* light, vector* viewVector, material* m);
 GLfloat dotProduct(vector* v1, vector* v2);
@@ -23,6 +27,8 @@ void ambientReflection(color *c , material* m);
 void diffuseReflection(color* DiffuseIntensity,vector* normalVector, light* lightVector, material* m);
 vector* getReflection(vector* normal, vector* light);
 GLfloat comp_pow(GLfloat a, GLfloat b);
+int shadow(point* p, vector* l); 
+
 
 material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb, GLfloat dif, GLfloat spec, GLfloat s) {
 
@@ -94,20 +100,80 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
   	ambientReflection(Ia, m);
   	diffuseReflection(Id, n, l, m);
   	specularReflection(Is, n, l->r->dir ,in, m);
-  	c->r += (Ia->r + Id->r + Is->r);
-  	c->g += (Ia->g + Id->g + Is->g);
-  	c->b += (Ia->b + Id->b + Is->b);
+
+/*	c->r += Ia->r;
+	c->g += Ia->g;
+	c->b += Ia->b;
+*/
+	if(!shadow(p, l->r->start))
+ 	{
+  		c->r += (Ia->r + Id->r + Is->r);
+  		c->g += (Ia->g + Id->g + Is->g);
+  		c->b += (Ia->b + Id->b + Is->b);
+	}
   }
 
   c->r/=num_lights;
   c->g/=num_lights;
-  c->b/=num_lights;
- 
+  c->b/=num_lights; 
+
   /* clamp color values to 1.0 */
   if (c->r > 1.0) c->r = 1.0;
   if (c->g > 1.0) c->g = 1.0;
   if (c->b > 1.0) c->b = 1.0;
 
+}
+
+int shadow(point* p, vector* l){ 
+	ray* r = (ray*)malloc(sizeof(ray));
+	r->start = (point*)malloc(sizeof(point));
+	r->start->x = p->x;
+	r->start->y = p->y;
+	r->start->z = p->z;
+	r->start->w = 1.0;
+	r->dir = (vector*)malloc(sizeof(vector));
+	r->dir->x = l->x;
+	r->dir->y = l->y;
+	r->dir->z = l->z;
+	r->dir->w = 0.0;
+	double t = 0;	
+
+	
+ 	int* hit = (int*) malloc(sizeof(int)*numItems);
+	int i;
+	for(i = 0; i < numItems; i++){
+		if(i == curItem)
+			continue;
+		item* cur_item = sceneItems[i];
+		switch(cur_item->type){
+			case 0: {
+				sphere* s = *((sphere**)cur_item->ptr);
+				hit[i] = raySphereIntersect(r, s, &t);
+				break;
+			}
+			case 1: {
+				plane* pl = *((plane**)cur_item->ptr);
+				hit[i] = planeIntersect(r, pl, &t);
+				break;
+			} 
+			default: {printf("NEITHER\n"); break; }
+		}
+	}
+	
+	int sum = 0;
+	for(i = 0; i < numItems; i++)
+		sum+= hit[i];
+	
+//	printf("p (%f,%f,%f) sum: %f\n",p->x,p->y,p->z,sum);
+
+	if(sum == 0) 
+		return(FALSE);
+	else if( sum != 0){
+	//	printf("p (%f,%f,%f) sum: %d\n",p->x,p->y,p->z,sum);
+		return(TRUE);
+	}
+	else
+		return(FALSE);
 }
 
 void ambientReflection(color *c , material* m){
