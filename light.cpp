@@ -244,17 +244,15 @@ GLfloat dotProduct(vector* v1, vector* v2) {
 }
 
 vector* getReflection(vector* normal, vector* light){
-//	printf("dot product\n");
 	GLfloat dot = dotProduct(normal, light);
         vector* reflection = (vector*)malloc(sizeof(vector));
     
-   // 	printf("about to compute reflection stuff\n");
         reflection->x = -((2*dot*normal->x) - light->x);
         reflection->y = -((2*dot*normal->y) - light->y);
 	reflection->z = -((2*dot*normal->z) - light->z);
   	reflection->w = 0;
- //	printf("normalizing reflection\n");
-        normalize(reflection);//	printf("returning reflection (%f,%f,%f)\n", reflection->x, reflection->y, reflection->z);
+
+        normalize(reflection);
 	return reflection;
 }
 

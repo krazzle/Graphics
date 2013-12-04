@@ -179,30 +179,26 @@ void drawScene () {
 /* returns the color seen by ray r in parameter c */
 /* d is the recursive depth */
 void traceRay(ray* r, color* c, int d)  {
+  //printf("in trace ray...\n");
   point p;  /* first intersection point */
   vector n;
   material* m;
   ray* reflected_ray;
 
   p.w = 0.0;  /* inialize to, "no intersection" */
-  if(d == 0)
-	printf("callin first hit gain\n");
   reflected_ray = firstHit(r,&p,&n,&m);
 
   if (p.w != 0.0) {
-    if(d == 0)
-	printf("callin shae again\n");
     shade(&p,&n,m,r->dir,c,d,(light**)lights);  /* do the lighting calculations */
   } else {             /* nothing was hit */
-    c->r = 0.0;
-    c->g = 0.0;
-    c->b = 0.0;
+    c->r += 0.0;
+    c->g += 0.0;
+    c->b += 0.0;
   }
  
-  if( isValid(reflected_ray->dir) && isValid((vector*)reflected_ray->start)  && (d > 0)){
-	printf("recursing on ray (%f,%f,%f) -> (%f,%f,%f) \n", reflected_ray->start->x, reflected_ray->start->y, reflected_ray->start->z, reflected_ray->dir->x, reflected_ray->dir->y, reflected_ray->dir->z);
-	color* new_c = (color*)malloc(sizeof(color));
-	traceRay(reflected_ray, new_c, d-1);
+  if(d > 0 && p.w != 0){
+//	printf("recursing on ray (%f,%f,%f) -> (%f,%f,%f) \n", reflected_ray->start->x, reflected_ray->start->y, reflected_ray->start->z, reflected_ray->dir->x, reflected_ray->dir->y, reflected_ray->dir->z);
+	traceRay(reflected_ray,c, d-1);
   }
 
 }
@@ -222,6 +218,8 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m) {
 
   int i; 
   for(i = 0; i < numItems; i++){
+	if(i == curItem)
+		continue;
 	item* cur_item = sceneItems[i];
         switch(cur_item->type){
 		case 0: {
@@ -242,8 +240,6 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m) {
 			}
 			break;}
 		case 1:{
- 	//		printf("drawing plane\n");
-			//possibly wrong casting...
 			plane* pl = *((plane**)cur_item->ptr);
 			hit[i] = planeIntersect(r, pl, &t);
 			if(hit[i]){
@@ -251,7 +247,7 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m) {
 				*m = pl->m;
 				findPointOnRay(r, t, p);
 				findPlaneNormal(pl, p, n);
-                                ray_vec->x = p->x - r->start->x;
+			        ray_vec->x = p->x - r->start->x;
                                 ray_vec->y = p->y - r->start->y;
                                 ray_vec->z = p->z - r->start->z;
 
@@ -267,8 +263,7 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m) {
 	sum+= hit[i];
 
   if(sum == 0) { p->w = 0.0; }
-
-  if( isValid(reflection) ){
+  else{
 	reflected_ray->start = p;
 	reflected_ray->dir = reflection;
   }
