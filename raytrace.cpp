@@ -23,8 +23,11 @@ void display(void);
 void init(int, int);
 void traceRay(ray*,color*,int);
 void drawScene(void);
-void firstHit(ray*,point*,vector*,material**);
+ray* firstHit(ray*,point*,vector*,material**);
 void addItem(uint32_t, int);
+extern vector* getReflection(vector*, vector*);
+int isValid(vector*);
+int abs(int);
 
 /* local data */
 item** sceneItems;
@@ -97,8 +100,8 @@ void initScene () {
   s1 = makeSphere(.20, -.05,-2.0,0.15);
   s2 = makeSphere(-.10, .15, -1.5, 0.15);
   s3 = makeSphere(-.15, 0, -2, .15);
-  s1->m = makeMaterial(1.0, 0.1, 1.0, .4, .3, .3, 4);
-  s2->m = makeMaterial(1.0, 0.1, 0.0, .4, .3, .3, 4);
+  s1->m = makeMaterial(1.0, 0.1, 1.0, .2, .6, .2, 4);
+  s2->m = makeMaterial(1.0, 0.1, 0.0, .2, .6, .2, 4);
   s3->m = makeMaterial(0.0,1.0,.3, .4,.3,.3,4);
   p1 = makePlane(0,0,0, 0,0,0);
   p1->m = makeMaterial(0.0,1.0,1.0, 0,1,0 ,2);
@@ -108,10 +111,10 @@ void initScene () {
   addItem((uint32_t)&s2, 0);
   
   l1 = makeLight(0,2,2, 0,1,1, 1.0,0,0);
-  l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
+  //l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
   lights[0] = l1;
-  lights[1] = l2;
-  num_lights = 2;
+  //lights[1] = l2;
+  num_lights = 1;
 //`  lights[1] = l2;
 }
 
@@ -165,7 +168,7 @@ void drawScene () {
       calculateDirection(viewpoint,&worldPix,&direction);
 
       /* trace the ray! */
-      traceRay(&r,&c,0);
+      traceRay(&r,&c,1);
       /* write the pixel! */
       drawPixel(i,j,c.r,c.g,c.b);
     }
@@ -179,27 +182,43 @@ void traceRay(ray* r, color* c, int d)  {
   point p;  /* first intersection point */
   vector n;
   material* m;
+  ray* reflected_ray;
 
   p.w = 0.0;  /* inialize to, "no intersection" */
-  firstHit(r,&p,&n,&m);
+  if(d == 0)
+	printf("callin first hit gain\n");
+  reflected_ray = firstHit(r,&p,&n,&m);
 
   if (p.w != 0.0) {
+    if(d == 0)
+	printf("callin shae again\n");
     shade(&p,&n,m,r->dir,c,d,(light**)lights);  /* do the lighting calculations */
   } else {             /* nothing was hit */
     c->r = 0.0;
     c->g = 0.0;
     c->b = 0.0;
   }
+ 
+  if( isValid(reflected_ray->dir) && isValid((vector*)reflected_ray->start)  && (d > 0)){
+	printf("recursing on ray (%f,%f,%f) -> (%f,%f,%f) \n", reflected_ray->start->x, reflected_ray->start->y, reflected_ray->start->z, reflected_ray->dir->x, reflected_ray->dir->y, reflected_ray->dir->z);
+	color* new_c = (color*)malloc(sizeof(color));
+	traceRay(reflected_ray, new_c, d-1);
+  }
+
 }
 
 /* firstHit */
 /* If something is hit, returns the finite intersection point p, 
    the normal vector n to the surface at that point, and the surface
    material m. If no hit, returns an infinite point (p->w = 0.0) */
-void firstHit(ray* r, point* p, vector* n, material* *m) {
+ray* firstHit(ray* r, point* p, vector* n, material* *m) {
   double t = 0;     /* parameter value at first hit */
   int* hit = (int*) malloc(sizeof(int)*numItems);   
-  curItem = 2;  
+  curItem = numItems+1;  
+  vector* reflection = NULL;
+  ray* reflected_ray = (ray*)malloc(sizeof(ray));
+
+  vector* ray_vec = (vector*)malloc(sizeof(vector));
 
   int i; 
   for(i = 0; i < numItems; i++){
@@ -216,6 +235,10 @@ void firstHit(ray* r, point* p, vector* n, material* *m) {
 				*m = s->m;
 				findPointOnRay(r,t,p);
 				findSphereNormal(s,p,n);
+				ray_vec->x = p->x - r->start->x;
+				ray_vec->y = p->y - r->start->y;
+				ray_vec->z = p->z - r->start->z;
+				reflection = getReflection(n, ray_vec);
 			}
 			break;}
 		case 1:{
@@ -228,6 +251,11 @@ void firstHit(ray* r, point* p, vector* n, material* *m) {
 				*m = pl->m;
 				findPointOnRay(r, t, p);
 				findPlaneNormal(pl, p, n);
+                                ray_vec->x = p->x - r->start->x;
+                                ray_vec->y = p->y - r->start->y;
+                                ray_vec->z = p->z - r->start->z;
+
+				reflection = getReflection(n, ray_vec);
 			}	
 			break;}
 		default: printf("type not found\n"); break;
@@ -238,7 +266,40 @@ void firstHit(ray* r, point* p, vector* n, material* *m) {
   for(i = 0; i < numItems; i++)
 	sum+= hit[i];
 
-  if(sum == 0) { p->w = 0.0;}
+  if(sum == 0) { p->w = 0.0; }
+
+  if( isValid(reflection) ){
+	reflected_ray->start = p;
+	reflected_ray->dir = reflection;
+  }
+  return reflected_ray;
+}
+
+int isValid(vector* r){
+ 	//printf("testing validity...\n");	
+	if(r == NULL  || isnan(r->x))
+		return(FALSE);
+	int s1, s2, s3 = 0; 
+	
+	if( abs(r->x) >= 0 && abs(r->x) < .001 )
+		s1 = 1;
+
+	if( abs(r->y) >= 0 && abs(r->y) < .001 )
+		s2 = 1;
+
+	if( abs(r->z) >= 0 && abs(r->z) < .001 )
+		s3 = 1;
+
+	int sum = s1 + s2 + s3;
+	if (sum == 3) { return(FALSE); } 
+	else return(TRUE);
+
+}
+
+int abs(int a){
+
+	if( a < 0){ return -a; }
+	else return a;
 
 }
 

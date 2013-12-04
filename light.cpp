@@ -19,7 +19,7 @@ extern int num_lights;
 extern item** sceneItems;
 extern int numItems;
 extern int curItem;
-
+extern int firstHit(ray*,point*,vector*,material**);
 void normalize(vector* v);
 void specularReflection(color* SpecularIntensity,vector* normal,  vector* light, vector* viewVector, material* m);
 GLfloat dotProduct(vector* v1, vector* v2);
@@ -78,11 +78,18 @@ light* makeLight(GLfloat x, GLfloat y ,GLfloat z, GLfloat vx, GLfloat vy, GLfloa
 /* shade */
 /* color of point p with normal vector n and material m returned in c */
 /* in is the direction of the incoming ray and d is the recusive depth */
-void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light** lights) {
+ray* shade(point* p, vector* n, material* m, vector* in, color* c, int d, light** lights) {
 
+ // printf("in  shade now!\n");
+  vector reflected_n;
+  ray* reflected_ray = NULL;
+  point* intersect_p = (point*)malloc(sizeof(point));
+  //material* trash_m;
+
+ // printf("calling normalize of the ones\n");
   normalize(n);
   normalize(in);
-//  printf("num_lights: %d\n", num_lights);
+ // printf("num_lights: %d\n", num_lights);
 
   color *Ia = (color*)malloc(sizeof(color));
   color *Id = (color*)malloc(sizeof(color));
@@ -92,6 +99,8 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
   c->g = 0;
   c->b = 0;
 
+
+ // printf("in shade\n");
   //vector* reflectionVec = getReflection(n, l->r->dir);  
   int i; 
   for(i = 0; i < num_lights; i++){
@@ -101,16 +110,18 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
   	diffuseReflection(Id, n, l, m);
   	specularReflection(Is, n, l->r->dir ,in, m);
 
-/*	c->r += Ia->r;
+	c->r += Ia->r;
 	c->g += Ia->g;
 	c->b += Ia->b;
-*/
-	if(!shadow(p, l->r->start))
- 	{
-  		c->r += (Ia->r + Id->r + Is->r);
-  		c->g += (Ia->g + Id->g + Is->g);
-  		c->b += (Ia->b + Id->b + Is->b);
+
+//	printf("before shadow\n");
+	if(!shadow(p, l->r->start))	{
+  		c->r += (Id->r + Is->r);
+  		c->g += (Id->g + Is->g);
+  		c->b += (Id->b + Is->b);
 	}
+	
+
   }
 
   c->r/=num_lights;
@@ -122,6 +133,7 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
   if (c->g > 1.0) c->g = 1.0;
   if (c->b > 1.0) c->b = 1.0;
 
+  return reflected_ray;
 }
 
 int shadow(point* p, vector* l){ 
@@ -137,7 +149,6 @@ int shadow(point* p, vector* l){
 	r->dir->z = l->z;
 	r->dir->w = 0.0;
 	double t = 0;	
-
 	
  	int* hit = (int*) malloc(sizeof(int)*numItems);
 	int i;
@@ -243,7 +254,7 @@ vector* getReflection(vector* normal, vector* light){
 	reflection->z = -((2*dot*normal->z) - light->z);
   	reflection->w = 0;
  //	printf("normalizing reflection\n");
-        normalize(reflection);
+        normalize(reflection);//	printf("returning reflection (%f,%f,%f)\n", reflection->x, reflection->y, reflection->z);
 	return reflection;
 }
 
