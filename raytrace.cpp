@@ -95,7 +95,7 @@ void initScene () {
 
   numItems = 0;
   s1 = makeSphere(.20, -.05,-2.0,0.15);
-  s2 = makeSphere(.15, .15, -1.5, 0.15);
+  s2 = makeSphere(-.10, .15, -1.5, 0.15);
   s3 = makeSphere(-.15, 0, -2, .15);
   s1->m = makeMaterial(1.0, 0.1, 1.0, .4, .3, .3, 4);
   s2->m = makeMaterial(1.0, 0.1, 0.0, .4, .3, .3, 4);

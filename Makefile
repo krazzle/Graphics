@@ -2,7 +2,7 @@
 # Project 1 Makefile
 
 CC = g++
-CFLAGS = -Wall -ggdb
+CFLAGS = -Wall -ggdb -fpermissive
 INCLUDE = -I/lusr/X11/include -I/lusr/include
 LIBDIR = -L/lusr/X11/lib -L/lusr/lib
 # Libraries that use native graphics hardware --
