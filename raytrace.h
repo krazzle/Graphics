@@ -96,7 +96,7 @@ void findPlaneNormal(plane*,point*,vector*);
 /* functions in light.cpp */
 material* makeMaterial(GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat);
 light* makeLight(GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat);
-ray* shade(point*,vector*,material*,vector*,color*,int, light**);
+void shade(point*,vector*,material*,vector*,color*,int, light**);
 
 /* global variables */
 extern int width;

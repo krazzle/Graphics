@@ -23,11 +23,9 @@ void display(void);
 void init(int, int);
 void traceRay(ray*,color*,int);
 void drawScene(void);
-ray* firstHit(ray*,point*,vector*,material**);
+ray* firstHit(ray*,point*,vector*,material**, int);
 void addItem(uint32_t, int);
 extern vector* getReflection(vector*, vector*);
-int isValid(vector*);
-int abs(int);
 
 /* local data */
 item** sceneItems;
@@ -106,16 +104,16 @@ void initScene () {
   p1 = makePlane(0,0,0, 0,0,0);
   p1->m = makeMaterial(0.0,1.0,1.0, 0,1,0 ,2);
 //  addItem((uint32_t)&p1, 1);
-  addItem((uint32_t)&s1, 0);
   addItem((uint32_t)&s3, 0);
-  addItem((uint32_t)&s2, 0);
+  addItem((uint32_t)&s1, 0);
+  //addItem((uint32_t)&s2, 0);
   
   l1 = makeLight(0,2,2, 0,1,1, 1.0,0,0);
   //l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
   lights[0] = l1;
   //lights[1] = l2;
   num_lights = 1;
-//`  lights[1] = l2;
+  curItem = numItems+1;
 }
 
 void addItem(uint32_t ptr, int type){
@@ -167,6 +165,11 @@ void drawScene () {
       /* note: direction vector is NOT NORMALIZED */
       calculateDirection(viewpoint,&worldPix,&direction);
 
+
+      c.r = 0;
+      c.g = 0;
+      c.b = 0;
+      curItem = numItems+1;
       /* trace the ray! */
       traceRay(&r,&c,1);
       /* write the pixel! */
@@ -180,21 +183,18 @@ void drawScene () {
 /* d is the recursive depth */
 void traceRay(ray* r, color* c, int d)  {
   //printf("in trace ray...\n");
+ // curItem = numItems+1;
   point p;  /* first intersection point */
   vector n;
   material* m;
   ray* reflected_ray;
 
   p.w = 0.0;  /* inialize to, "no intersection" */
-  reflected_ray = firstHit(r,&p,&n,&m);
+  reflected_ray = firstHit(r,&p,&n,&m, d);
 
   if (p.w != 0.0) {
     shade(&p,&n,m,r->dir,c,d,(light**)lights);  /* do the lighting calculations */
-  } else {             /* nothing was hit */
-    c->r += 0.0;
-    c->g += 0.0;
-    c->b += 0.0;
-  }
+  } 
  
   if(d > 0 && p.w != 0){
 //	printf("recursing on ray (%f,%f,%f) -> (%f,%f,%f) \n", reflected_ray->start->x, reflected_ray->start->y, reflected_ray->start->z, reflected_ray->dir->x, reflected_ray->dir->y, reflected_ray->dir->z);
@@ -207,10 +207,9 @@ void traceRay(ray* r, color* c, int d)  {
 /* If something is hit, returns the finite intersection point p, 
    the normal vector n to the surface at that point, and the surface
    material m. If no hit, returns an infinite point (p->w = 0.0) */
-ray* firstHit(ray* r, point* p, vector* n, material* *m) {
+ray* firstHit(ray* r, point* p, vector* n, material* *m, int depth) {
   double t = 0;     /* parameter value at first hit */
   int* hit = (int*) malloc(sizeof(int)*numItems);   
-  curItem = numItems+1;  
   vector* reflection = NULL;
   ray* reflected_ray = (ray*)malloc(sizeof(ray));
 
@@ -230,6 +229,8 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m) {
 			hit[i] = raySphereIntersect(r, s, &t);
 			if(hit[i]){
 				curItem = i;
+				//if(depth != 0)
+				//	printf("hit sphere %d curItem = %d \n", i, curItem);
 				*m = s->m;
 				findPointOnRay(r,t,p);
 				findSphereNormal(s,p,n);
@@ -270,31 +271,4 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m) {
   return reflected_ray;
 }
 
-int isValid(vector* r){
- 	//printf("testing validity...\n");	
-	if(r == NULL  || isnan(r->x))
-		return(FALSE);
-	int s1, s2, s3 = 0; 
-	
-	if( abs(r->x) >= 0 && abs(r->x) < .001 )
-		s1 = 1;
-
-	if( abs(r->y) >= 0 && abs(r->y) < .001 )
-		s2 = 1;
-
-	if( abs(r->z) >= 0 && abs(r->z) < .001 )
-		s3 = 1;
-
-	int sum = s1 + s2 + s3;
-	if (sum == 3) { return(FALSE); } 
-	else return(TRUE);
-
-}
-
-int abs(int a){
-
-	if( a < 0){ return -a; }
-	else return a;
-
-}
 
