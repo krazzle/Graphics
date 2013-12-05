@@ -141,8 +141,8 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
   if (c->g > 1.0) c->g = 1.0;
   if (c->b > 1.0) c->b = 1.0;
 
-  if(d == 0)
-	printf("color value is (%f,%f,%f)\n", c->r, c->g, c->b);
+//  if(d == 0)
+//	printf("color value is (%f,%f,%f)\n", c->r, c->g, c->b);
 
 
 }

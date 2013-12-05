@@ -26,6 +26,8 @@ void drawScene(void);
 ray* firstHit(ray*,point*,vector*,material**, int);
 void addItem(uint32_t, int);
 extern vector* getReflection(vector*, vector*);
+void moveToFront();
+
 
 /* local data */
 item** sceneItems;
@@ -98,15 +100,15 @@ void initScene () {
   s1 = makeSphere(.20, -.05,-2.0,0.15);
   s2 = makeSphere(-.10, .15, -1.5, 0.15);
   s3 = makeSphere(-.15, 0, -2, .15);
-  s1->m = makeMaterial(1.0, 0.1, 1.0, .2, .6, .2, 4);
+  s1->m = makeMaterial(1.0, 0, 1.0, .2, .6, .2, 4);
   s2->m = makeMaterial(1.0, 0.1, 0.0, .2, .6, .2, 4);
-  s3->m = makeMaterial(0.0,1.0,.3, .4,.3,.3,4);
+  s3->m = makeMaterial(0.9,.9,.9, .4,.3,.3,4);
   p1 = makePlane(0,0,0, 0,0,0);
   p1->m = makeMaterial(0.0,1.0,1.0, 0,1,0 ,2);
 //  addItem((uint32_t)&p1, 1);
+//  addItem((uint32_t)&s1, 0);
+  addItem((uint32_t)&s2, 0);
   addItem((uint32_t)&s3, 0);
-  addItem((uint32_t)&s1, 0);
-  //addItem((uint32_t)&s2, 0);
   
   l1 = makeLight(0,2,2, 0,1,1, 1.0,0,0);
   //l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
@@ -122,6 +124,21 @@ void addItem(uint32_t ptr, int type){
  	i->type = type;
 	sceneItems[numItems] = i;
 	numItems++;
+}
+
+void moveToFront(){
+//	printf("moving item # %d to front of the array\n", curItem);
+	if(curItem == 0)
+		return;
+	else{
+		item* temp = sceneItems[curItem];
+		int i; 
+		for(i = 1; i < numItems; i++){
+			sceneItems[i] = sceneItems[i-1];
+		}
+		sceneItems[0] = temp;
+	}
+	printf("last item type is %d\n", sceneItems[numItems-1]->type);
 }
 
 void initCamera (int w, int h) {
@@ -197,6 +214,7 @@ void traceRay(ray* r, color* c, int d)  {
   } 
  
   if(d > 0 && p.w != 0){
+	moveToFront();
 //	printf("recursing on ray (%f,%f,%f) -> (%f,%f,%f) \n", reflected_ray->start->x, reflected_ray->start->y, reflected_ray->start->z, reflected_ray->dir->x, reflected_ray->dir->y, reflected_ray->dir->z);
 	traceRay(reflected_ray,c, d-1);
   }
@@ -217,6 +235,8 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m, int depth) {
 
   int i; 
   for(i = 0; i < numItems; i++){
+//	if(depth == 0)
+//		printf("curItem = %d\n", curItem);
 	if(i == curItem)
 		continue;
 	item* cur_item = sceneItems[i];
@@ -229,8 +249,8 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m, int depth) {
 			hit[i] = raySphereIntersect(r, s, &t);
 			if(hit[i]){
 				curItem = i;
-				//if(depth != 0)
-				//	printf("hit sphere %d curItem = %d \n", i, curItem);
+//				if(depth == 0)
+//					printf("hit sphere %d curItem = %d \n", i, curItem);
 				*m = s->m;
 				findPointOnRay(r,t,p);
 				findSphereNormal(s,p,n);
