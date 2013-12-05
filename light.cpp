@@ -28,7 +28,7 @@ void diffuseReflection(color* DiffuseIntensity,vector* normalVector, light* ligh
 vector* getReflection(vector* normal, vector* light);
 GLfloat comp_pow(GLfloat a, GLfloat b);
 int shadow(point* p, vector* l); 
-
+GLfloat depthCalc(int d);
 
 material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb, GLfloat dif, GLfloat spec, GLfloat s) {
 
@@ -73,18 +73,25 @@ light* makeLight(GLfloat x, GLfloat y ,GLfloat z, GLfloat vx, GLfloat vy, GLfloa
   return(l);
 }
 
+GLfloat depthCalc(int d){
+
+	GLfloat retval = 1;
+	switch(d){
+		case 1: retval = 1; break;
+		case 0: retval = .5; break;
+		default: break;
+	}
+	return retval;
+}
+
 /* LIGHTING CALCULATIONS */
 
 /* shade */
 /* color of point p with normal vector n and material m returned in c */
 /* in is the direction of the incoming ray and d is the recusive depth */
-ray* shade(point* p, vector* n, material* m, vector* in, color* c, int d, light** lights) {
+void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light** lights) {
 
- // printf("in  shade now!\n");
-  vector reflected_n;
-  ray* reflected_ray = NULL;
-  point* intersect_p = (point*)malloc(sizeof(point));
-  //material* trash_m;
+  GLfloat Kd = depthCalc(d);
 
  // printf("calling normalize of the ones\n");
   normalize(n);
@@ -95,30 +102,31 @@ ray* shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
   color *Id = (color*)malloc(sizeof(color));
   color *Is = (color*)malloc(sizeof(color));  
 
-  c->r = 0;
+/*  c->r = 0;
   c->g = 0;
   c->b = 0;
-
+*/
 
  // printf("in shade\n");
   //vector* reflectionVec = getReflection(n, l->r->dir);  
   int i; 
   for(i = 0; i < num_lights; i++){
 	light* l = lights[i];
+	GLfloat dist = sqrt(((p->x - l->r->start->x)*(p->x - l->r->start->x)) + ((p->y - l->r->start->y)*(p->y - l->r->start->y)) + ((p->z - l->r->start->z)*(p->z - l->r->start->z)));
       	normalize(l->r->dir);
   	ambientReflection(Ia, m);
   	diffuseReflection(Id, n, l, m);
   	specularReflection(Is, n, l->r->dir ,in, m);
 
-	c->r += Ia->r;
-	c->g += Ia->g;
-	c->b += Ia->b;
+	c->r += Kd*(Ia->r);
+	c->g += Kd*(Ia->g);
+	c->b += Kd*(Ia->b);
 
 //	printf("before shadow\n");
 	if(!shadow(p, l->r->start))	{
-  		c->r += (Id->r + Is->r);
-  		c->g += (Id->g + Is->g);
-  		c->b += (Id->b + Is->b);
+  		c->r += Kd*(Id->r + Is->r);
+  		c->g += Kd*(Id->g + Is->g);
+  		c->b += Kd*(Id->b + Is->b);
 	}
 	
 
@@ -133,7 +141,10 @@ ray* shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
   if (c->g > 1.0) c->g = 1.0;
   if (c->b > 1.0) c->b = 1.0;
 
-  return reflected_ray;
+//  if(d == 0)
+//	printf("color value is (%f,%f,%f)\n", c->r, c->g, c->b);
+
+
 }
 
 int shadow(point* p, vector* l){ 
