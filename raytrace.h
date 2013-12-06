@@ -9,6 +9,8 @@
 /* constants */
 #define TRUE 1
 #define FALSE 0
+#define NEAR 1
+#define FAR 0
 
 #define PI 3.14159265358979323846264338327
 
@@ -49,6 +51,7 @@ typedef struct material {
 typedef struct item {
   uint32_t ptr;
   int type;
+  int ID;
 } item;
 
 typedef struct light {

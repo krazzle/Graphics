@@ -24,12 +24,11 @@ void init(int, int);
 void traceRay(ray*,color*,int);
 void drawScene(void);
 ray* firstHit(ray*,point*,vector*,material**, int);
-void addItem(uint32_t, int);
+void addItem(uint32_t, int,int);
 extern vector* getReflection(vector*, vector*);
-void moveToFront();
+void sortByDepth(point*, int);/* local data */
+double getDistance(item*, point*);
 
-
-/* local data */
 item** sceneItems;
 int numItems;
 int curItem;
@@ -106,10 +105,10 @@ void initScene () {
   p1 = makePlane(0,0,0, 0,0,0);
   p1->m = makeMaterial(0.0,1.0,1.0, 0,1,0 ,2);
 //  addItem((uint32_t)&p1, 1);
-//  addItem((uint32_t)&s1, 0);
-  addItem((uint32_t)&s2, 0);
-  addItem((uint32_t)&s3, 0);
-  
+  addItem((uint32_t)&s1, 0, 1);
+  addItem((uint32_t)&s2, 0, 2);
+  addItem((uint32_t)&s3, 0, 3);
+  sortByDepth(viewpoint, FAR);
   l1 = makeLight(0,2,2, 0,1,1, 1.0,0,0);
   //l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
   lights[0] = l1;
@@ -118,27 +117,56 @@ void initScene () {
   curItem = numItems+1;
 }
 
-void addItem(uint32_t ptr, int type){
+void addItem(uint32_t ptr, int type, int id_val){
 	item* i = (item*)malloc(sizeof(item));
 	i->ptr= ptr;
  	i->type = type;
+	i->ID = id_val;
 	sceneItems[numItems] = i;
 	numItems++;
 }
 
-void moveToFront(){
-//	printf("moving item # %d to front of the array\n", curItem);
-	if(curItem == 0)
-		return;
-	else{
-		item* temp = sceneItems[curItem];
-		int i; 
-		for(i = 1; i < numItems; i++){
-			sceneItems[i] = sceneItems[i-1];
+void sortByDepth(point* p, int type){
+	int i;
+	int sorted = 0;
+	while(!sorted){
+		sorted = 1;
+		for( i = 0; i < numItems-1; i++){
+			item* i1 = sceneItems[i];
+			item* i2 = sceneItems[i+1];
+			double i1Val = getDistance(i1, p);
+			double i2Val = getDistance(i2, p);
+			if(type == NEAR){
+				if(i2Val < i1Val){
+                                	sorted = 0;
+                                	item* temp = sceneItems[i];
+                                	sceneItems[i] = sceneItems[i+1];
+                               	 	sceneItems[i+1] = temp;
+                        	}
+			}
+			else if(type == FAR){
+				if(i2Val > i1Val){
+                                	sorted = 0;
+                                	item* temp = sceneItems[i];
+                                	sceneItems[i] = sceneItems[i+1];
+                                	sceneItems[i+1] = temp;
+                        	}	
+			}
+			else {};
 		}
-		sceneItems[0] = temp;
 	}
-	printf("last item type is %d\n", sceneItems[numItems-1]->type);
+}
+
+double getDistance(item *i, point* p){
+	double val = 0;
+	switch(i->type){
+        	case 0: {
+                	sphere* s = *((sphere**)i->ptr);
+                        val = sqrt(((s->c->x - p->x)*(s->c->x - p->x)) + ((s->c->y - p->y)*(s->c->y - p->y)) + ((s->c->z - p->z)*(s->c->z - p->z)));
+               	} break;
+                default: printf("type not found\n"); break;
+     	}
+	return val;
 }
 
 void initCamera (int w, int h) {
@@ -199,6 +227,7 @@ void drawScene () {
 /* returns the color seen by ray r in parameter c */
 /* d is the recursive depth */
 void traceRay(ray* r, color* c, int d)  {
+
   //printf("in trace ray...\n");
  // curItem = numItems+1;
   point p;  /* first intersection point */
@@ -214,7 +243,8 @@ void traceRay(ray* r, color* c, int d)  {
   } 
  
   if(d > 0 && p.w != 0){
-	moveToFront();
+	//sort by depth from current point?
+	sortByDepth(&p, NEAR);
 //	printf("recursing on ray (%f,%f,%f) -> (%f,%f,%f) \n", reflected_ray->start->x, reflected_ray->start->y, reflected_ray->start->z, reflected_ray->dir->x, reflected_ray->dir->y, reflected_ray->dir->z);
 	traceRay(reflected_ray,c, d-1);
   }
@@ -235,22 +265,15 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m, int depth) {
 
   int i; 
   for(i = 0; i < numItems; i++){
-//	if(depth == 0)
-//		printf("curItem = %d\n", curItem);
-	if(i == curItem)
+	if(i == curItem) //we dont want to check for an intersection on an item we've recently hit
 		continue;
 	item* cur_item = sceneItems[i];
         switch(cur_item->type){
 		case 0: {
- 			//printf("generating sphere\n");
-			//possibly wrong
-			//cur_item->ptr is the address of the sphere pointer
    			sphere* s = *((sphere**)cur_item->ptr);
 			hit[i] = raySphereIntersect(r, s, &t);
 			if(hit[i]){
 				curItem = i;
-//				if(depth == 0)
-//					printf("hit sphere %d curItem = %d \n", i, curItem);
 				*m = s->m;
 				findPointOnRay(r,t,p);
 				findSphereNormal(s,p,n);
