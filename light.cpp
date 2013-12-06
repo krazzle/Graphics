@@ -78,7 +78,7 @@ GLfloat depthCalc(int d){
 	GLfloat retval = 1;
 	switch(d){
 		case 1: retval = 1; break;
-		case 0: retval = .5; break;
+		case 0: retval = .3; break;
 		default: break;
 	}
 	return retval;

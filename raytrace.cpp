@@ -26,7 +26,7 @@ void drawScene(void);
 ray* firstHit(ray*,point*,vector*,material**, int);
 void addItem(uint32_t, int,int);
 extern vector* getReflection(vector*, vector*);
-void sortByDepth(point*, int);/* local data */
+void sortByDepth(point*);/* local data */
 double getDistance(item*, point*);
 
 item** sceneItems;
@@ -37,6 +37,7 @@ int curItem;
 sphere* s1;
 sphere* s2;
 sphere* s3;
+sphere* s4;
 light* l1;
 light* l2;
 plane* p1;
@@ -99,21 +100,24 @@ void initScene () {
   s1 = makeSphere(.20, -.05,-2.0,0.15);
   s2 = makeSphere(-.10, .15, -1.5, 0.15);
   s3 = makeSphere(-.15, 0, -2, .15);
+  s4 = makeSphere(.25, .05, -1.0, .10);
   s1->m = makeMaterial(1.0, 0, 1.0, .2, .6, .2, 4);
   s2->m = makeMaterial(1.0, 0.1, 0.0, .2, .6, .2, 4);
   s3->m = makeMaterial(0.9,.9,.9, .4,.3,.3,4);
+  s4->m = makeMaterial(0.0, .78, .2, .4,.4,.2,4);
   p1 = makePlane(0,0,0, 0,0,0);
   p1->m = makeMaterial(0.0,1.0,1.0, 0,1,0 ,2);
 //  addItem((uint32_t)&p1, 1);
   addItem((uint32_t)&s1, 0, 1);
   addItem((uint32_t)&s2, 0, 2);
   addItem((uint32_t)&s3, 0, 3);
-  sortByDepth(viewpoint, FAR);
+  addItem((uint32_t)&s4, 0, 4);
+  sortByDepth(viewpoint);
   l1 = makeLight(0,2,2, 0,1,1, 1.0,0,0);
-  //l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
+  l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
   lights[0] = l1;
-  //lights[1] = l2;
-  num_lights = 1;
+  lights[1] = l2;
+  num_lights = 2;
   curItem = numItems+1;
 }
 
@@ -126,7 +130,7 @@ void addItem(uint32_t ptr, int type, int id_val){
 	numItems++;
 }
 
-void sortByDepth(point* p, int type){
+void sortByDepth(point* p){
 	int i;
 	int sorted = 0;
 	while(!sorted){
@@ -136,23 +140,12 @@ void sortByDepth(point* p, int type){
 			item* i2 = sceneItems[i+1];
 			double i1Val = getDistance(i1, p);
 			double i2Val = getDistance(i2, p);
-			if(type == NEAR){
-				if(i2Val < i1Val){
-                                	sorted = 0;
-                                	item* temp = sceneItems[i];
-                                	sceneItems[i] = sceneItems[i+1];
-                               	 	sceneItems[i+1] = temp;
-                        	}
-			}
-			else if(type == FAR){
-				if(i2Val > i1Val){
-                                	sorted = 0;
-                                	item* temp = sceneItems[i];
-                                	sceneItems[i] = sceneItems[i+1];
-                                	sceneItems[i+1] = temp;
-                        	}	
-			}
-			else {};
+			if(i2Val < i1Val){
+                                sorted = 0;
+                                item* temp = sceneItems[i];
+                                sceneItems[i] = sceneItems[i+1];
+                         	sceneItems[i+1] = temp;
+                        }
 		}
 	}
 }
@@ -243,9 +236,6 @@ void traceRay(ray* r, color* c, int d)  {
   } 
  
   if(d > 0 && p.w != 0){
-	//sort by depth from current point?
-	sortByDepth(&p, NEAR);
-//	printf("recursing on ray (%f,%f,%f) -> (%f,%f,%f) \n", reflected_ray->start->x, reflected_ray->start->y, reflected_ray->start->z, reflected_ray->dir->x, reflected_ray->dir->y, reflected_ray->dir->z);
 	traceRay(reflected_ray,c, d-1);
   }
 
@@ -281,6 +271,9 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m, int depth) {
 				ray_vec->y = p->y - r->start->y;
 				ray_vec->z = p->z - r->start->z;
 				reflection = getReflection(n, ray_vec);
+				reflected_ray->start = p;
+				reflected_ray->dir = reflection;
+				return reflected_ray;
 			}
 			break;}
 		case 1:{
@@ -294,24 +287,18 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m, int depth) {
 			        ray_vec->x = p->x - r->start->x;
                                 ray_vec->y = p->y - r->start->y;
                                 ray_vec->z = p->z - r->start->z;
-
 				reflection = getReflection(n, ray_vec);
+				reflected_ray->start = p;
+				reflected_ray->dir = reflection;
+				return reflected_ray;
 			}	
 			break;}
 		default: printf("type not found\n"); break;
 	}
   }
    
-  int sum = 0;
-  for(i = 0; i < numItems; i++)
-	sum+= hit[i];
-
-  if(sum == 0) { p->w = 0.0; }
-  else{
-	reflected_ray->start = p;
-	reflected_ray->dir = reflection;
-  }
-  return reflected_ray;
+  p->w = 0.0;
+  return NULL;
 }
 
 
