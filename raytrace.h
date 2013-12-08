@@ -9,8 +9,8 @@
 /* constants */
 #define TRUE 1
 #define FALSE 0
-#define NEAR 1
-#define FAR 0
+#define RETURN_REFLECTED 0
+#define RETURN_REFRACTED 1
 
 #define PI 3.14159265358979323846264338327
 
@@ -45,6 +45,9 @@ typedef struct material {
   GLfloat dif;
   GLfloat spec;
   GLfloat s;
+
+  GLfloat reflectivity;
+  GLfloat transparency;
 
 } material;
 
@@ -97,7 +100,7 @@ void findSphereNormal(sphere*,point*,vector*);
 void findPlaneNormal(plane*,point*,vector*);
 
 /* functions in light.cpp */
-material* makeMaterial(GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat);
+material* makeMaterial(GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat);
 light* makeLight(GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat,GLfloat);
 void shade(point*,vector*,material*,vector*,color*,int, light**);
 
