@@ -28,9 +28,8 @@ void diffuseReflection(color* DiffuseIntensity,vector* normalVector, light* ligh
 vector* getReflection(vector* normal, vector* light);
 GLfloat comp_pow(GLfloat a, GLfloat b);
 int shadow(point* p, vector* l); 
-GLfloat depthCalc(int d);
 
-material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb, GLfloat dif, GLfloat spec, GLfloat s) {
+material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb, GLfloat dif, GLfloat spec, GLfloat s, GLfloat refl, GLfloat trans) {
 
   material* m;
   
@@ -44,6 +43,8 @@ material* makeMaterial(GLfloat r, GLfloat g, GLfloat b, GLfloat amb, GLfloat dif
   m->dif = dif;
   m->spec = spec;
   m->s = s;
+  m->reflectivity = refl;
+  m->transparency = trans;
   return(m);
 }
 
@@ -73,17 +74,6 @@ light* makeLight(GLfloat x, GLfloat y ,GLfloat z, GLfloat vx, GLfloat vy, GLfloa
   return(l);
 }
 
-GLfloat depthCalc(int d){
-
-	GLfloat retval = 1;
-	switch(d){
-		case 1: retval = 1; break;
-		case 0: retval = .3; break;
-		default: break;
-	}
-	return retval;
-}
-
 /* LIGHTING CALCULATIONS */
 
 /* shade */
@@ -91,7 +81,10 @@ GLfloat depthCalc(int d){
 /* in is the direction of the incoming ray and d is the recusive depth */
 void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light** lights) {
 
-  GLfloat Kd = depthCalc(d);
+  GLfloat Kt = m->transparency;
+  GLfloat Kd = 1;
+  if(d == 0)
+	Kd = m->reflectivity;
 
  // printf("calling normalize of the ones\n");
   normalize(n);
@@ -118,15 +111,15 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
   	diffuseReflection(Id, n, l, m);
   	specularReflection(Is, n, l->r->dir ,in, m);
 
-	c->r += Kd*(Ia->r);
-	c->g += Kd*(Ia->g);
-	c->b += Kd*(Ia->b);
+	c->r += (Kt+Kd)*(Ia->r);
+	c->g += (Kt+Kd)*(Ia->g);
+	c->b += (Kt+Kd)*(Ia->b);
 
 //	printf("before shadow\n");
 	if(!shadow(p, l->r->start))	{
-  		c->r += Kd*(Id->r + Is->r);
-  		c->g += Kd*(Id->g + Is->g);
-  		c->b += Kd*(Id->b + Is->b);
+  		c->r += (Kt+Kd)*(Id->r + Is->r);
+  		c->g += (Kt+Kd)*(Id->g + Is->g);
+  		c->b += (Kt+Kd)*(Id->b + Is->b);
 	}
 	
 

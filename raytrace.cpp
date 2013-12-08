@@ -15,6 +15,8 @@
 #include "common.h"
 #include "lowlevel.h"
 #include "raytrace.h"
+#include <sys/resource.h>
+
 
 /* local functions */
 void initScene(void);
@@ -23,11 +25,13 @@ void display(void);
 void init(int, int);
 void traceRay(ray*,color*,int);
 void drawScene(void);
-ray* firstHit(ray*,point*,vector*,material**, int);
+ray** firstHit(ray*,point*,vector*,material**, int, color*);
 void addItem(uint32_t, int,int);
 extern vector* getReflection(vector*, vector*);
+extern GLfloat dotProduct(vector* v1, vector* v2);
 void sortByDepth(point*);/* local data */
 double getDistance(item*, point*);
+vector* SnellsLaw(vector*, vector*, material*);
 
 item** sceneItems;
 int numItems;
@@ -54,6 +58,11 @@ int height = 350;    /* height of window in pixels */
 
 int main (int argc, char** argv) {
   int win;
+
+  const rlim_t kStackSize = 16 * 1024 * 1024;   // min stack size = 16 MB
+  struct rlimit rl;
+  rl.rlim_cur = kStackSize;
+  setrlimit(RLIMIT_STACK, &rl);
 
   glutInit(&argc,argv);
   glutInitWindowSize(width,height);
@@ -98,16 +107,13 @@ void initScene () {
 
   numItems = 0;
   s1 = makeSphere(.20, -.05,-2.0,0.15);
-  s2 = makeSphere(-.10, .15, -1.5, 0.15);
+  s2 = makeSphere(-.10, 0, -1.5, 0.15);
   s3 = makeSphere(-.15, 0, -2, .15);
-  s4 = makeSphere(.25, .05, -1.0, .10);
-  s1->m = makeMaterial(1.0, 0, 1.0, .2, .6, .2, 4);
-  s2->m = makeMaterial(1.0, 0.1, 0.0, .2, .6, .2, 4);
-  s3->m = makeMaterial(0.9,.9,.9, .4,.3,.3,4);
-  s4->m = makeMaterial(0.0, .78, .2, .4,.4,.2,4);
-  p1 = makePlane(0,0,0, 0,0,0);
-  p1->m = makeMaterial(0.0,1.0,1.0, 0,1,0 ,2);
-//  addItem((uint32_t)&p1, 1);
+  s4 = makeSphere(.15, .05, -1.0, .10);
+  s1->m = makeMaterial(1.0, 0,   0,   .4, .5, 0, 4, .2, .2);
+  s2->m = makeMaterial(0,   1.0, 0,   .4, .5, 0, 4, .2, .2);
+  s3->m = makeMaterial(0,   0,   1.0, .4, .5, 0, 4, .2, .2);
+  s4->m = makeMaterial(1.0, 1.0, 1.0, .4, .5, 0, 4, .2, .2);
   addItem((uint32_t)&s1, 0, 1);
   addItem((uint32_t)&s2, 0, 2);
   addItem((uint32_t)&s3, 0, 3);
@@ -202,7 +208,7 @@ void drawScene () {
       /* find direction */
       /* note: direction vector is NOT NORMALIZED */
       calculateDirection(viewpoint,&worldPix,&direction);
-
+      //printf("calculating pixel (%f,%f)\n", worldPix.x, worldPix.y);
 
       c.r = 0;
       c.g = 0;
@@ -226,32 +232,37 @@ void traceRay(ray* r, color* c, int d)  {
   point p;  /* first intersection point */
   vector n;
   material* m;
-  ray* reflected_ray;
+  ray* reflected_ray = NULL;
+  ray* refracted_ray = NULL;
+  ray** rays;
 
   p.w = 0.0;  /* inialize to, "no intersection" */
-  reflected_ray = firstHit(r,&p,&n,&m, d);
+//  printf("ray(%f,%f,%f)->(%f,%f,%f)\n", r->start->x, r->start->y, r->start->z, r->dir->x, r->dir->y, r->dir->z);
+//  refracted_ray = firstHit(r,&p,&n,&m, d,c, RETURN_REFRACTED);
+  rays = firstHit(r,&p,&n,&m, d,c);
 
   if (p.w != 0.0) {
     shade(&p,&n,m,r->dir,c,d,(light**)lights);  /* do the lighting calculations */
   } 
- 
   if(d > 0 && p.w != 0){
-	traceRay(reflected_ray,c, d-1);
+//	traceRay(rays[1], c, d-1);
+	if(rays[0] != NULL)
+		traceRay(rays[0], c, d);
+	traceRay(rays[1], c, d-1);
   }
-
 }
 
 /* firstHit */
 /* If something is hit, returns the finite intersection point p, 
    the normal vector n to the surface at that point, and the surface
    material m. If no hit, returns an infinite point (p->w = 0.0) */
-ray* firstHit(ray* r, point* p, vector* n, material* *m, int depth) {
+ray** firstHit(ray* r, point* p, vector* n, material* *m, int depth, color* c) {
   double t = 0;     /* parameter value at first hit */
   int* hit = (int*) malloc(sizeof(int)*numItems);   
   vector* reflection = NULL;
-  ray* reflected_ray = (ray*)malloc(sizeof(ray));
-
-  vector* ray_vec = (vector*)malloc(sizeof(vector));
+  ray* reflected_ray;
+  ray* refracted_ray;
+  ray** rays = (ray**)malloc(sizeof(ray*));
 
   int i; 
   for(i = 0; i < numItems; i++){
@@ -266,17 +277,27 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m, int depth) {
 				curItem = i;
 				*m = s->m;
 				findPointOnRay(r,t,p);
-				findSphereNormal(s,p,n);
+				findSphereNormal(s,p,n);				
+				if(s->m->transparency > 0){
+					refracted_ray = (ray*)malloc(sizeof(ray));
+					refracted_ray->start = p;
+					refracted_ray->dir = r->dir; 
+					rays[0] = refracted_ray;
+				}
+				
+				reflected_ray = (ray*)malloc(sizeof(ray));	
+				vector* ray_vec = (vector*)malloc(sizeof(vector));
 				ray_vec->x = p->x - r->start->x;
 				ray_vec->y = p->y - r->start->y;
 				ray_vec->z = p->z - r->start->z;
 				reflection = getReflection(n, ray_vec);
 				reflected_ray->start = p;
-				reflected_ray->dir = reflection;
-				return reflected_ray;
+				reflected_ray->dir = reflection;	
+				rays[1] = reflected_ray;
+				return rays;
 			}
 			break;}
-		case 1:{
+	/*	case 1:{
 			plane* pl = *((plane**)cur_item->ptr);
 			hit[i] = planeIntersect(r, pl, &t);
 			if(hit[i]){
@@ -284,15 +305,22 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m, int depth) {
 				*m = pl->m;
 				findPointOnRay(r, t, p);
 				findPlaneNormal(pl, p, n);
-			        ray_vec->x = p->x - r->start->x;
+				if(pl->m->transparency > 0){
+                                        refracted_ray->start = p;
+                                        refracted_ray->dir = r->dir;
+					rays[0] = refracted_ray;
+				} else { rays[0] = NULL; }		        	
+
+				ray_vec->x = p->x - r->start->x;
                                 ray_vec->y = p->y - r->start->y;
                                 ray_vec->z = p->z - r->start->z;
 				reflection = getReflection(n, ray_vec);
 				reflected_ray->start = p;
 				reflected_ray->dir = reflection;
-				return reflected_ray;
+				rays[1] = reflected_ray;
+				return rays;
 			}	
-			break;}
+			break;}*/
 		default: printf("type not found\n"); break;
 	}
   }
@@ -301,4 +329,44 @@ ray* firstHit(ray* r, point* p, vector* n, material* *m, int depth) {
   return NULL;
 }
 
+vector* SnellsLaw(vector* a, vector* b, material* m){
+//	printf("a (%f,%f,%f) b(%f,%f,%f)\n", a->x, a->y, a->z, b->x, b->y, b->z);
+//	GLfloat a_size = sqrt(((a->x)*(a->x)) + ((a->y)*(a->y)) + ((a->z)*(a->z)));
+//	GLfloat b_size = sqrt(((b->x)*(b->x)) + ((b->y)*(b->y)) + ((b->z)*(b->z)));
+/*	GLfloat k1 = 1;
+	GLfloat k2 = 1.5;
+		
+	a->x = -(a->x);
+	a->y = -(a->y);
+	a->z = -(a->z);
 
+	GLfloat angle1 = acos(dotProduct(a, b));
+//	printf("sin(angle1) = %f (sin(angle1)/k2) = %f\n", sin(angle1), sin(angle1)/k2);
+	GLfloat angle2 = asin((k1*sin(angle1))/k2);
+
+	b->x = -(b->x);
+	b->y = -(b->y);
+	b->z = -(b->z);
+	
+//	printf("angle1 = %f, angle2 = %f\n", angle1, angle2);
+*/
+	vector* retval = (vector*) malloc(sizeof(vector));
+
+//	retval->x = 	(cos(angle2)*cos(angle2))*(b->x) + 
+//			(cos(angle2)*sin(angle2))*(b->y) + 
+//			(-sin(angle2))*(b->z);
+
+//	retval->y = 	((sin(angle2)*sin(angle2)*cos(angle2) - (cos(angle2)*sin(angle2)))*(b->x)) + 
+//			((sin(angle2)*sin(angle2)*sin(angle2) + (cos(angle2)*cos(angle2)))*(b->y)) + 
+//			(sin(angle2)*cos(angle2))*(b->z);
+
+//	retval->z = 	((cos(angle2)*sin(angle2)*cos(angle2) + (sin(angle2)*sin(angle2)))*(b->x)) + 
+//			((cos(angle2)*sin(angle2)*sin(angle2) - (sin(angle2)*cos(angle2)))*(b->y)) + 
+//			(cos(angle2)*cos(angle2))*(b->z);
+
+	retval->x = a->x;
+	retval->y = a->y;
+	retval->z = a->z;
+//	printf("final angle (%f,%f,%f)\n", retval->x, retval->y, retval->z);
+	return retval;
+}
