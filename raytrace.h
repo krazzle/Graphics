@@ -14,8 +14,9 @@
 
 #define PI 3.14159265358979323846264338327
 
-#define SPHERE 0;
-#define PLANE 1;
+#define SPHERE 0
+#define PLANE 1
+#define CYLENDAR 2
 
 /* data structures */
 
@@ -83,21 +84,31 @@ typedef struct plane {
   material* m;
 } plane;
 
+typedef struct cylendar {
+  point* center;
+  vector* dir; 
+  GLfloat radius;
+  material* m;
+} cylendar;
+
 /* functions in raytrace.cpp */
 void traceRay(ray*, color*, int, vector*);
 
 /* functions in geometry.cpp */
 sphere* makeSphere(GLfloat, GLfloat, GLfloat, GLfloat);
 plane* makePlane(GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat);
+cylendar* makeCylendar(GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat);
 point* makePoint(GLfloat, GLfloat, GLfloat);
 point* copyPoint(point *);
 void freePoint(point *);
 void calculateDirection(point*,point*,point*);
 void findPointOnRay(ray*,double,point*);
 int raySphereIntersect(ray*,sphere*,double*);
+int rayCylendarIntersect(ray*, cylendar*, double*);
 int planeIntersect(ray*,plane*,double*);
 void findSphereNormal(sphere*,point*,vector*);
 void findPlaneNormal(plane*,point*,vector*);
+void findCylendarNormal(cylendar*, point*, vector*);
 
 /* functions in light.cpp */
 material* makeMaterial(GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat);
