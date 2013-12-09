@@ -80,7 +80,6 @@ light* makeLight(GLfloat x, GLfloat y ,GLfloat z, GLfloat vx, GLfloat vy, GLfloa
 /* color of point p with normal vector n and material m returned in c */
 /* in is the direction of the incoming ray and d is the recusive depth */
 void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light** lights) {
-
   GLfloat Kt = m->transparency;
   GLfloat Kd = 1;
   if(d == 0)
@@ -133,7 +132,6 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
 	
 
   }
-
   c->r/=num_lights;
   c->g/=num_lights;
   c->b/=num_lights; 
@@ -193,8 +191,7 @@ int shadow(point* p, vector* l){
 	for(i = 0; i < numItems; i++)
 		sum+= hit[i];
 	
-//	printf("p (%f,%f,%f) sum: %f\n",p->x,p->y,p->z,sum);
-
+//	printf("p (%f,%f,%f) sum: %f\n",p->x,p->y,p->z,sum)
 	if(sum == 0) 
 		return(FALSE);
 	else if( sum != 0){

@@ -125,6 +125,11 @@ void initScene () {
   c1 = makeCylendar(1.5, .4, -7, 0, 1, 0, .25);
   c1->m = makeMaterial(1.0, 1.0, 1.0, .3,.3, .3, 4, .1, 0);
 
+  p1 = makePlane(0, -1, 0, 0, 1, 0);
+  p1->m = makeMaterial(.5, .5, .5, .3, .3, .3, 4, .1, 0);
+//  printf("after make plane\n");
+
+//  addItem((uint32_t)&p1, 1, 8);
   addItem((uint32_t)&c1, 2, 7);
   addItem((uint32_t)&s1, 0, 1);
   addItem((uint32_t)&s2, 0, 2);
@@ -140,6 +145,7 @@ void initScene () {
   lights[1] = l2;
   num_lights = 2;
   curItem = numItems+1;
+//  printf("after init\n");
 }
 
 void addItem(uint32_t ptr, int type, int id_val){
@@ -178,6 +184,9 @@ double getDistance(item *i, point* p){
                 	sphere* s = *((sphere**)i->ptr);
                         val = sqrt(((s->c->x - p->x)*(s->c->x - p->x)) + ((s->c->y - p->y)*(s->c->y - p->y)) + ((s->c->z - p->z)*(s->c->z - p->z)));
                	} break;
+		case 1:{
+			val = 0;
+		break;}
 		case 2:{
 			cylendar* c = *((cylendar**)i->ptr);
 			val = sqrt(((c->center->x - p->x)*(c->center->x - p->x)) + ((c->center->y - p->y)*(c->center->y - p->y)) + ((c->center->z - p->z)*(c->center->z - p->z))); 
@@ -260,7 +269,9 @@ void traceRay(ray* r, color* c, int d)  {
 //  refracted_ray = firstHit(r,&p,&n,&m, d,c, RETURN_REFRACTED);
   rays = firstHit(r,&p,&n,&m, d,c);
 
-  if (p.w != 0.0) {
+  if (p.w != 0.0) {	
+//    printf("in shade point p(%f,%f,%f)\n", p.x, p.y, p.z);
+  //  printf("normal = (%f,%f,%f)\n", n.x, n.y, n.z);
     shade(&p,&n,m,r->dir,c,d,(light**)lights);  /* do the lighting calculations */
   } 
   if(d > 0 && p.w != 0){
@@ -350,30 +361,38 @@ ray** firstHit(ray* r, point* p, vector* n, material* *m, int depth, color* c) {
                                 rays[1] = reflected_ray;
                                 return rays;
 		} break;}
-	/*	case 1:{
+		case 1:{
 			plane* pl = *((plane**)cur_item->ptr);
 			hit[i] = planeIntersect(r, pl, &t);
 			if(hit[i]){
 				curItem = i;
 				*m = pl->m;
 				findPointOnRay(r, t, p);
-				findPlaneNormal(pl, p, n);
+				n->x = pl->normal->x;
+  				n->y = pl->normal->y;
+				n->z = pl->normal->z;
 				if(pl->m->transparency > 0){
-                                        refracted_ray->start = p;
+                                        refracted_ray = (ray*)malloc(sizeof(ray));
+                                        refracted_ray->start = (point*)malloc(sizeof(point));
+                                        refracted_ray->start->x = p->x;
+                                        refracted_ray->start->y = p->y;
+                                        refracted_ray->start->z = p->z;
                                         refracted_ray->dir = r->dir;
-					rays[0] = refracted_ray;
-				} else { rays[0] = NULL; }		        	
+                                        rays[0] = refracted_ray;
+                                }
 
-				ray_vec->x = p->x - r->start->x;
+                                reflected_ray = (ray*)malloc(sizeof(ray));
+                                vector* ray_vec = (vector*)malloc(sizeof(vector));
+                                ray_vec->x = p->x - r->start->x;
                                 ray_vec->y = p->y - r->start->y;
                                 ray_vec->z = p->z - r->start->z;
-				reflection = getReflection(n, ray_vec);
-				reflected_ray->start = p;
-				reflected_ray->dir = reflection;
-				rays[1] = reflected_ray;
-				return rays;
+                                reflection = getReflection(n, ray_vec);
+                                reflected_ray->start = p;
+                                reflected_ray->dir = reflection;
+                                rays[1] = reflected_ray;
+                                return rays;
 			}	
-			break;}*/
+			break;}
 		default: printf("type not found\n"); break;
 	}
   }
@@ -386,7 +405,7 @@ vector* SnellsLaw(vector* a, vector* b, material* m){
 //	printf("a (%f,%f,%f) b(%f,%f,%f)\n", a->x, a->y, a->z, b->x, b->y, b->z);
 //	GLfloat a_size = sqrt(((a->x)*(a->x)) + ((a->y)*(a->y)) + ((a->z)*(a->z)));
 //	GLfloat b_size = sqrt(((b->x)*(b->x)) + ((b->y)*(b->y)) + ((b->z)*(b->z)));
-/*	GLfloat k1 = 1;
+	GLfloat k1 = 1;
 	GLfloat k2 = 1.5;
 		
 	a->x = -(a->x);
@@ -402,24 +421,24 @@ vector* SnellsLaw(vector* a, vector* b, material* m){
 	b->z = -(b->z);
 	
 //	printf("angle1 = %f, angle2 = %f\n", angle1, angle2);
-*/
+
 	vector* retval = (vector*) malloc(sizeof(vector));
 
-//	retval->x = 	(cos(angle2)*cos(angle2))*(b->x) + 
-//			(cos(angle2)*sin(angle2))*(b->y) + 
-//			(-sin(angle2))*(b->z);
+	retval->x = 	(cos(angle2)*cos(angle2))*(b->x) + 
+			(cos(angle2)*sin(angle2))*(b->y) + 
+			(-sin(angle2))*(b->z);
 
-//	retval->y = 	((sin(angle2)*sin(angle2)*cos(angle2) - (cos(angle2)*sin(angle2)))*(b->x)) + 
-//			((sin(angle2)*sin(angle2)*sin(angle2) + (cos(angle2)*cos(angle2)))*(b->y)) + 
-//			(sin(angle2)*cos(angle2))*(b->z);
+	retval->y = 	((sin(angle2)*sin(angle2)*cos(angle2) - (cos(angle2)*sin(angle2)))*(b->x)) + 
+			((sin(angle2)*sin(angle2)*sin(angle2) + (cos(angle2)*cos(angle2)))*(b->y)) + 
+			(sin(angle2)*cos(angle2))*(b->z);
 
-//	retval->z = 	((cos(angle2)*sin(angle2)*cos(angle2) + (sin(angle2)*sin(angle2)))*(b->x)) + 
-//			((cos(angle2)*sin(angle2)*sin(angle2) - (sin(angle2)*cos(angle2)))*(b->y)) + 
-//			(cos(angle2)*cos(angle2))*(b->z);
+	retval->z = 	((cos(angle2)*sin(angle2)*cos(angle2) + (sin(angle2)*sin(angle2)))*(b->x)) + 
+			((cos(angle2)*sin(angle2)*sin(angle2) - (sin(angle2)*cos(angle2)))*(b->y)) + 
+			(cos(angle2)*cos(angle2))*(b->z);
 
-	retval->x = a->x;
-	retval->y = a->y;
-	retval->z = a->z;
+//	retval->x = a->x;
+//	retval->y = a->y;
+//	retval->z = a->z;
 //	printf("final angle (%f,%f,%f)\n", retval->x, retval->y, retval->z);
 	return retval;
 }
