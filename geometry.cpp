@@ -138,7 +138,9 @@ int raySphereIntersect(ray* r,sphere* s,double* t) {
     if (*t < 0) {
       *t = (-b + D) / (2*a);
     }
-    if (*t < 0) { return(FALSE); }
+    if (*t < .0001) {
+	 return(FALSE); 
+    }
     else return(TRUE);
   }
 }
