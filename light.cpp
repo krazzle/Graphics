@@ -179,6 +179,11 @@ int shadow(point* p, vector* l){
 				plane* pl = *((plane**)cur_item->ptr);
 				hit[i] = planeIntersect(r, pl, &t);
 				break;
+			}
+  			case 2: {
+				cylendar* c1 = *((cylendar**)cur_item->ptr);
+  				hit[i] = rayCylendarIntersect(r, c1, &t);
+				break;
 			} 
 			default: {printf("NEITHER\n"); break; }
 		}

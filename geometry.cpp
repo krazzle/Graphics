@@ -15,6 +15,7 @@
 #include "common.h"
 #include "raytrace.h"
 
+extern void normalize(vector*);
 extern item** sceneItems;
 extern int numItems;
 extern GLfloat dotProduct(vector*, vector*);
@@ -105,6 +106,21 @@ plane* makePlane(GLfloat A, GLfloat B, GLfloat C, GLfloat x0, GLfloat y0, GLfloa
   return(p);
 }
 
+cylendar* makeCylendar(GLfloat px, GLfloat py, GLfloat pz, GLfloat vx, GLfloat vy, GLfloat vz, GLfloat rad){
+  cylendar* c;
+  c = (cylendar*)malloc(sizeof(cylendar));
+  c->center = (point*) malloc(sizeof(point));
+  c->dir = (vector*) malloc(sizeof(vector));
+  c->center->x = px;
+  c->center->y = py;
+  c->center->z = pz;
+  c->dir->x = vx;
+  c->dir->y = vy;
+  c->dir->z = vz;
+  c->radius = rad;
+  return c;
+}
+
 /* returns TRUE if ray r hits sphere s, with parameter value in t */
 int raySphereIntersect(ray* r,sphere* s,double* t) {
   point p;   /* start of transformed ray */
@@ -141,6 +157,45 @@ int raySphereIntersect(ray* r,sphere* s,double* t) {
     if (*t < .0001) {
 	 return(FALSE); 
     }
+    else return(TRUE);
+  }
+}
+
+int rayCylendarIntersect(ray* r, cylendar* cyl, double* t){
+  GLfloat a, b, c;
+  point* deltaP = (point*) malloc(sizeof(point));
+  deltaP->x = r->start->x - cyl->center->x;
+  deltaP->y = r->start->y - cyl->center->y;
+  deltaP->z = r->start->z - cyl->center->z;
+
+  vector* val1 = (vector*) malloc(sizeof(vector));
+  GLfloat dotProd = dotProduct(cyl->dir, r->dir);
+  val1->x = r->dir->x - (dotProd)*(cyl->dir->x);
+  val1->y = r->dir->y - (dotProd)*(cyl->dir->y);
+  val1->z = r->dir->z - (dotProd)*(cyl->dir->z); 
+  vector* val2 = (vector*) malloc(sizeof(vector));  
+  dotProd = dotProduct((vector*)deltaP, cyl->dir);
+  val2->x = deltaP->x - (dotProd)*(cyl->dir->x);
+  val2->y = deltaP->y - (dotProd)*(cyl->dir->y);
+  val2->z = deltaP->z - (dotProd)*(cyl->dir->z);
+  a = dotProduct(val1, val1);
+  b = 2*dotProduct(val1, val2);
+  c = dotProduct(val2, val2) - (cyl->radius*cyl->radius);
+  
+  double D;
+  D = b*b - 4*a*c;
+  if(D < 0){
+	return(FALSE);
+  }
+  else {
+    D = sqrt(D);
+    *t = (-b - D) / (2*a);
+    if(*t < 0) {
+  	*t = (-b + D) / (2*a);
+    }
+    if( *t < .0001) { 
+	return(FALSE);
+    } 
     else return(TRUE);
   }
 }
@@ -183,4 +238,11 @@ void findPlaneNormal(plane* p, point* point, vector* n){
   n->y = p->normal->y/val;
   n->z = p->normal->z/val;
   n->w = 0.0;
+}
+
+void findCylendarNormal(cylendar* c, point* point, vector* n){
+  n->x = point->x - c->center->x;
+  n->y = 0; 
+  n->z = point->z - c->center->z;
+  normalize(n);
 }

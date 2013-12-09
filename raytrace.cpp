@@ -44,6 +44,7 @@ sphere* s3;
 sphere* s4;
 sphere* s5;
 sphere* s6;
+cylendar* c1;
 light* l1;
 light* l2;
 plane* p1;
@@ -120,12 +121,18 @@ void initScene () {
   s4->m = makeMaterial(0.0,1.0,0, .3, .3, .3, 4, .1, .1);
   s5->m = makeMaterial(0.0,0,1.0, .3, .3, .3, 4, .1, .1);
   s6->m = makeMaterial(.5, 0,1.0, .3, .3, .3, 4, .1, .1);
+  
+  c1 = makeCylendar(1.5, .4, -7, 0, 1, 0, .25);
+  c1->m = makeMaterial(1.0, 1.0, 1.0, .3,.3, .3, 4, .1, 0);
+
+  addItem((uint32_t)&c1, 2, 7);
   addItem((uint32_t)&s1, 0, 1);
   addItem((uint32_t)&s2, 0, 2);
   addItem((uint32_t)&s3, 0, 3);
   addItem((uint32_t)&s4, 0, 4);
   addItem((uint32_t)&s5, 0, 5);
   addItem((uint32_t)&s6, 0, 6);
+
   sortByDepth(viewpoint);
   l1 = makeLight(0,2,2, 0,1,1, 1.0,0,0);
   l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
@@ -171,6 +178,10 @@ double getDistance(item *i, point* p){
                 	sphere* s = *((sphere**)i->ptr);
                         val = sqrt(((s->c->x - p->x)*(s->c->x - p->x)) + ((s->c->y - p->y)*(s->c->y - p->y)) + ((s->c->z - p->z)*(s->c->z - p->z)));
                	} break;
+		case 2:{
+			cylendar* c = *((cylendar**)i->ptr);
+			val = sqrt(((c->center->x - p->x)*(c->center->x - p->x)) + ((c->center->y - p->y)*(c->center->y - p->y)) + ((c->center->z - p->z)*(c->center->z - p->z))); 
+			break;}
                 default: printf("type not found\n"); break;
      	}
 	return val;
@@ -223,7 +234,7 @@ void drawScene () {
       c.b = 0;
       curItem = numItems+1;
       /* trace the ray! */
-      traceRay(&r,&c,1);
+      traceRay(&r,&c,3);
       /* write the pixel! */
       drawPixel(i,j,c.r,c.g,c.b);
     }
@@ -309,6 +320,36 @@ ray** firstHit(ray* r, point* p, vector* n, material* *m, int depth, color* c) {
 				return rays;
 			}
 			break;}
+		case 2: {
+		 	cylendar* cyl = *((cylendar**)cur_item->ptr);
+			hit[i] = rayCylendarIntersect(r, cyl, &t);
+			if(hit[i]){
+				curItem = i;
+				*m = cyl->m;
+				findPointOnRay(r, t, p);
+				findCylendarNormal(cyl, p, n);
+                                if(cyl->m->transparency > 0){
+//                                      printf("t val: %f on object %d\n", t, cur_item->ID);
+                                        refracted_ray = (ray*)malloc(sizeof(ray));
+                                        refracted_ray->start = (point*)malloc(sizeof(point));
+                                        refracted_ray->start->x = p->x;
+                                        refracted_ray->start->y = p->y;
+                                        refracted_ray->start->z = p->z;
+                                        refracted_ray->dir = r->dir;
+                                        rays[0] = refracted_ray;
+                                }
+
+                                reflected_ray = (ray*)malloc(sizeof(ray));
+                                vector* ray_vec = (vector*)malloc(sizeof(vector));
+                                ray_vec->x = p->x - r->start->x;
+                                ray_vec->y = p->y - r->start->y;
+                                ray_vec->z = p->z - r->start->z;
+                                reflection = getReflection(n, ray_vec);
+                                reflected_ray->start = p;
+                                reflected_ray->dir = reflection;
+                                rays[1] = reflected_ray;
+                                return rays;
+		} break;}
 	/*	case 1:{
 			plane* pl = *((plane**)cur_item->ptr);
 			hit[i] = planeIntersect(r, pl, &t);
