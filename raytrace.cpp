@@ -42,9 +42,6 @@ sphere* s1;
 sphere* s2;
 sphere* s3;
 sphere* s4;
-sphere* s5;
-sphere* s6;
-cylendar* c1;
 light* l1;
 light* l2;
 plane* p1;
@@ -109,31 +106,27 @@ void initScene () {
   sceneItems = (item**) malloc(sizeof(item*)*10);  
 
   numItems = 0;
-  s1 = makeSphere(-.40, -.1, -3.0, 0.25);
-  s2 = makeSphere(-.35, -.1, -4.0, 0.25);
-  s3 = makeSphere(-.30, -.1, -5.0, 0.25);
-  s4 = makeSphere(.30, -.1, -5.0, 0.25);
-  s5 = makeSphere(.35, -.1, -4.0, .25);
-  s6 = makeSphere(.40, -.1, -3.0, .25);
-  s1->m = makeMaterial(1.0, 0, 0, .3, .3, .3, 4, .1, .1);
-  s2->m = makeMaterial(1.0, .5,0, .3, .3, .3, 4, .1, .1);
-  s3->m = makeMaterial(1.0,1.0,0, .3, .3, .3, 4, .1, .1);
-  s4->m = makeMaterial(0.0,1.0,0, .3, .3, .3, 4, .1, .1);
-  s5->m = makeMaterial(0.0,0,1.0, .3, .3, .3, 4, .1, .1);
-  s6->m = makeMaterial(.5, 0,1.0, .3, .3, .3, 4, .1, .1);
-  
-  c1 = makeCylendar(1.5, .4, -7, 0, 1, 0, .25);
-  c1->m = makeMaterial(1.0, 1.0, 1.0, .3,.3, .3, 4, .1, 0);
+  s1 = makeSphere(.20, -.05,-2.0,0.15);
+  s2 = makeSphere(-.10, 0, -1.5, 0.15);
+  s3 = makeSphere(-.15, 0, -2, .15);
+  s4 = makeSphere(.15, .05, -1.0, .10);
+  s1->m = makeMaterial(1.0, 0,   0,   .4, .5, 0, 4, .2, .2);
+  s2->m = makeMaterial(0,   1.0, 0,   .4, .5, 0, 4, .2, .2);
+  s3->m = makeMaterial(0,   0,   1.0, .4, .5, 0, 4, .2, .2);
+  s4->m = makeMaterial(1.0, 1.0, 1.0, .4, .5, 0, 4, .2, .2);
 
-  addItem((uint32_t)&c1, 2, 7);
+  p1 = makePlane( 1, 1, 1, 0, 0, 0);
+  p1->m = makeMaterial(1.0, 1.0, 1.0, .4, .5, 0, 4, .2, .2);
+  // end of plane attempt
+
+  
+
   addItem((uint32_t)&s1, 0, 1);
   addItem((uint32_t)&s2, 0, 2);
   addItem((uint32_t)&s3, 0, 3);
   addItem((uint32_t)&s4, 0, 4);
-  addItem((uint32_t)&s5, 0, 5);
-  addItem((uint32_t)&s6, 0, 6);
-
-  sortByDepth(viewpoint);
+  addItem((uint32_t)&p1, 1, 5);
+  // sortByDepth(viewpoint); ******
   l1 = makeLight(0,2,2, 0,1,1, 1.0,0,0);
   l2 = makeLight(-10,10,10,-.5,.5,.5,1.0,0,0);
   lights[0] = l1;
@@ -172,20 +165,31 @@ void sortByDepth(point* p){
 }
 
 double getDistance(item *i, point* p){
-	double val = 0;
-	switch(i->type){
-        	case 0: {
-                	sphere* s = *((sphere**)i->ptr);
-                        val = sqrt(((s->c->x - p->x)*(s->c->x - p->x)) + ((s->c->y - p->y)*(s->c->y - p->y)) + ((s->c->z - p->z)*(s->c->z - p->z)));
-               	} break;
-		case 2:{
-			cylendar* c = *((cylendar**)i->ptr);
-			val = sqrt(((c->center->x - p->x)*(c->center->x - p->x)) + ((c->center->y - p->y)*(c->center->y - p->y)) + ((c->center->z - p->z)*(c->center->z - p->z))); 
-			break;}
-                default: printf("type not found\n"); break;
-     	}
-	return val;
+  double val = 0;
+  switch(i->type){
+  case 0: {
+    sphere* s = *((sphere**)i->ptr);
+    val = sqrt(((s->c->x - p->x)*(s->c->x - p->x)) + ((s->c->y - p->y)*(s->c->y - p->y)) + ((s->c->z - p->z)*(s->c->z - p->z)));
+  } break;
+  case 1: {
+    
+    plane* pl = *((plane**)i->ptr);
+    // distance = magnitude ( v dotProduct n), where v: dist(p,plane->origin) and n: normalize(plane->noramal)
+    // v is p
+    // vector n = findPlaneNormal(pl, &n);
+    // val = dotProduct( n, (vector*)p);
+    if ( val < 0) {
+      val = -1 * val;
+    }
+    
+  } break;	  
+  default: printf("type not found\n"); break;		  
+  }
+  return val;
 }
+
+//*** move this function somewhere else
+
 
 void initCamera (int w, int h) {
   viewpoint = makePoint(0.0,0,0);
@@ -234,7 +238,7 @@ void drawScene () {
       c.b = 0;
       curItem = numItems+1;
       /* trace the ray! */
-      traceRay(&r,&c,3);
+      traceRay(&r,&c,1);
       /* write the pixel! */
       drawPixel(i,j,c.r,c.g,c.b);
     }
@@ -298,12 +302,8 @@ ray** firstHit(ray* r, point* p, vector* n, material* *m, int depth, color* c) {
 				findPointOnRay(r,t,p);
 				findSphereNormal(s,p,n);				
 				if(s->m->transparency > 0){
-//					printf("t val: %f on object %d\n", t, cur_item->ID);
 					refracted_ray = (ray*)malloc(sizeof(ray));
-					refracted_ray->start = (point*)malloc(sizeof(point));
-					refracted_ray->start->x = p->x;
-					refracted_ray->start->y = p->y;
-					refracted_ray->start->z = p->z;
+					refracted_ray->start = p;
 					refracted_ray->dir = r->dir; 
 					rays[0] = refracted_ray;
 				}
@@ -320,60 +320,36 @@ ray** firstHit(ray* r, point* p, vector* n, material* *m, int depth, color* c) {
 				return rays;
 			}
 			break;}
-		case 2: {
-		 	cylendar* cyl = *((cylendar**)cur_item->ptr);
-			hit[i] = rayCylendarIntersect(r, cyl, &t);
-			if(hit[i]){
-				curItem = i;
-				*m = cyl->m;
-				findPointOnRay(r, t, p);
-				findCylendarNormal(cyl, p, n);
-                                if(cyl->m->transparency > 0){
-//                                      printf("t val: %f on object %d\n", t, cur_item->ID);
-                                        refracted_ray = (ray*)malloc(sizeof(ray));
-                                        refracted_ray->start = (point*)malloc(sizeof(point));
-                                        refracted_ray->start->x = p->x;
-                                        refracted_ray->start->y = p->y;
-                                        refracted_ray->start->z = p->z;
-                                        refracted_ray->dir = r->dir;
-                                        rays[0] = refracted_ray;
-                                }
-
-                                reflected_ray = (ray*)malloc(sizeof(ray));
-                                vector* ray_vec = (vector*)malloc(sizeof(vector));
-                                ray_vec->x = p->x - r->start->x;
-                                ray_vec->y = p->y - r->start->y;
-                                ray_vec->z = p->z - r->start->z;
-                                reflection = getReflection(n, ray_vec);
-                                reflected_ray->start = p;
-                                reflected_ray->dir = reflection;
-                                rays[1] = reflected_ray;
-                                return rays;
-		} break;}
-	/*	case 1:{
-			plane* pl = *((plane**)cur_item->ptr);
+		case 1:{
+		        plane* pl = *((plane**)cur_item->ptr);
 			hit[i] = planeIntersect(r, pl, &t);
 			if(hit[i]){
 				curItem = i;
 				*m = pl->m;
 				findPointOnRay(r, t, p);
-				findPlaneNormal(pl, p, n);
+				findPlaneNormal(pl, n);
 				if(pl->m->transparency > 0){
-                                        refracted_ray->start = p;
-                                        refracted_ray->dir = r->dir;
-					rays[0] = refracted_ray;
-				} else { rays[0] = NULL; }		        	
-
+				  
+				  refracted_ray = (ray*)malloc(sizeof(ray));
+				  refracted_ray->start = p;
+				  refracted_ray->dir = r->dir; 
+				  rays[0] = refracted_ray;
+				}
+				
+				reflected_ray = (ray*)malloc(sizeof(ray));	
+				vector* ray_vec = (vector*)malloc(sizeof(vector));
 				ray_vec->x = p->x - r->start->x;
-                                ray_vec->y = p->y - r->start->y;
-                                ray_vec->z = p->z - r->start->z;
+				ray_vec->y = p->y - r->start->y;
+				ray_vec->z = p->z - r->start->z;
 				reflection = getReflection(n, ray_vec);
 				reflected_ray->start = p;
-				reflected_ray->dir = reflection;
+				reflected_ray->dir = reflection;	
 				rays[1] = reflected_ray;
+
+
 				return rays;
 			}	
-			break;}*/
+			break;}
 		default: printf("type not found\n"); break;
 	}
   }

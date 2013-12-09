@@ -21,10 +21,10 @@ extern int numItems;
 extern int curItem;
 extern int firstHit(ray*,point*,vector*,material**);
 void normalize(vector* v);
-GLfloat specularReflection(color* SpecularIntensity,vector* normal,  vector* light, vector* viewVector, material* m);
+void specularReflection(color* SpecularIntensity,vector* normal,  vector* light, vector* viewVector, material* m);
 GLfloat dotProduct(vector* v1, vector* v2);
 void ambientReflection(color *c , material* m);
-GLfloat diffuseReflection(color* DiffuseIntensity,vector* normalVector, light* lightVector, material* m);
+void diffuseReflection(color* DiffuseIntensity,vector* normalVector, light* lightVector, material* m);
 vector* getReflection(vector* normal, vector* light);
 GLfloat comp_pow(GLfloat a, GLfloat b);
 int shadow(point* p, vector* l); 
@@ -105,20 +105,11 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
   int i; 
   for(i = 0; i < num_lights; i++){
 	light* l = lights[i];
-//	GLfloat dist = sqrt(((p->x - l->r->start->x)*(p->x - l->r->start->x)) + ((p->y - l->r->start->y)*(p->y - l->r->start->y)) + ((p->z - l->r->start->z)*(p->z - l->r->start->z)));
+	GLfloat dist = sqrt(((p->x - l->r->start->x)*(p->x - l->r->start->x)) + ((p->y - l->r->start->y)*(p->y - l->r->start->y)) + ((p->z - l->r->start->z)*(p->z - l->r->start->z)));
       	normalize(l->r->dir);
   	ambientReflection(Ia, m);
   	diffuseReflection(Id, n, l, m);
   	specularReflection(Is, n, l->r->dir ,in, m);
-
-	//may need to reverse direction of light
-//	vector* vec = (vector*)malloc(sizeof(vector));
-//	vec->x = l->r->start->x - p->x;
-//	vec->y = l->r->start->y - p->y;
-//	vec->z = l->r->start->z - p->z;
-//	GLfloat distanceProd = getDistance(n, vec);
-//	vec->x =  
-//	GLfloat distanceProdPhong = 1;
 
 	c->r += (Kt+Kd)*(Ia->r);
 	c->g += (Kt+Kd)*(Ia->g);
@@ -126,9 +117,9 @@ void shade(point* p, vector* n, material* m, vector* in, color* c, int d, light*
 
 //	printf("before shadow\n");
 	if(!shadow(p, l->r->start))	{
-  		c->r += (Kt+Kd)*((Id->r) + (Is->r)*2);
-  		c->g += (Kt+Kd)*((Id->g) + (Is->g)*2);
-  		c->b += (Kt+Kd)*((Id->b) + (Is->b)*2);
+  		c->r += (Kt+Kd)*(Id->r + Is->r);
+  		c->g += (Kt+Kd)*(Id->g + Is->g);
+  		c->b += (Kt+Kd)*(Id->b + Is->b);
 	}
 	
 
@@ -179,11 +170,6 @@ int shadow(point* p, vector* l){
 				plane* pl = *((plane**)cur_item->ptr);
 				hit[i] = planeIntersect(r, pl, &t);
 				break;
-			}
-  			case 2: {
-				cylendar* c1 = *((cylendar**)cur_item->ptr);
-  				hit[i] = rayCylendarIntersect(r, c1, &t);
-				break;
 			} 
 			default: {printf("NEITHER\n"); break; }
 		}
@@ -211,7 +197,7 @@ void ambientReflection(color *c , material* m){
   c->b = m->amb*m->b;
 }
 
-GLfloat diffuseReflection(color* DiffuseIntensity, vector* normalVector, light* lightVector, material* m) {
+void diffuseReflection(color* DiffuseIntensity, vector* normalVector, light* lightVector, material* m) {
 
   GLfloat max = 0;
   GLfloat dot_product = dotProduct(normalVector, lightVector->r->dir);
@@ -221,10 +207,9 @@ GLfloat diffuseReflection(color* DiffuseIntensity, vector* normalVector, light* 
   DiffuseIntensity->g = m->dif * max * m->g;
   DiffuseIntensity->b = m->dif * max * m->b;
   
-  return max;
 }
 
-GLfloat specularReflection(color* SpecularIntensity,vector* normal, vector* light, vector* viewVector, material* m) {
+void specularReflection(color* SpecularIntensity,vector* normal, vector* light, vector* viewVector, material* m) {
  // printf("reflection (%f,%f,%f) view (%f,%f,%f)i\n", reflectionVector->x, reflectionVector->y, reflectionVector->z, viewVector->x, viewVector->y, viewVector->z);  
   //printf("getting reflection\n");
   vector* reflectionVec = getReflection(normal, light);  
@@ -241,7 +226,6 @@ GLfloat specularReflection(color* SpecularIntensity,vector* normal, vector* ligh
   SpecularIntensity->r = m->spec * powVal * m->r;
   SpecularIntensity->g = m->spec * powVal * m->g;
   SpecularIntensity->b = m->spec * powVal * m->b;
-  return max;
 }
 
 GLfloat comp_pow(GLfloat a, GLfloat b){
