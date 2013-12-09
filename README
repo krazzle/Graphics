@@ -5,11 +5,14 @@
  * for compiling, etc., if you did something besides the standard
  * Makefile.  Also, document any additional features in this file.
  *
- * Group Members: Alyssa Sallean Andoni Mendoza
+ * Group Members:
  *
  */
 
 
+<<<<<<< HEAD
 hi muhibur/grader!
 We didn't do anything too special, but we had fun! 
 we tried to do snells law, there's a method at the bottom of raytrace.cpp, but we never had time to fully implement it. 
+=======
+>>>>>>> 28b06374b9c051fe7092c72431c1e29b4637de10
